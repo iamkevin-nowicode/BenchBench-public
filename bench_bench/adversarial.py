@@ -656,6 +656,7 @@ def _evaluate_genome(name: str, genome: AdversarialGenome, seeds: list[int], con
                 household_strain=result.household_strain,
                 fallback_actions=sum(1 for record in week_records if record["validation"]["fallback_used"]),
                 invalid_reason=result.invalid_reason,
+                constraint_violations=constraint_violations(pain_days=result.pain_days),
             )
         )
     structural_valid = [

@@ -28,13 +28,13 @@ from .schemas import InterruptObservation, ReactiveAction, WeekAction, WeekObser
 
 
 class ModelTurn(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", strict=True)
     action: WeekAction
     notebook_update: str = Field(default="", max_length=2_000)
 
 
 class ReactiveTurn(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", strict=True)
     action: ReactiveAction
     notebook_update: str = Field(default="", max_length=2_000)
 
@@ -559,6 +559,10 @@ Valid example:
                 response, reactive, update, parse_errors, interrupt_retries, reactive_attempts = self._request_reactive(
                     interrupt_messages, env, interrupt
                 )
+                if reactive_attempts and reactive_attempts[-1].get("fallback"):
+                    env.record_reactive_fallback(
+                        parse_errors[-1] if parse_errors else "model response was unavailable or invalid"
+                    )
                 model_calls += _model_attempt_count(reactive_attempts)
                 repair_calls += interrupt_retries
                 for attempt in reactive_attempts:

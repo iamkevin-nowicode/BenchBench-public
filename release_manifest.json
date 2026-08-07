@@ -5,7 +5,7 @@
   "package": "bench_bench",
   "required_runtime": "Python 3.11+",
   "required_dependency": "pydantic >=2,<3",
-  "engine_config_hash": "sha256:f86634de54d16383952499a16b7672c14ca7473f19f4916a094382c950d903a8",
+  "engine_config_hash": "sha256:d5585a5bb69088a0cb7b3f4f78b70dc79a3caa59a3fcbbc00a9fcebde6d3add1",
   "benchmark_card": "BENCHMARK_CARD.md",
   "authoritative_leaderboard_status": "pending_independent_review_and_live_run",
   "authoritative_leaderboard_json": "reports/PUBLIC_LEADERBOARD.json",
@@ -31,7 +31,7 @@
   "viewer_command": "python3 -m bench_bench render-replay <episode.jsonl> --output replay.html",
   "public_transcript_analysis_command": "python3 -m bench_bench analyze-runs --input-dir runs/public-leaderboard --json reports/PUBLIC_LEADERBOARD.json --markdown reports/PUBLIC_LEADERBOARD.md",
   "public_transcript_note": "No public transcripts are present before independent review. After the live run, analyze-runs or render-replay applies to runner transcripts; the replay command applies to native play episode logs.",
-  "endpoint_command": "python3 -m bench_bench run-model --base-url <endpoint> --model <model> --seed-count 5 [--seed-values <comma-separated-values>]",
-  "multi_model_command": "python3 -m bench_bench run-model-suite --base-url <endpoint> --models <model-a,model-b> --seed-count 5 [--seed-values <comma-separated-values>]",
+  "endpoint_command": "python3 -m bench_bench run-model --base-url <endpoint> --model <model> --weeks 52 --seed-values 100,101,102,103,104,105,106,107,108,109",
+  "multi_model_command": "python3 -m bench_bench run-model-suite --base-url https://api.openai.com/v1 --models gpt-5.4,gpt-5.4-mini,gpt-5.3-chat-latest,gpt-4.1 --weeks 52 --seed-values 100,101,102,103,104,105,106,107,108,109 --temperature 0.2 --max-retries 1 --request-retries 8 --retry-backoff-seconds 5 --output-dir runs/public-leaderboard --analysis-json reports/PUBLIC_LEADERBOARD.json --analysis-markdown reports/PUBLIC_LEADERBOARD.md",
   "public_leaderboard_note": "The authoritative leaderboard is intentionally pending the frozen-protocol live run on public seeds 100–109; no model calls have been made for this release candidate."
 }

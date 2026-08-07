@@ -1,4 +1,822 @@
 {
+  "ablations": [
+    {
+      "changed_decisions": true,
+      "changed_score": true,
+      "decision_delta_vs_full": {
+        "random": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 0.0
+        },
+        "reckless-maximalist": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 0.0
+        },
+        "recovery-aware": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 3.6
+        },
+        "rigid-linear": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 0.0
+        },
+        "scripted-expert": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 0.0
+        },
+        "skip-when-busy": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 0.0
+        }
+      },
+      "disabled": {
+        "enable_sleep_system": false
+      },
+      "gate": {
+        "adjacent_sigma": {
+          "random->reckless-maximalist": {
+            "gap_kg": 3.478,
+            "pooled_seed_std_kg": 1.1852,
+            "sigma": 2.9345
+          },
+          "reckless-maximalist->rigid-linear": {
+            "gap_kg": 5.223,
+            "pooled_seed_std_kg": 0.7354,
+            "sigma": 7.1019
+          },
+          "recovery-aware->scripted-expert": {
+            "gap_kg": 3.306,
+            "pooled_seed_std_kg": 0.6335,
+            "sigma": 5.2186
+          },
+          "rigid-linear->skip-when-busy": {
+            "gap_kg": -2.108,
+            "pooled_seed_std_kg": 0.8142,
+            "sigma": -2.589
+          },
+          "skip-when-busy->recovery-aware": {
+            "gap_kg": 2.927,
+            "pooled_seed_std_kg": 0.8096,
+            "sigma": 3.6152
+          }
+        },
+        "expert_minus_random_kg": 12.826,
+        "gate_enforced": true,
+        "gate_pass": false,
+        "invalid_episode_free": true,
+        "ordering_pass": false,
+        "pairwise_order_rates": {
+          "random<reckless": 1.0,
+          "random<rigid": 1.0,
+          "recovery<expert": 1.0,
+          "rigid_or_reckless<skip": 0.0,
+          "skip<recovery": 1.0
+        },
+        "pooled_seed_std_kg": 1.1281,
+        "reckless_loses_endogenously": true,
+        "separation_ratio": 11.3698,
+        "stable_order_rate_threshold": 0.65,
+        "stable_ordering_pass": false
+      },
+      "name": "no-sleep-system",
+      "score_delta_vs_full_kg": {
+        "random": 3.282,
+        "reckless-maximalist": 6.193,
+        "recovery-aware": 0.7335,
+        "rigid-linear": 6.576,
+        "scripted-expert": 0.155,
+        "skip-when-busy": 0.2525
+      },
+      "summaries": {
+        "random": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 93.14,
+          "counted_mean_final_1rm_kg": 90.221,
+          "counted_min_final_1rm_kg": 86.75,
+          "counted_seed_std_kg": 1.4643,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 93.14,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 106.5,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 72.6,
+          "mean_fallback_sessions": 12.7,
+          "mean_final_1rm_kg": 90.221,
+          "mean_household_strain": 0.5251,
+          "mean_missed_sessions": 38.75,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 12.3,
+          "mean_planned_sessions": 111.35,
+          "mean_productive_weeks": 31.8,
+          "mean_sleep_debt": 0.0,
+          "mean_transformed_sessions": 7.0,
+          "min_final_1rm_kg": 86.75,
+          "policy": "random",
+          "seed_std_kg": 1.4643
+        },
+        "reckless-maximalist": {
+          "constraint_violating_episodes": 20,
+          "constraint_violation_counts": {
+            "pain_days>14": 20
+          },
+          "counted_episodes": 0,
+          "counted_max_final_1rm_kg": null,
+          "counted_mean_final_1rm_kg": null,
+          "counted_min_final_1rm_kg": null,
+          "counted_seed_std_kg": null,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 94.88,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 204.3,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 167.1,
+          "mean_fallback_sessions": 10.7,
+          "mean_final_1rm_kg": 93.699,
+          "mean_household_strain": 1.0,
+          "mean_missed_sessions": 37.9,
+          "mean_pain_days": 289.95,
+          "mean_planned_fallbacks": 1.0,
+          "mean_planned_sessions": 205.0,
+          "mean_productive_weeks": 47.45,
+          "mean_sleep_debt": 0.0,
+          "mean_transformed_sessions": 150.05,
+          "min_final_1rm_kg": 91.47,
+          "policy": "reckless-maximalist",
+          "seed_std_kg": 0.8156
+        },
+        "recovery-aware": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 100.78,
+          "counted_mean_final_1rm_kg": 99.741,
+          "counted_min_final_1rm_kg": 98.35,
+          "counted_seed_std_kg": 0.6338,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 100.78,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 149.95,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 136.55,
+          "mean_fallback_sessions": 10.7,
+          "mean_final_1rm_kg": 99.741,
+          "mean_household_strain": 0.0,
+          "mean_missed_sessions": 15.4,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 1.0,
+          "mean_planned_sessions": 151.95,
+          "mean_productive_weeks": 47.35,
+          "mean_sleep_debt": 0.0,
+          "mean_transformed_sessions": 11.15,
+          "min_final_1rm_kg": 98.35,
+          "policy": "recovery-aware",
+          "seed_std_kg": 0.6338
+        },
+        "rigid-linear": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 99.96,
+          "counted_mean_final_1rm_kg": 98.922,
+          "counted_min_final_1rm_kg": 97.32,
+          "counted_seed_std_kg": 0.6454,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 99.96,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 155.15,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 131.5,
+          "mean_fallback_sessions": 8.55,
+          "mean_final_1rm_kg": 98.922,
+          "mean_household_strain": 0.7975,
+          "mean_missed_sessions": 24.5,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 0.0,
+          "mean_planned_sessions": 156.0,
+          "mean_productive_weeks": 48.65,
+          "mean_sleep_debt": 0.0,
+          "mean_transformed_sessions": 10.7,
+          "min_final_1rm_kg": 97.32,
+          "policy": "rigid-linear",
+          "seed_std_kg": 0.6454
+        },
+        "scripted-expert": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 103.96,
+          "counted_mean_final_1rm_kg": 103.047,
+          "counted_min_final_1rm_kg": 101.33,
+          "counted_seed_std_kg": 0.6332,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 103.96,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 151.6,
+          "mean_capital_purchases": 1.0,
+          "mean_completed_sessions": 146.25,
+          "mean_fallback_sessions": 11.45,
+          "mean_final_1rm_kg": 103.047,
+          "mean_household_strain": 0.0,
+          "mean_missed_sessions": 6.75,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 0.0,
+          "mean_planned_sessions": 153.0,
+          "mean_productive_weeks": 50.75,
+          "mean_sleep_debt": 0.0,
+          "mean_transformed_sessions": 11.9,
+          "min_final_1rm_kg": 101.33,
+          "policy": "scripted-expert",
+          "seed_std_kg": 0.6332
+        },
+        "skip-when-busy": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 98.98,
+          "counted_mean_final_1rm_kg": 96.814,
+          "counted_min_final_1rm_kg": 94.89,
+          "counted_seed_std_kg": 0.9536,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 98.98,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 111.1,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 106.75,
+          "mean_fallback_sessions": 0.45,
+          "mean_final_1rm_kg": 96.814,
+          "mean_household_strain": 0.0226,
+          "mean_missed_sessions": 14.8,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 0.45,
+          "mean_planned_sessions": 121.55,
+          "mean_productive_weeks": 44.7,
+          "mean_sleep_debt": 0.0,
+          "mean_transformed_sessions": 0.05,
+          "min_final_1rm_kg": 94.89,
+          "policy": "skip-when-busy",
+          "seed_std_kg": 0.9536
+        }
+      }
+    },
+    {
+      "changed_decisions": true,
+      "changed_score": true,
+      "decision_delta_vs_full": {
+        "random": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 0.0
+        },
+        "reckless-maximalist": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 0.0
+        },
+        "recovery-aware": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 2.85
+        },
+        "rigid-linear": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 0.0
+        },
+        "scripted-expert": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 0.0
+        },
+        "skip-when-busy": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 0.0
+        }
+      },
+      "disabled": {
+        "enable_delayed_adaptation": false
+      },
+      "gate": {
+        "adjacent_sigma": {
+          "random->reckless-maximalist": {
+            "gap_kg": 8.269,
+            "pooled_seed_std_kg": 4.0599,
+            "sigma": 2.0367
+          },
+          "reckless-maximalist->rigid-linear": {
+            "gap_kg": 12.1355,
+            "pooled_seed_std_kg": 4.1755,
+            "sigma": 2.9064
+          },
+          "recovery-aware->scripted-expert": {
+            "gap_kg": 10.3665,
+            "pooled_seed_std_kg": 3.3909,
+            "sigma": 3.0572
+          },
+          "rigid-linear->skip-when-busy": {
+            "gap_kg": 16.21,
+            "pooled_seed_std_kg": 3.8469,
+            "sigma": 4.2138
+          },
+          "skip-when-busy->recovery-aware": {
+            "gap_kg": 12.631,
+            "pooled_seed_std_kg": 3.681,
+            "sigma": 3.4314
+          }
+        },
+        "expert_minus_random_kg": 59.612,
+        "gate_enforced": true,
+        "gate_pass": true,
+        "invalid_episode_free": true,
+        "ordering_pass": true,
+        "pairwise_order_rates": {
+          "random<reckless": 1.0,
+          "random<rigid": 1.0,
+          "recovery<expert": 1.0,
+          "rigid_or_reckless<skip": 1.0,
+          "skip<recovery": 1.0
+        },
+        "pooled_seed_std_kg": 3.4344,
+        "reckless_loses_endogenously": true,
+        "separation_ratio": 17.3575,
+        "stable_order_rate_threshold": 0.65,
+        "stable_ordering_pass": true
+      },
+      "name": "no-delayed-adaptation",
+      "score_delta_vs_full_kg": {
+        "random": 22.1315,
+        "reckless-maximalist": 29.8335,
+        "recovery-aware": 59.3085,
+        "rigid-linear": 37.129,
+        "scripted-expert": 65.7905,
+        "skip-when-busy": 49.1235
+      },
+      "summaries": {
+        "random": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 115.13,
+          "counted_mean_final_1rm_kg": 109.0705,
+          "counted_min_final_1rm_kg": 100.99,
+          "counted_seed_std_kg": 3.7061,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 115.13,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 106.5,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 53.15,
+          "mean_fallback_sessions": 9.6,
+          "mean_final_1rm_kg": 109.0705,
+          "mean_household_strain": 0.6779,
+          "mean_missed_sessions": 58.2,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 12.3,
+          "mean_planned_sessions": 111.35,
+          "mean_productive_weeks": 23.9,
+          "mean_sleep_debt": 13.9985,
+          "mean_transformed_sessions": 6.4,
+          "min_final_1rm_kg": 100.99,
+          "policy": "random",
+          "seed_std_kg": 3.7061
+        },
+        "reckless-maximalist": {
+          "constraint_violating_episodes": 20,
+          "constraint_violation_counts": {
+            "pain_days>14": 20
+          },
+          "counted_episodes": 0,
+          "counted_max_final_1rm_kg": null,
+          "counted_mean_final_1rm_kg": null,
+          "counted_min_final_1rm_kg": null,
+          "counted_seed_std_kg": null,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 127.17,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 204.3,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 103.45,
+          "mean_fallback_sessions": 5.8,
+          "mean_final_1rm_kg": 117.3395,
+          "mean_household_strain": 1.0,
+          "mean_missed_sessions": 101.55,
+          "mean_pain_days": 261.0,
+          "mean_planned_fallbacks": 1.0,
+          "mean_planned_sessions": 205.0,
+          "mean_productive_weeks": 36.9,
+          "mean_sleep_debt": 14.0,
+          "mean_transformed_sessions": 132.45,
+          "min_final_1rm_kg": 109.6,
+          "policy": "reckless-maximalist",
+          "seed_std_kg": 4.3853
+        },
+        "recovery-aware": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 165.83,
+          "counted_mean_final_1rm_kg": 158.316,
+          "counted_min_final_1rm_kg": 152.08,
+          "counted_seed_std_kg": 3.6251,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 165.83,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 149.25,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 135.9,
+          "mean_fallback_sessions": 10.65,
+          "mean_final_1rm_kg": 158.316,
+          "mean_household_strain": 0.0,
+          "mean_missed_sessions": 15.3,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 1.0,
+          "mean_planned_sessions": 151.2,
+          "mean_productive_weeks": 47.35,
+          "mean_sleep_debt": 0.0532,
+          "mean_transformed_sessions": 11.05,
+          "min_final_1rm_kg": 152.08,
+          "policy": "recovery-aware",
+          "seed_std_kg": 3.6251
+        },
+        "rigid-linear": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 138.14,
+          "counted_mean_final_1rm_kg": 129.475,
+          "counted_min_final_1rm_kg": 121.41,
+          "counted_seed_std_kg": 3.9545,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 138.14,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 155.15,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 92.6,
+          "mean_fallback_sessions": 5.35,
+          "mean_final_1rm_kg": 129.475,
+          "mean_household_strain": 0.8664,
+          "mean_missed_sessions": 63.4,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 0.0,
+          "mean_planned_sessions": 156.0,
+          "mean_productive_weeks": 41.5,
+          "mean_sleep_debt": 14.0,
+          "mean_transformed_sessions": 10.7,
+          "min_final_1rm_kg": 121.41,
+          "policy": "rigid-linear",
+          "seed_std_kg": 3.9545
+        },
+        "scripted-expert": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 174.74,
+          "counted_mean_final_1rm_kg": 168.6825,
+          "counted_min_final_1rm_kg": 163.73,
+          "counted_seed_std_kg": 3.1392,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 174.74,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 151.6,
+          "mean_capital_purchases": 1.0,
+          "mean_completed_sessions": 146.25,
+          "mean_fallback_sessions": 11.45,
+          "mean_final_1rm_kg": 168.6825,
+          "mean_household_strain": 0.0,
+          "mean_missed_sessions": 6.75,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 0.0,
+          "mean_planned_sessions": 153.0,
+          "mean_productive_weeks": 50.75,
+          "mean_sleep_debt": 0.0532,
+          "mean_transformed_sessions": 11.9,
+          "min_final_1rm_kg": 163.73,
+          "policy": "scripted-expert",
+          "seed_std_kg": 3.1392
+        },
+        "skip-when-busy": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 149.53,
+          "counted_mean_final_1rm_kg": 145.685,
+          "counted_min_final_1rm_kg": 136.38,
+          "counted_seed_std_kg": 3.7361,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 149.53,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 111.1,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 106.8,
+          "mean_fallback_sessions": 0.45,
+          "mean_final_1rm_kg": 145.685,
+          "mean_household_strain": 0.0226,
+          "mean_missed_sessions": 14.75,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 0.45,
+          "mean_planned_sessions": 121.55,
+          "mean_productive_weeks": 44.7,
+          "mean_sleep_debt": 0.0543,
+          "mean_transformed_sessions": 0.05,
+          "min_final_1rm_kg": 136.38,
+          "policy": "skip-when-busy",
+          "seed_std_kg": 3.7361
+        }
+      }
+    },
+    {
+      "changed_decisions": true,
+      "changed_score": true,
+      "decision_delta_vs_full": {
+        "random": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.65,
+          "planned_sessions": 1.2
+        },
+        "reckless-maximalist": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": -1.0,
+          "planned_sessions": 3.0
+        },
+        "recovery-aware": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": -1.0,
+          "planned_sessions": 7.65
+        },
+        "rigid-linear": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 0.0
+        },
+        "scripted-expert": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": 0.0,
+          "planned_sessions": 3.0
+        },
+        "skip-when-busy": {
+          "capital_purchases": 0.0,
+          "planned_fallbacks": -0.45,
+          "planned_sessions": 8.75
+        }
+      },
+      "disabled": {
+        "enable_event_system": false
+      },
+      "gate": {
+        "adjacent_sigma": {
+          "random->reckless-maximalist": {
+            "gap_kg": -3.2685,
+            "pooled_seed_std_kg": 1.4046,
+            "sigma": -2.3269
+          },
+          "reckless-maximalist->rigid-linear": {
+            "gap_kg": 13.247,
+            "pooled_seed_std_kg": 1.2406,
+            "sigma": 10.6779
+          },
+          "recovery-aware->scripted-expert": {
+            "gap_kg": 0.654,
+            "pooled_seed_std_kg": 0.492,
+            "sigma": 1.3293
+          },
+          "rigid-linear->skip-when-busy": {
+            "gap_kg": -1.2095,
+            "pooled_seed_std_kg": 0.8304,
+            "sigma": -1.4565
+          },
+          "skip-when-busy->recovery-aware": {
+            "gap_kg": 2.9325,
+            "pooled_seed_std_kg": 0.7846,
+            "sigma": 3.7376
+          }
+        },
+        "expert_minus_random_kg": 12.3555,
+        "gate_enforced": true,
+        "gate_pass": false,
+        "invalid_episode_free": true,
+        "ordering_pass": false,
+        "pairwise_order_rates": {
+          "random<reckless": 0.05,
+          "random<rigid": 1.0,
+          "recovery<expert": 1.0,
+          "rigid_or_reckless<skip": 0.05,
+          "skip<recovery": 1.0
+        },
+        "pooled_seed_std_kg": 0.8661,
+        "reckless_loses_endogenously": true,
+        "separation_ratio": 14.2665,
+        "stable_order_rate_threshold": 0.65,
+        "stable_ordering_pass": false
+      },
+      "name": "no-event-system",
+      "score_delta_vs_full_kg": {
+        "random": 5.1485,
+        "reckless-maximalist": 1.313,
+        "recovery-aware": 4.7815,
+        "rigid-linear": 9.72,
+        "scripted-expert": 1.551,
+        "skip-when-busy": 4.295
+      },
+      "summaries": {
+        "random": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 95.05,
+          "counted_mean_final_1rm_kg": 92.0875,
+          "counted_min_final_1rm_kg": 90.2,
+          "counted_seed_std_kg": 1.139,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 95.05,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 112.55,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 81.85,
+          "mean_fallback_sessions": 10.8,
+          "mean_final_1rm_kg": 92.0875,
+          "mean_household_strain": 0.2716,
+          "mean_missed_sessions": 30.7,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 12.95,
+          "mean_planned_sessions": 112.55,
+          "mean_productive_weeks": 35.15,
+          "mean_sleep_debt": 0.9462,
+          "mean_transformed_sessions": 2.35,
+          "min_final_1rm_kg": 90.2,
+          "policy": "random",
+          "seed_std_kg": 1.139
+        },
+        "reckless-maximalist": {
+          "constraint_violating_episodes": 20,
+          "constraint_violation_counts": {
+            "pain_days>14": 20
+          },
+          "counted_episodes": 0,
+          "counted_max_final_1rm_kg": null,
+          "counted_mean_final_1rm_kg": null,
+          "counted_min_final_1rm_kg": null,
+          "counted_seed_std_kg": null,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 91.71,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 208.0,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 111.0,
+          "mean_fallback_sessions": 0.0,
+          "mean_final_1rm_kg": 88.819,
+          "mean_household_strain": 1.0,
+          "mean_missed_sessions": 97.0,
+          "mean_pain_days": 286.4,
+          "mean_planned_fallbacks": 0.0,
+          "mean_planned_sessions": 208.0,
+          "mean_productive_weeks": 40.1,
+          "mean_sleep_debt": 14.0,
+          "mean_transformed_sessions": 142.95,
+          "min_final_1rm_kg": 86.32,
+          "policy": "reckless-maximalist",
+          "seed_std_kg": 1.6275
+        },
+        "recovery-aware": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 104.47,
+          "counted_mean_final_1rm_kg": 103.789,
+          "counted_min_final_1rm_kg": 102.09,
+          "counted_seed_std_kg": 0.5304,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 104.47,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 156.0,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 150.7,
+          "mean_fallback_sessions": 0.0,
+          "mean_final_1rm_kg": 103.789,
+          "mean_household_strain": 0.0,
+          "mean_missed_sessions": 5.3,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 0.0,
+          "mean_planned_sessions": 156.0,
+          "mean_productive_weeks": 51.85,
+          "mean_sleep_debt": 0.0,
+          "mean_transformed_sessions": 0.0,
+          "min_final_1rm_kg": 102.09,
+          "policy": "recovery-aware",
+          "seed_std_kg": 0.5304
+        },
+        "rigid-linear": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 102.81,
+          "counted_mean_final_1rm_kg": 102.066,
+          "counted_min_final_1rm_kg": 100.46,
+          "counted_seed_std_kg": 0.6553,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 102.81,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 156.0,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 140.9,
+          "mean_fallback_sessions": 0.0,
+          "mean_final_1rm_kg": 102.066,
+          "mean_household_strain": 0.609,
+          "mean_missed_sessions": 15.1,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 0.0,
+          "mean_planned_sessions": 156.0,
+          "mean_productive_weeks": 51.9,
+          "mean_sleep_debt": 0.4747,
+          "mean_transformed_sessions": 0.0,
+          "min_final_1rm_kg": 100.46,
+          "policy": "rigid-linear",
+          "seed_std_kg": 0.6553
+        },
+        "scripted-expert": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 105.09,
+          "counted_mean_final_1rm_kg": 104.443,
+          "counted_min_final_1rm_kg": 102.98,
+          "counted_seed_std_kg": 0.4503,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 105.09,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 156.0,
+          "mean_capital_purchases": 1.0,
+          "mean_completed_sessions": 150.7,
+          "mean_fallback_sessions": 0.0,
+          "mean_final_1rm_kg": 104.443,
+          "mean_household_strain": 0.0,
+          "mean_missed_sessions": 5.3,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 0.0,
+          "mean_planned_sessions": 156.0,
+          "mean_productive_weeks": 51.85,
+          "mean_sleep_debt": 0.0,
+          "mean_transformed_sessions": 0.0,
+          "min_final_1rm_kg": 102.98,
+          "policy": "scripted-expert",
+          "seed_std_kg": 0.4503
+        },
+        "skip-when-busy": {
+          "constraint_violating_episodes": 0,
+          "constraint_violation_counts": {},
+          "counted_episodes": 20,
+          "counted_max_final_1rm_kg": 102.73,
+          "counted_mean_final_1rm_kg": 100.8565,
+          "counted_min_final_1rm_kg": 98.1,
+          "counted_seed_std_kg": 0.9746,
+          "episodes": 20,
+          "invalid_episodes": 0,
+          "max_final_1rm_kg": 102.73,
+          "mean_action_repairs": 0.0,
+          "mean_attempted_sessions": 130.3,
+          "mean_capital_purchases": 0.0,
+          "mean_completed_sessions": 125.35,
+          "mean_fallback_sessions": 0.0,
+          "mean_final_1rm_kg": 100.8565,
+          "mean_household_strain": 0.0,
+          "mean_missed_sessions": 4.95,
+          "mean_pain_days": 0.0,
+          "mean_planned_fallbacks": 0.0,
+          "mean_planned_sessions": 130.3,
+          "mean_productive_weeks": 50.75,
+          "mean_sleep_debt": 0.0,
+          "mean_transformed_sessions": 0.0,
+          "min_final_1rm_kg": 98.1,
+          "policy": "skip-when-busy",
+          "seed_std_kg": 0.9746
+        }
+      }
+    }
+  ],
   "benchmark": "Bench-bench",
   "config": {
     "brzycki_repmax_ceiling_ratio": 1.3,
@@ -40,7 +858,7 @@
     "weekly_time_budget_minutes": 900,
     "weeks": 52
   },
-  "engine_config_hash": "sha256:f86634de54d16383952499a16b7672c14ca7473f19f4916a094382c950d903a8",
+  "engine_config_hash": "sha256:d5585a5bb69088a0cb7b3f4f78b70dc79a3caa59a3fcbbc00a9fcebde6d3add1",
   "episodes": {
     "random": [
       {
@@ -65,7 +883,7 @@
         "seed": 0,
         "sleep_debt": 13.982,
         "total_spend_cents": 18000,
-        "transformed_sessions": 5
+        "transformed_sessions": 6
       },
       {
         "action_repairs": 0,
@@ -89,7 +907,7 @@
         "seed": 1,
         "sleep_debt": 13.991,
         "total_spend_cents": 18000,
-        "transformed_sessions": 11
+        "transformed_sessions": 17
       },
       {
         "action_repairs": 0,
@@ -113,7 +931,7 @@
         "seed": 2,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 5
+        "transformed_sessions": 6
       },
       {
         "action_repairs": 0,
@@ -137,7 +955,7 @@
         "seed": 3,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 6
+        "transformed_sessions": 7
       },
       {
         "action_repairs": 0,
@@ -161,7 +979,7 @@
         "seed": 4,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 5
+        "transformed_sessions": 6
       },
       {
         "action_repairs": 0,
@@ -185,7 +1003,7 @@
         "seed": 5,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 6
+        "transformed_sessions": 9
       },
       {
         "action_repairs": 0,
@@ -209,7 +1027,7 @@
         "seed": 6,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 1
+        "transformed_sessions": 5
       },
       {
         "action_repairs": 0,
@@ -233,7 +1051,7 @@
         "seed": 7,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 4
+        "transformed_sessions": 7
       },
       {
         "action_repairs": 0,
@@ -257,7 +1075,7 @@
         "seed": 8,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 1
+        "transformed_sessions": 4
       },
       {
         "action_repairs": 0,
@@ -281,7 +1099,7 @@
         "seed": 9,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 2
+        "transformed_sessions": 7
       },
       {
         "action_repairs": 0,
@@ -305,7 +1123,7 @@
         "seed": 10,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 0
+        "transformed_sessions": 2
       },
       {
         "action_repairs": 0,
@@ -329,7 +1147,7 @@
         "seed": 11,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 3
+        "transformed_sessions": 5
       },
       {
         "action_repairs": 0,
@@ -353,7 +1171,7 @@
         "seed": 12,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 3
+        "transformed_sessions": 4
       },
       {
         "action_repairs": 0,
@@ -377,7 +1195,7 @@
         "seed": 13,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 8
+        "transformed_sessions": 10
       },
       {
         "action_repairs": 0,
@@ -401,7 +1219,7 @@
         "seed": 14,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 3
+        "transformed_sessions": 7
       },
       {
         "action_repairs": 0,
@@ -449,7 +1267,7 @@
         "seed": 16,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 3
+        "transformed_sessions": 5
       },
       {
         "action_repairs": 0,
@@ -497,7 +1315,7 @@
         "seed": 18,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 6
+        "transformed_sessions": 7
       },
       {
         "action_repairs": 0,
@@ -3183,7 +4001,7 @@
       "mean_planned_sessions": 111.35,
       "mean_productive_weeks": 23.7,
       "mean_sleep_debt": 13.9987,
-      "mean_transformed_sessions": 4.35,
+      "mean_transformed_sessions": 6.45,
       "min_final_1rm_kg": 85.29,
       "policy": "random",
       "seed_std_kg": 1.0

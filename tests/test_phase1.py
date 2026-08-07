@@ -331,6 +331,48 @@ def test_session_accounting_separates_transforms_attempts_and_misses() -> None:
     assert result["missed_sessions"] == 1
 
 
+def test_execution_transformations_are_counted_and_surface_their_reasons() -> None:
+    config = SimConfig(weeks=1, enable_event_system=False, enable_money_system=False)
+
+    rep_rate = BenchEnvironment(0, config)
+    rep_rate_outcome = rep_rate.submit_week(
+        WeekAction(
+            sessions=[SessionPlan(day=0, focus="volume", sets=8, reps=15, load_kg=60, duration_min=10)],
+        )
+    )
+    assert rep_rate_outcome.transformed_sessions == 1
+    assert "duration/repetition-rate limit reduced prescribed repetitions" in rep_rate_outcome.transformation_reasons
+
+    home_cap = BenchEnvironment(0, config)
+    home_cap._state.home_gym = True
+    home_outcome = home_cap.submit_week(
+        WeekAction(
+            sessions=[SessionPlan(day=0, location="home", focus="heavy", sets=1, reps=1, load_kg=100, duration_min=10)],
+        )
+    )
+    assert home_outcome.transformed_sessions == 1
+    assert "home no-spotter load cap applied" in home_outcome.transformation_reasons
+
+    load_cap = BenchEnvironment(0, config)
+    load_outcome = load_cap.submit_week(
+        WeekAction(
+            sessions=[SessionPlan(day=0, focus="heavy", sets=1, reps=1, load_kg=250, duration_min=10)],
+        )
+    )
+    assert load_outcome.transformed_sessions == 1
+    assert "load-ratio execution cap applied" in load_outcome.transformation_reasons
+
+
+def test_invalid_reactive_action_fallback_is_counted_in_weekly_outcome() -> None:
+    env = BenchEnvironment(2, SimConfig(weeks=1))
+    outcome = env.submit_week(
+        WeekAction(life=LifeAllocation(meal_prep_hours=0, partner_coverage_hours=0, partner_giveback_hours=0)),
+        reactive_responder=lambda _observation: {"extra_spend_cents": "15000"},
+    )
+    assert outcome.reactive_action_fallbacks == 1
+    assert any("reactive action replaced with protect_recovery" in reason for reason in outcome.transformation_reasons)
+
+
 def test_zero_load_sessions_do_not_earn_stimulus_or_productive_credit() -> None:
     config = SimConfig(
         weeks=4,

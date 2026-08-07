@@ -6,7 +6,7 @@ represented by private engine dataclasses rather than an observation model.
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 Slot = Literal["morning", "lunch", "evening"]
@@ -19,7 +19,10 @@ CapitalPurchase = Literal["home_gym", "recurring_childcare", "meal_prep_subscrip
 
 
 class SchemaBase(BaseModel):
-    model_config = ConfigDict(extra="forbid", frozen=True)
+    # Action values cross the simulator boundary exactly as authored.  In
+    # particular, numeric strings and string purchase sentinels are errors,
+    # not silently normalized actions.
+    model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
 
 
 class SessionPlan(SchemaBase):
@@ -55,20 +58,6 @@ class LifeAllocation(SchemaBase):
     sleep_protection: Literal["none", "standard", "strong"] = "standard"
     career_choice: Literal["protect_time", "accept_stretch_project", "defer"] = "protect_time"
     purchases: list[CapitalPurchase] = Field(default_factory=list, max_length=3)
-
-    @field_validator("purchases", mode="before")
-    @classmethod
-    def normalize_purchase_sentinel(cls, value: object) -> object:
-        """Accept common no-purchase/string forms without changing the public type."""
-        if value is None:
-            return []
-        if isinstance(value, str):
-            normalized = value.strip().lower()
-            if normalized in {"", "none", "no purchases", "no-purchases", "no_purchase", "[]"}:
-                return []
-            if normalized in {"home_gym", "recurring_childcare", "meal_prep_subscription"}:
-                return [normalized]
-        return value
 
     @model_validator(mode="after")
     def validate_purchases(self) -> "LifeAllocation":
@@ -136,6 +125,8 @@ class RecentWeek(SchemaBase):
     average_sleep_hours: float = Field(ge=0.0, le=12.0)
     estimated_1rm_kg: float = Field(ge=0.0, le=300.0)
     headline: str
+    reactive_action_fallbacks: int = Field(default=0, ge=0, le=5)
+    transformation_reasons: list[str] = Field(default_factory=list, max_length=16)
 
 
 class WeekObservation(SchemaBase):

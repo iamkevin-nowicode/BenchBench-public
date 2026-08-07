@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 
@@ -13,7 +14,15 @@ PAIN_DAYS_LIMIT = 14
 
 def constraint_violations(*, pain_days: int | float | None) -> tuple[str, ...]:
     """Return the hard-score violations for an episode."""
-    if pain_days is not None and float(pain_days) > PAIN_DAYS_LIMIT:
+    if pain_days is None:
+        return ("missing_pain_days",)
+    try:
+        numeric_pain_days = float(pain_days)
+    except (TypeError, ValueError):
+        return ("invalid_pain_days",)
+    if not math.isfinite(numeric_pain_days):
+        return ("invalid_pain_days",)
+    if numeric_pain_days > PAIN_DAYS_LIMIT:
         return (f"pain_days>{PAIN_DAYS_LIMIT}",)
     return ()
 

@@ -59,6 +59,9 @@ class _WeekRuntime:
     nutrition_band: str = "adequate"
     planned_sessions: int = 0
     transformed_sessions: int = 0
+    transformed_session_days: set[int] = field(default_factory=set)
+    transformation_reasons: list[str] = field(default_factory=list)
+    reactive_action_fallbacks: int = 0
     attempted_sessions: int = 0
     completed_sessions: int = 0
     # Completed sessions whose executed focus is fallback. Authored or
@@ -113,6 +116,7 @@ class _State:
     completed_sessions: int = 0
     missed_sessions: int = 0
     fallback_sessions: int = 0
+    reactive_action_fallbacks: int = 0
     productive_weeks: int = 0
     productive_streak_weeks: int = 0
     pain_days: int = 0
@@ -161,6 +165,8 @@ class WeekOutcome:
     pain_band: str
     headline: str
     interrupts: tuple[str, ...]
+    reactive_action_fallbacks: int = 0
+    transformation_reasons: tuple[str, ...] = ()
     session_failure_reasons: tuple[SessionFailure, ...] | None = None
 
     def as_dict(self) -> dict[str, Any]:
@@ -182,6 +188,7 @@ class FinalResult:
     completed_sessions: int
     missed_sessions: int
     fallback_sessions: int
+    reactive_action_fallbacks: int
     productive_weeks: int
     pain_days: int
     household_strain: float
@@ -557,9 +564,6 @@ class BenchEnvironment:
                     runtime.session_failure_reasons.append(SessionFailure(day=day, reason="cancelled"))
                     day_note = "session cancelled by standing rule"
                 else:
-                    if session != planned:
-                        runtime.transformed_sessions += 1
-                        self._state.transformed_sessions += 1
                     runtime.attempted_sessions += 1
                     self._state.attempted_sessions += 1
                     session_is_fallback = session.focus == "fallback"
@@ -610,6 +614,7 @@ class BenchEnvironment:
             completed_sessions=self._state.completed_sessions,
             missed_sessions=self._state.missed_sessions,
             fallback_sessions=self._state.fallback_sessions,
+            reactive_action_fallbacks=self._state.reactive_action_fallbacks,
             productive_weeks=self._state.productive_weeks,
             pain_days=self._state.pain_days,
             household_strain=round(self._state.household_strain, 3),
@@ -774,6 +779,12 @@ class BenchEnvironment:
                 if runtime is not None
                 else ()
             ),
+            reactive_action_fallbacks=runtime.reactive_action_fallbacks if runtime is not None else 0,
+            transformation_reasons=(
+                tuple(runtime.transformation_reasons)
+                if runtime is not None
+                else ()
+            ),
             session_failure_reasons=(
                 tuple(runtime.session_failure_reasons)
                 if runtime is not None and self.config.expose_session_failure_reasons
@@ -815,11 +826,42 @@ class BenchEnvironment:
         try:
             raw = responder(observation)
             if raw is None:
+                self._record_reactive_action_fallback(active_runtime, "reactive action was missing")
                 return ReactiveAction(response="protect_recovery")
             action, error = self.validate_reactive_action(raw, event)
-            return action if error is None and action is not None else ReactiveAction(response="protect_recovery")
-        except (ValidationError, TypeError, ValueError):
+            if error is None and action is not None:
+                return action
+            self._record_reactive_action_fallback(active_runtime, error or "reactive action was invalid")
             return ReactiveAction(response="protect_recovery")
+        except (ValidationError, TypeError, ValueError) as exc:
+            self._record_reactive_action_fallback(active_runtime, str(exc) or "reactive action was invalid")
+            return ReactiveAction(response="protect_recovery")
+
+    @staticmethod
+    def _record_transformation_reason(runtime: _WeekRuntime, reason: str) -> None:
+        if reason not in runtime.transformation_reasons:
+            runtime.transformation_reasons.append(reason)
+
+    def _record_session_transformation(self, runtime: _WeekRuntime, day: int, reason: str) -> None:
+        if day not in runtime.transformed_session_days:
+            runtime.transformed_session_days.add(day)
+            runtime.transformed_sessions += 1
+            self._state.transformed_sessions += 1
+        self._record_transformation_reason(runtime, reason)
+
+    def _record_reactive_action_fallback(self, runtime: _WeekRuntime | None, reason: str) -> None:
+        if runtime is None:
+            return
+        runtime.reactive_action_fallbacks += 1
+        self._state.reactive_action_fallbacks += 1
+        self._record_transformation_reason(
+            runtime,
+            f"reactive action replaced with protect_recovery: {reason}",
+        )
+
+    def record_reactive_fallback(self, reason: str) -> None:
+        """Record a runner-side reactive fallback in the active weekly outcome."""
+        self._record_reactive_action_fallback(self._active_runtime, reason)
 
     def _apply_interrupt(self, event: InterruptEvent, reactive: ReactiveAction, runtime: _WeekRuntime) -> None:
         self._state.last_interrupt = event.title
@@ -919,28 +961,49 @@ class BenchEnvironment:
             return None
         session = planned
         if day in runtime.home_days and self._state.home_gym:
-            session = session.model_copy(update={"location": "home"})
+            updated = session.model_copy(update={"location": "home"})
+            if updated != session:
+                self._record_session_transformation(runtime, day, "reactive reallocation moved the session to home")
+            session = updated
         if day in runtime.fallback_days:
-            session = self._as_fallback(session)
+            updated = self._as_fallback(session)
+            if updated != session:
+                self._record_session_transformation(runtime, day, "reactive action converted the session to fallback")
+            session = updated
         if sleep < 5.0:
             if runtime.action.rules.on_sleep_below_5h == "skip":
                 return None
             if runtime.action.rules.on_sleep_below_5h == "fallback":
-                session = self._as_fallback(session)
+                updated = self._as_fallback(session)
+                if updated != session:
+                    self._record_session_transformation(runtime, day, "sleep rule converted the session to fallback")
+                session = updated
             elif runtime.action.rules.on_sleep_below_5h == "reduce":
-                session = self._as_reduced(session)
+                updated = self._as_reduced(session)
+                if updated != session:
+                    self._record_session_transformation(runtime, day, "sleep rule reduced the session")
+                session = updated
         if self._pain_stage() >= 1:
             if runtime.action.rules.on_pain_warning == "skip":
                 return None
             if runtime.action.rules.on_pain_warning == "fallback":
-                session = self._as_fallback(session)
+                updated = self._as_fallback(session)
+                if updated != session:
+                    self._record_session_transformation(runtime, day, "pain rule converted the session to fallback")
+                session = updated
             elif runtime.action.rules.on_pain_warning == "reduce":
-                session = self._as_reduced(session)
+                updated = self._as_reduced(session)
+                if updated != session:
+                    self._record_session_transformation(runtime, day, "pain rule reduced the session")
+                session = updated
         if self._state.illness_days > 0:
             if runtime.action.rules.on_illness == "skip":
                 return None
             if runtime.action.rules.on_illness in ("protect_recovery", "fallback"):
-                session = self._as_fallback(session)
+                updated = self._as_fallback(session)
+                if updated != session:
+                    self._record_session_transformation(runtime, day, "illness rule converted the session to fallback")
+                session = updated
         return session
 
     @staticmethod
@@ -1061,11 +1124,24 @@ class BenchEnvironment:
         # Do not turn an authored zero/very-light load into a 35%-capacity
         # session.  The meaningful-load threshold below makes warm-up-only
         # prescriptions non-productive without silently rewriting the action.
-        load_ratio = _clamp(executed_load_kg / max(1.0, true_capacity), 0.0, 1.20)
+        authored_load_ratio = executed_load_kg / max(1.0, true_capacity)
+        load_ratio = _clamp(authored_load_ratio, 0.0, 1.20)
+        if load_ratio != authored_load_ratio:
+            self._record_session_transformation(
+                runtime,
+                self._state.day_index % 7,
+                "load-ratio execution cap applied",
+            )
         if session.location == "home" and session.focus in ("heavy", "test"):
             # A home rack has no spotter.  It remains useful for ordinary
             # volume and technique work, but true near-max work is capped.
-            load_ratio = min(load_ratio, self.config.home_no_spotter_max_ratio)
+            if load_ratio > self.config.home_no_spotter_max_ratio:
+                self._record_session_transformation(
+                    runtime,
+                    self._state.day_index % 7,
+                    "home no-spotter load cap applied",
+                )
+                load_ratio = self.config.home_no_spotter_max_ratio
         # Couple reps to load with a Brzycki-style rep-max ceiling.  A
         # prescription above the ceiling is reduced to the largest plausible
         # rep count (with one rep as the minimum attempted set), so excessive
@@ -1075,6 +1151,12 @@ class BenchEnvironment:
         rep_max_reps = math.floor(37.0 - (36.0 * ceiling_load_kg / ceiling_1rm_kg))
         rep_max_reps = max(1, rep_max_reps)
         executed_reps = min(session.reps, rep_max_reps)
+        if executed_reps < session.reps:
+            self._record_session_transformation(
+                runtime,
+                self._state.day_index % 7,
+                "rep-max ceiling reduced prescribed repetitions",
+            )
         duration_rep_limit = max(
             1,
             math.floor(
@@ -1083,6 +1165,12 @@ class BenchEnvironment:
                 / max(1, session.sets)
             ),
         )
+        if duration_rep_limit < executed_reps:
+            self._record_session_transformation(
+                runtime,
+                self._state.day_index % 7,
+                "duration/repetition-rate limit reduced prescribed repetitions",
+            )
         executed_reps = min(executed_reps, duration_rep_limit)
         focus_factor = {"volume": 0.92, "heavy": 1.05, "technique": 0.56, "fallback": 0.60, "test": 0.86}[session.focus]
         effort_factor = _clamp(0.68 + (session.target_rpe - 5.0) * 0.065, 0.65, 1.02)
@@ -1291,6 +1379,8 @@ class BenchEnvironment:
             pain_band=self._pain_band(),
             headline=headline,
             interrupts=tuple(record["title"] for record in runtime.interrupt_records),
+            reactive_action_fallbacks=runtime.reactive_action_fallbacks,
+            transformation_reasons=tuple(runtime.transformation_reasons),
             session_failure_reasons=(
                 tuple(runtime.session_failure_reasons)
                 if self.config.expose_session_failure_reasons
@@ -1454,6 +1544,8 @@ class BenchEnvironment:
                     average_sleep_hours=float(summary["average_sleep_hours"]),
                     estimated_1rm_kg=float(summary["estimated_1rm_kg"]),
                     headline=str(summary["headline"]),
+                    reactive_action_fallbacks=int(summary.get("reactive_action_fallbacks", 0)),
+                    transformation_reasons=list(summary.get("transformation_reasons", [])),
                 )
             )
         equipment = ["commercial_gym"]

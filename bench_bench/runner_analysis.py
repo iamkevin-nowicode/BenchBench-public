@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import fields as dataclass_fields
 import json
+import math
 from pathlib import Path
 import re
 from statistics import fmean
@@ -133,6 +134,12 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
     final_heavy = any(session.get("focus") in ("heavy", "test") for session in final_action.get("sessions", []))
     purchases = [purchase for turn in turns for purchase in turn["action"].get("life", {}).get("purchases", [])]
     final_result = end.get("result", {})
+    if not isinstance(final_result, dict):
+        final_result = {}
+    required_final_fields = ("final_1rm_kg", "pain_days", "invalid_reason")
+    for field_name in required_final_fields:
+        if field_name not in final_result:
+            transcript_violations.append(f"missing_final_result_field:{field_name}")
     invalid_reason = final_result.get("invalid_reason")
     score = score_fields(
         final_result.get("final_1rm_kg"),
@@ -168,17 +175,23 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         "seed": int(start.get("seed", -1)),
         "weeks": len(turns),
         "configured_weeks": configured_weeks,
-        "valid": not exclusion_reasons and "final_1rm_kg" in final_result,
+        "valid": not exclusion_reasons and all(field_name in final_result for field_name in required_final_fields),
         "invalid_reason": invalid_reason,
         "exclusion_reasons": exclusion_reasons,
         # Keep the legacy field as the raw engine result for compatibility;
         # leaderboard aggregates use counted_final_1rm_kg below.
-        "final_1rm_kg": score["raw_final_1rm_kg"] or 0.0,
+        "final_1rm_kg": score["raw_final_1rm_kg"],
         "raw_final_1rm_kg": score["raw_final_1rm_kg"],
         "counted_final_1rm_kg": score["counted_final_1rm_kg"] if not exclusion_reasons else None,
         "constraint_violations": score["constraint_violations"],
         "violations": score["constraint_violations"],
-        "pain_days": int(final_result.get("pain_days", 0)),
+        "pain_days": (
+            int(final_result["pain_days"])
+            if isinstance(final_result.get("pain_days"), (int, float))
+            and not isinstance(final_result.get("pain_days"), bool)
+            and math.isfinite(float(final_result["pain_days"]))
+            else None
+        ),
         "planned_sessions": int(final_result.get("planned_sessions", 0)),
         "transformed_sessions": int(final_result.get("transformed_sessions", 0)),
         "attempted_sessions": int(final_result.get("attempted_sessions", 0)),

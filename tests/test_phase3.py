@@ -126,6 +126,23 @@ def test_analyzer_counts_only_pain_compliant_scores_and_retains_raw_score(tmp_pa
     assert f"{summary['raw_final_1rm_kg']:.2f}" in report
 
 
+def test_analyzer_fails_closed_when_pain_days_is_missing(tmp_path) -> None:
+    transcript = tmp_path / "missing-pain.jsonl"
+    runner = ModelRunner(DeterministicPolicyClient("recovery-aware", 3), RunnerConfig(weeks=1))
+    runner.run_episode(3, transcript)
+    records = [json.loads(line) for line in transcript.read_text().splitlines()]
+    end = next(record for record in records if record.get("type") == "run_end")
+    del end["result"]["pain_days"]
+    transcript.write_text("".join(json.dumps(record) + "\n" for record in records))
+
+    summary = analyze_transcript(transcript)
+    assert summary["valid"] is False
+    assert summary["counted_final_1rm_kg"] is None
+    assert summary["pain_days"] is None
+    assert summary["constraint_violations"] == ["missing_pain_days"]
+    assert "transcript: missing_final_result_field:pain_days" in summary["exclusion_reasons"]
+
+
 def test_model_runner_repairs_budget_invalid_weekly_action(tmp_path) -> None:
     weekly_calls = 0
 
@@ -308,11 +325,15 @@ def test_system_prompts_state_objective_and_keep_reactive_prompt_short() -> None
     assert "WeekAction fields" not in reactive
 
 
-def test_step2_schema_tolerates_no_purchase_sentinels_and_short_fallbacks() -> None:
+def test_action_schema_rejects_coercive_numeric_and_purchase_sentinel_inputs() -> None:
     from bench_bench.schemas import LifeAllocation, SessionPlan
 
-    assert LifeAllocation(purchases="none").purchases == []  # type: ignore[arg-type]
-    assert LifeAllocation(purchases="home_gym").purchases == ["home_gym"]  # type: ignore[arg-type]
+    with pytest.raises(ValueError):
+        LifeAllocation(purchases="none")  # type: ignore[arg-type]
+    with pytest.raises(ValueError):
+        LifeAllocation(purchases="home_gym")  # type: ignore[arg-type]
+    with pytest.raises(ValueError):
+        SessionPlan(day="2", sets="3")  # type: ignore[arg-type]
     assert SessionPlan(day=2, focus="fallback", duration_min=10).duration_min == 10
 
 

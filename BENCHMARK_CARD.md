@@ -1,6 +1,6 @@
 # Bench-bench v0.1 Benchmark Card
 
-Engine/config hash for this artifact set: `sha256:f86634de54d16383952499a16b7672c14ca7473f19f4916a094382c950d903a8`
+Engine/config hash for this artifact set: `sha256:d5585a5bb69088a0cb7b3f4f78b70dc79a3caa59a3fcbbc00a9fcebde6d3add1`
 
 ## Summary
 
@@ -116,14 +116,17 @@ score; the model leaderboard uses the counted column and excludes violations.
 
 The 12-week diagnostic has 5.766σ expert–random separation and fails the
 stable-ordering diagnostic, so it is not a release gate. In the current
-52-week widened adversarial search, the best valid candidate scored 102.22 kg
-against the 102.89 kg expert. No candidate beat the expert, no candidate
-required human review, and no candidate was release-blocking. The widened
-genome covers mixed-focus weekly templates, per-week structure, boundary loads
-including zero, and ordered purchases; the volume-stacking, 8×4, mixed-focus,
-zero-load, and purchase-order regression families remain below expert, while
-the over-ceiling authored fallback family is invalid in search. Beating the
-expert alone is not a release block.
+52-week widened adversarial search, the best valid candidate scored 100.48 kg
+against the 102.89 kg expert. `adversarial-001` had a raw mean of 102.22 kg
+and a counted mean of 102.08 kg across its 16 pain-compliant episodes, but
+four of 20 episodes exceeded `pain_days ≤ 14`; it is therefore not a fully
+valid candidate and was excluded from the search ranking. No candidate beat
+the expert, no candidate required human review, and no candidate was
+release-blocking. The widened genome covers mixed-focus weekly templates,
+per-week structure, boundary loads including zero, and ordered purchases; the
+volume-stacking, 8×4, mixed-focus, zero-load, and purchase-order regression
+families remain below expert, while the over-ceiling authored fallback family
+is invalid in search. Beating the expert alone is not a release block.
 
 ## Public leaderboard status
 

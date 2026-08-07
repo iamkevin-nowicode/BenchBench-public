@@ -4,8 +4,8 @@
     "adversarial-001": {
       "abuse_signatures": [],
       "beats_expert": false,
-      "expert_margin_kg": -0.67,
-      "final_mean_final_1rm_kg": 102.222,
+      "expert_margin_kg": -0.8164,
+      "final_mean_final_1rm_kg": 102.0756,
       "genome": {
         "buy_home_rack": true,
         "childcare_hours": 0.0,
@@ -552,7 +552,7 @@
       "adversarial-001": {
         "abuse_signatures": [],
         "beats_expert": false,
-        "expert_margin_kg": -0.67,
+        "expert_margin_kg": -0.8164,
         "release_blocked": false,
         "requires_human_review": false
       },
@@ -707,7 +707,7 @@
     "weekly_time_budget_minutes": 900,
     "weeks": 52
   },
-  "engine_config_hash": "sha256:f86634de54d16383952499a16b7672c14ca7473f19f4916a094382c950d903a8",
+  "engine_config_hash": "sha256:d5585a5bb69088a0cb7b3f4f78b70dc79a3caa59a3fcbbc00a9fcebde6d3add1",
   "episodes": {
     "adversarial-001": [
       {
@@ -796,8 +796,10 @@
       },
       {
         "completed_sessions": 128,
-        "constraint_violations": [],
-        "counted_final_1rm_kg": 102.33,
+        "constraint_violations": [
+          "pain_days>14"
+        ],
+        "counted_final_1rm_kg": null,
         "fallback_actions": 0,
         "final_1rm_kg": 102.33,
         "household_strain": 0.0,
@@ -820,8 +822,10 @@
       },
       {
         "completed_sessions": 129,
-        "constraint_violations": [],
-        "counted_final_1rm_kg": 102.82,
+        "constraint_violations": [
+          "pain_days>14"
+        ],
+        "counted_final_1rm_kg": null,
         "fallback_actions": 0,
         "final_1rm_kg": 102.82,
         "household_strain": 0.0,
@@ -856,8 +860,10 @@
       },
       {
         "completed_sessions": 133,
-        "constraint_violations": [],
-        "counted_final_1rm_kg": 103.17,
+        "constraint_violations": [
+          "pain_days>14"
+        ],
+        "counted_final_1rm_kg": null,
         "fallback_actions": 0,
         "final_1rm_kg": 103.17,
         "household_strain": 0.0,
@@ -892,8 +898,10 @@
       },
       {
         "completed_sessions": 146,
-        "constraint_violations": [],
-        "counted_final_1rm_kg": 102.91,
+        "constraint_violations": [
+          "pain_days>14"
+        ],
+        "counted_final_1rm_kg": null,
         "fallback_actions": 0,
         "final_1rm_kg": 102.91,
         "household_strain": 0.0,
@@ -3373,7 +3381,6 @@
     ]
   },
   "exploit_policies": [
-    "adversarial-001",
     "adversarial-002",
     "adversarial-003",
     "adversarial-004",
@@ -3383,6 +3390,7 @@
     "regression-zero-load-boundary",
     "regression-volume-stacking",
     "regression-volume-8x4",
+    "adversarial-001",
     "regression-compressed-fallback"
   ],
   "phase": 4,
@@ -3440,20 +3448,22 @@
   ],
   "summaries": {
     "adversarial-001": {
-      "constraint_violating_episodes": 0,
-      "constraint_violation_counts": {},
-      "episodes": 20,
+      "constraint_violating_episodes": 4,
+      "constraint_violation_counts": {
+        "pain_days>14": 4
+      },
+      "episodes": 16,
       "invalid_episodes": 0,
-      "max_final_1rm_kg": 103.17,
+      "max_final_1rm_kg": 103.1,
       "mean_fallback_actions": 0.0,
-      "mean_final_1rm_kg": 102.222,
+      "mean_final_1rm_kg": 102.0756,
       "mean_household_strain": 0.0011,
       "mean_pain_days": 10.5,
       "min_final_1rm_kg": 100.64,
       "policy": "adversarial-001",
       "raw_mean_final_1rm_kg": 102.222,
       "raw_seed_std_kg": 0.7049,
-      "seed_std_kg": 0.7049
+      "seed_std_kg": 0.7004
     },
     "adversarial-002": {
       "constraint_violating_episodes": 0,
