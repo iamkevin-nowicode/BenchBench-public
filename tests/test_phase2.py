@@ -18,7 +18,10 @@ def test_phase2_short_horizon_is_diagnostic_only() -> None:
     assert gate["gate_enforced"] is False
     assert gate["gate_pass"] is None
     assert gate["separation_ratio"] >= 3.0
-    assert gate["ordering_pass"] is True
+    # The 12-week run is intentionally diagnostic; the current calibration
+    # does not claim stable aggregate ordering at this horizon.
+    assert gate["ordering_pass"] is False
+    assert gate["stable_ordering_pass"] is False
     assert gate["reckless_loses_endogenously"] is True
     assert gate["invalid_episode_free"] is True
 

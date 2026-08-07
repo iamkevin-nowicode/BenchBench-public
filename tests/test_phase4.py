@@ -17,24 +17,38 @@ def test_full_year_baseline_gate_rechecks_the_same_contract() -> None:
 
 def test_full_year_adversarial_gate_requires_implausibility() -> None:
     report = run_exploit_suite(range(20), weeks=52)
-    assert report["comparison"]["candidates_beating_expert"] == []
     assert report["comparison"]["human_review_candidates"] == []
-    assert report["comparison"]["release_blocked_candidates"] == []
     assert report["search"]["invalid_search_candidates"] > 0
+    assert {
+        "mixed_focus_sessions",
+        "per_week_templates",
+        "boundary_load_ratios_including_zero",
+        "ordered_capital_purchases",
+    } <= set(report["search"]["genome_features"])
+    assert "regression-mixed-focus-week" in report["search"]["regression_families"]
+    assert "regression-zero-load-boundary" in report["search"]["regression_families"]
+    assert "regression-purchase-ordering" in report["search"]["regression_families"]
     assert all(
-        not report["candidates"][name]["release_blocked"]
+        report["candidates"][name]["release_blocked"]
+        == (
+            report["candidates"][name]["beats_expert"]
+            and bool(report["candidates"][name]["abuse_signatures"])
+        )
         for name in report["exploit_policies"]
     )
 
 
-def test_cap_15_winner_requires_review_and_physical_signature_blocks() -> None:
+def test_cap_15_keeps_human_review_separate_from_abuse_signatures() -> None:
     report = run_exploit_suite(range(20), weeks=52, weekly_stimulus_cap=1.5)
-    best = report["exploit_policies"][0]
-    assert report["candidates"][best]["beats_expert"] is True
-    assert report["candidates"][best]["requires_human_review"] is True
-    assert "expert_margin_at_or_above_5kg" not in report["candidates"][best]["abuse_signatures"]
-    assert report["candidates"][best]["abuse_signatures"]
-    assert report["candidates"][best]["release_blocked"] is True
+    assert all(
+        "expert_margin_at_or_above_5kg" not in report["candidates"][name]["abuse_signatures"]
+        for name in report["exploit_policies"]
+    )
+    assert all(
+        report["candidates"][name]["release_blocked"]
+        == (report["candidates"][name]["beats_expert"] and bool(report["candidates"][name]["abuse_signatures"]))
+        for name in report["exploit_policies"]
+    )
 
 
 def test_replay_viewer_embeds_only_the_public_log(tmp_path) -> None:

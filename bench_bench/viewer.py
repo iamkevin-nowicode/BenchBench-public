@@ -71,9 +71,9 @@ const stat = (label, value) => `<span class="stat">${{esc(label)}} <strong>${{es
 const result = end.result || {{}};
 document.getElementById('stats').innerHTML = [
   stat('Seed', start.seed), stat('Weeks', weeks.length), stat('Final 1RM', `${{result.final_1rm_kg ?? '—'}} kg`),
-  stat('Sessions', result.completed_sessions ?? '—'), stat('Pain days', result.pain_days ?? '—'), stat('Spend', money(result.total_spend_cents))
+  stat('Sessions', `${{result.completed_sessions ?? '—'}}/${{result.planned_sessions ?? '—'}}`), stat('Pain days', result.pain_days ?? '—'), stat('Spend', money(result.total_spend_cents))
 ].join('');
-const summary = (week, outcome) => `<h2>Week ${{week.week}}</h2><span class="chip ${{outcome.completed_sessions >= 2 ? 'good' : outcome.completed_sessions ? 'warn' : 'bad'}}">${{outcome.completed_sessions}}/${{outcome.planned_sessions}} sessions</span><span class="chip">sleep ${{outcome.average_sleep_hours}}h</span><span class="chip">estimate ${{outcome.estimated_1rm_kg}} kg</span><span class="chip">pain ${{esc(outcome.pain_band)}}</span>`;
+const summary = (week, outcome) => `<h2>Week ${{week.week}}</h2><span class="chip ${{outcome.completed_sessions >= 2 ? 'good' : outcome.completed_sessions ? 'warn' : 'bad'}}">planned ${{outcome.planned_sessions}} · transformed ${{outcome.transformed_sessions ?? 0}} · attempted ${{outcome.attempted_sessions ?? 0}} · completed ${{outcome.completed_sessions}} · missed ${{outcome.missed_sessions ?? 0}}</span><span class="chip">sleep ${{outcome.average_sleep_hours}}h</span><span class="chip">estimate ${{outcome.estimated_1rm_kg}} kg</span><span class="chip">pain ${{esc(outcome.pain_band)}}</span>`;
 const timeline = document.getElementById('timeline');
 timeline.innerHTML = weeks.map((record, index) => {{
   const outcome = record.outcome || {{}};

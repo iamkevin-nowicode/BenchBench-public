@@ -115,7 +115,8 @@ def play(args: argparse.Namespace) -> int:
                 repair = None
         outcome = env.submit_week(raw, repair_action=repair, reactive_responder=_interactive_interrupt)
         print(
-            f"W{outcome.week}: {outcome.headline} | completed {outcome.completed_sessions}/{outcome.planned_sessions}, "
+            f"W{outcome.week}: {outcome.headline} | planned {outcome.planned_sessions}, transformed {outcome.transformed_sessions}, "
+            f"attempted {outcome.attempted_sessions}, completed {outcome.completed_sessions}, missed {outcome.missed_sessions}, "
             f"sleep {outcome.average_sleep_hours:.1f}h, estimate {outcome.estimated_1rm_kg:.1f} kg"
         )
 
@@ -124,8 +125,10 @@ def play(args: argparse.Namespace) -> int:
     improvement = f"+{result.improvement_kg:.2f}" if result.improvement_kg >= 0 else f"{result.improvement_kg:.2f}"
     print(
         f"1RM {result.final_1rm_kg:.2f} kg  ({improvement}) | "
-        f"sessions {result.completed_sessions}, fallbacks {result.fallback_sessions}, "
-        f"missed {result.missed_sessions}, productive weeks {result.productive_weeks}"
+        f"planned {result.planned_sessions}, transformed {result.transformed_sessions}, "
+        f"attempted {result.attempted_sessions}, completed {result.completed_sessions}, "
+        f"missed {result.missed_sessions}, fallbacks {result.fallback_sessions}, "
+        f"productive weeks {result.productive_weeks}"
     )
     if result.invalid_reason:
         print(f"INVALID EPISODE: {result.invalid_reason}")

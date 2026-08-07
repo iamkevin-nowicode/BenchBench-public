@@ -150,3 +150,26 @@ This section supersedes earlier seed and leaderboard decisions.
 - No live model run or public leaderboard is generated before independent
   review of this frozen protocol. The authoritative leaderboard is created
   only after the public-seed live run.
+- Session accounting is reported separately as planned, transformed,
+  attempted, completed, and missed. `fallback_sessions` counts completed
+  fallback executions only. Declared work is limited to one prescribed
+  repetition per minute; loads below 0.35× true capacity earn no stimulus or
+  technique credit, and productive-week qualification uses delivered stimulus.
+- Weekly stimulus uses a real diminishing-returns tail: the default curve is
+  linear through 0.75 raw units and approaches the 1.00-unit cap thereafter.
+  The configured start is deliberately below the cap, so it is not a hard
+  clip disguised as a curve.
+- Each week reserves the cost of all scheduled household shocks before any
+  reactive spend is validated. The terminal invalidation path remains covered
+  by an independent execution-time accounting-drift fixture, rather than by a
+  validator-approved shock sequence that can fail spuriously.
+
+## Scoring constraint decision — 2026-08-07
+
+- Pain days `≤14` is the only behavioral hard constraint on the headline score.
+  A structurally valid episode always retains its raw standardized-test result;
+  a pain-violating episode receives no counted leaderboard score and is listed
+  in the `violations` column.
+- Household strain and sleep debt remain diagnostics only. They are not
+  pass/fail thresholds or hidden score penalties. Structural invalidation via
+  `invalid_reason` remains separately excluded from aggregates.

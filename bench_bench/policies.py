@@ -85,7 +85,9 @@ def _session(
         focus=focus,  # type: ignore[arg-type]
         sets=sets,
         reps=reps,
-        load_kg=round(max(20.0, load), 1),
+        # Zero is a legal authored boundary.  The engine decides whether a
+        # meaningful stimulus exists; the policy helper must not rewrite it.
+        load_kg=round(max(0.0, load), 1),
         duration_min=duration,
         target_rpe=rpe,
     )
@@ -396,6 +398,60 @@ class ScriptedExpertPolicy(ScriptedPolicy):
         return ReactiveAction(response="protect_recovery", fallback_session_days=[observation.day])
 
 
+class ReviewerVolumePolicy(ScriptedPolicy):
+    """Fixed reviewer-supplied high-volume candidate.
+
+    The weekly plan is intentionally otherwise non-adaptive: four volume
+    sessions, 3x7 at 0.68x the visible estimate, strong sleep protection,
+    balanced partner time, and three hours of delegated chores.  ``duration``
+    is injectable so the authored 10-minute version can be compared with the
+    21-minute version that permits all 21 prescribed reps under the engine's
+    one-rep-per-minute execution rule.
+    """
+
+    name = "reviewer-volume"
+
+    def __init__(self, seed: int, *, duration_min: int = 10) -> None:
+        super().__init__(seed)
+        self.duration_min = duration_min
+
+    def action(self, observation: WeekObservation) -> WeekAction:
+        has_home = "home_rack" in observation.equipment
+        purchases = ["home_gym"] if observation.episode_week == 8 and not has_home else []
+        location = "home" if has_home or purchases else "gym"
+        days = _open_days(observation, 4)
+        sessions = [
+            _session(
+                day,
+                location=location,
+                focus="volume",
+                sets=3,
+                reps=7,
+                load=observation.estimated_1rm_kg * 0.68,
+                duration=self.duration_min,
+                rpe=6.5,
+            )
+            for day in days
+        ]
+        return WeekAction(
+            sessions=sessions,
+            life=_life(
+                meal_prep=2.0,
+                sleep="strong",
+                coverage=3.0,
+                giveback=3.0,
+                chores=3.0,
+                purchases=purchases,
+            ),
+            rules=_rules(),
+        )
+
+    def reactive(self, observation: InterruptObservation) -> ReactiveAction:
+        if observation.severity == "high":
+            return ReactiveAction(response="protect_recovery", cancel_session_days=[observation.day])
+        return ReactiveAction(response="protect_recovery", fallback_session_days=[observation.day])
+
+
 _POLICY_TYPES = {
     RandomPolicy.name: RandomPolicy,
     RigidLinearPolicy.name: RigidLinearPolicy,
@@ -403,6 +459,7 @@ _POLICY_TYPES = {
     SkipWhenBusyPolicy.name: SkipWhenBusyPolicy,
     RecoveryAwarePolicy.name: RecoveryAwarePolicy,
     ScriptedExpertPolicy.name: ScriptedExpertPolicy,
+    ReviewerVolumePolicy.name: ReviewerVolumePolicy,
 }
 
 

@@ -1,6 +1,6 @@
 # Bench-bench Current Artifact Verification
 
-- Engine/config hash: `sha256:5bd2bc4dbdcf35846c87adf5102851b42692f1dcab9b35144a3b7bca0405dd27`
+- Engine/config hash: `sha256:f86634de54d16383952499a16b7672c14ca7473f19f4916a094382c950d903a8`
 - Overall: **PASS**
 
 | Check | Result |
@@ -13,6 +13,7 @@
 | card_adversarial_numbers_match | PASS |
 | card_and_manifest_have_hash | PASS |
 | card_baseline_numbers_match | PASS |
+| card_counted_baseline_numbers_match | PASS |
 | card_diagnostic_numbers_match | PASS |
 | card_gate_numbers_match | PASS |
 | card_public_status_matches | PASS |

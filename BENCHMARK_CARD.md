@@ -1,6 +1,6 @@
 # Bench-bench v0.1 Benchmark Card
 
-Engine/config hash for this artifact set: `sha256:5bd2bc4dbdcf35846c87adf5102851b42692f1dcab9b35144a3b7bca0405dd27`
+Engine/config hash for this artifact set: `sha256:f86634de54d16383952499a16b7672c14ca7473f19f4916a094382c950d903a8`
 
 ## Summary
 
@@ -63,22 +63,34 @@ episode and model-runner result records.
 Strength uses a deliberately coarse Banister-style fitness-fatigue impulse
 response with delayed adaptation, recovery gating, technique proficiency,
 tendon irritation, endogenous adherence, and consistency-based base-capacity
-drift. The event calendar includes the baby sleep arc, daycare illness
+drift. Declared work is also duration-limited at a fixed repetition rate;
+loads below 0.35× true capacity are warm-up-only and do not earn strength or
+technique stimulus, and productive-week qualification uses delivered stimulus.
+Raw weekly stimulus is linear through 0.75 units, then follows a smooth
+diminishing-returns curve toward the 1.00-unit cap; the start point is below
+the cap rather than being clamped into a hard clip.
+The event calendar includes the baby sleep arc, daycare illness
 exposure, work crunches, travel, gym crowding, household shocks, and capital
 decisions. These are benchmark-designed mechanics, not a physiological model.
 
 ## Scoring and validity
 
-Headline score is the averaged hidden-test 1RM. Secondary reporting includes
+Headline score is the averaged hidden-test 1RM, counted only when the episode
+has `pain_days ≤ 14`. The raw final 1RM is retained beside the counted score
+for every structurally valid episode. Secondary reporting includes
 improvement, productive weeks, completed and missed sessions, fallback use,
 pain burden, sleep debt, household strain, spending, and repair counts.
+Household strain and sleep debt are diagnostics only; neither can invalidate a
+score.
 
 Budget and schema errors are handled through validation, one repair attempt,
 and a safe fallback. If an execution-time charge nevertheless exceeds the
 available cash ledger, the episode terminates immediately, records an
 `episode_invalidated` event, and sets a non-null `invalid_reason` in its final
 result. The analyzer and leaderboard exclude such episodes automatically.
-The current 52-week calibration suite contains zero invalid episodes.
+The current 52-week calibration suite contains zero structurally invalid
+episodes. Reckless-maximalist violates the pain constraint on all 20 burned
+seeds; its raw score remains visible, but it has no counted leaderboard score.
 
 ## Current validation
 
@@ -86,26 +98,32 @@ The six scripted baselines were evaluated on development seeds 0–19 under the
 current 52-week configuration. These are burned calibration values, not the
 public leaderboard seed set:
 
-| Policy | Mean final 1RM (kg) | Seed SD (kg) |
-|---|---:|---:|
-| scripted-expert | 105.03 | 0.77 |
-| recovery-aware | 101.02 | 0.85 |
-| skip-when-busy | 97.89 | 1.17 |
-| rigid-linear | 92.71 | 1.47 |
-| reckless-maximalist | 90.10 | 0.97 |
-| random | 88.43 | 1.06 |
+| Policy | Raw mean (kg) | Counted mean (kg) | Raw seed SD | Counted seed SD | Violations |
+|---|---:|---:|---:|---:|---|
+| scripted-expert | 102.89 | 102.89 | 0.65 | 0.65 | — |
+| recovery-aware | 99.01 | 99.01 | 0.70 | 0.70 | — |
+| skip-when-busy | 96.56 | 96.56 | 0.96 | 0.96 | — |
+| rigid-linear | 92.35 | 92.35 | 1.77 | 1.77 | — |
+| reckless-maximalist | 87.51 | — | 1.07 | — | pain_days>14: 20 |
+| random | 86.94 | 86.94 | 1.00 | 1.00 | — |
 
 Ordering is `expert > recovery-aware > skip-when-busy > rigid-linear >
-reckless > random`. The expert–random gap is 16.604 kg, or 17.901 pooled
+reckless > random`. The expert–random gap is 15.953 kg, or 18.920 pooled
 seed SDs. The 65% adjacent-order criterion passes; reckless loses
-endogenously; all 20 baseline episodes are valid.
+endogenously. The gate is a raw six-script calibration diagnostic so its
+mechanical ordering remains inspectable even though reckless has no counted
+score; the model leaderboard uses the counted column and excludes violations.
 
-The 12-week diagnostic has 6.216σ expert–random separation but fails the
-stable-ordering diagnostic, so it is not a release gate. In the fresh
-52-week adversarial search, the best valid candidate scored 104.44 kg against
-the 105.03 kg expert; no candidate beat expert, required human review, or
-blocked release. The volume-stacking and 8×4 regression families scored about
-82.12 kg; the over-ceiling authored fallback family was invalid in search.
+The 12-week diagnostic has 5.766σ expert–random separation and fails the
+stable-ordering diagnostic, so it is not a release gate. In the current
+52-week widened adversarial search, the best valid candidate scored 102.22 kg
+against the 102.89 kg expert. No candidate beat the expert, no candidate
+required human review, and no candidate was release-blocking. The widened
+genome covers mixed-focus weekly templates, per-week structure, boundary loads
+including zero, and ordered purchases; the volume-stacking, 8×4, mixed-focus,
+zero-load, and purchase-order regression families remain below expert, while
+the over-ceiling authored fallback family is invalid in search. Beating the
+expert alone is not a release block.
 
 ## Public leaderboard status
 

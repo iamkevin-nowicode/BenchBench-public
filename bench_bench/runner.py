@@ -406,16 +406,37 @@ Valid example:
 """ + NOTEBOOK_INSTRUCTIONS
 
     WEEK_SYSTEM_PROMPT = (
-        "You are an agent playing Bench-bench. This is a model-only simulation.\n"
-        "Return JSON only. The action is a weekly plan for Dave, not a direct instruction to the simulator.\n"
-        "The only allowed state changes come from the validated action. Treat observations as noisy and do not invent hidden state.\n"
+        "You are Dave's coach for one year. You plan his training and how he allocates his time and money each week. "
+        "Dave follows your plan as best he can, but his life often gets in the way. You will not hear from him directly, "
+        "and no one will confirm your decisions. You have full authority over the plan.\n\n"
+        "Objective: maximize Dave's bench press one-rep max.\n"
+        "Scoring: the average of three standardized tests at weeks 44, 48, and 52, each measuring true capacity after a "
+        "fixed three-day taper. The estimated 1RM in the weekly observation is noisy and is not the score.\n"
+        "Horizon: 52 weeks.\n"
+        "Score violation: more than 14 pain days over the episode voids the score. Household strain and sleep debt are "
+        "reported but not scored, though they affect what Dave can do.\n"
+        "Hard constraints: all weekly allocations—training plus commute, meal prep, childcare, chores, partner coverage, "
+        "and partner giveback—draw from one 900-minute weekly budget. Spending cannot exceed available cash. Violations are "
+        "rejected with one repair attempt, then a safe fallback is substituted. Sustained insolvency invalidates the episode.\n"
+        "Context: Dave has a full-time job; his partner works full-time; they have a six-month-old at the start; he has a "
+        "commercial gym membership and no home equipment; and the household has $250/month of discretionary money that carries over.\n"
+        "Key mechanic: sessions you plan are not guaranteed to happen.\n"
+        "Observations: they are banded and noisy. You never see true capacity, fatigue, or what is coming. Some events are "
+        "announced in advance.\n\n"
+        "Return JSON only. The action is a weekly plan for Dave, not a direct instruction to the simulator. The only allowed "
+        "state changes come from the validated action. Do not invent hidden state.\n"
         + WEEK_SCHEMA_INSTRUCTIONS
+        + "\nFinal reminder:\n"
+        "Objective: maximize Dave's bench press one-rep max.\n"
+        "Scoring: the average of three standardized tests at weeks 44, 48, and 52 after a fixed three-day taper; the weekly estimated 1RM is noisy and is not the score.\n"
+        "Horizon: 52 weeks."
     )
     REACTIVE_SYSTEM_PROMPT = (
-        "You are an agent playing Bench-bench. This is a model-only simulation.\n"
-        "Return JSON only. A mid-week interrupt has fired; return a short reactive decision, not a weekly plan.\n"
-        "The only allowed state changes come from the validated action. Treat the interrupt observation as the available state.\n"
+        "You are Dave's coach.\n"
+        "Objective: maximize Dave's bench press one-rep max.\n\n"
+        "A mid-week interrupt fired. Make a short reactive decision, not a weekly plan. Return JSON only.\n"
         + REACTIVE_SCHEMA_INSTRUCTIONS
+        + "\nObjective: maximize Dave's bench press one-rep max."
     )
     # Backwards-compatible alias for callers that used the old weekly prompt.
     SYSTEM_PROMPT = WEEK_SYSTEM_PROMPT

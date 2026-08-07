@@ -31,14 +31,25 @@ class SimConfig:
     # irritation still see the prescribed work, so extra work cannot become a
     # free second dose of adaptation.
     weekly_stimulus_cap: float = 1.0
-    weekly_stimulus_diminishing_start: float = 1.25
+    # With a 1.0 weekly cap, diminishing returns begin below the cap.  The
+    # curve therefore has a genuine nonlinear tail instead of silently
+    # clamping its start point to the cap.
+    weekly_stimulus_diminishing_start: float = 0.75
+    # Loads below this ratio are warm-up-only: they may occupy a session, but
+    # do not produce strength stimulus or technique credit.
+    minimum_meaningful_load_ratio: float = 0.35
+    # A session cannot claim more than this many prescribed repetitions per
+    # minute. The limit applies to every focus, including fallback.
+    session_reps_per_minute: float = 1.0
+    productive_week_stimulus_threshold: float = 0.20
     # One shared discretionary household-time pool. It covers training plus
     # the life allocations in the weekly action.
     weekly_time_budget_minutes: int = 900
     delegated_chore_cost_per_hour_cents: int = 1_200
     reactive_childcare_cost_per_hour_cents: int = 1_400
-    # Recalibrated after adding durable-capacity drift and multi-test scoring;
-    # the paired reduction keeps scripted-expert near the 105 kg target.
+    # Calibration adopted after durable-capacity drift and multi-test scoring;
+    # later stimulus-curve corrections are accepted without retuning these
+    # strength coefficients to restore an earlier headline score.
     fitness_to_strength_kg: float = 2.00
     fatigue_to_strength_kg: float = 0.20
     # Sustained consistency can raise the athlete's durable base capacity.
@@ -96,6 +107,9 @@ class SimConfig:
             "fallback_max_load_ratio": self.fallback_max_load_ratio,
             "weekly_stimulus_cap": self.weekly_stimulus_cap,
             "weekly_stimulus_diminishing_start": self.weekly_stimulus_diminishing_start,
+            "minimum_meaningful_load_ratio": self.minimum_meaningful_load_ratio,
+            "session_reps_per_minute": self.session_reps_per_minute,
+            "productive_week_stimulus_threshold": self.productive_week_stimulus_threshold,
             "weekly_time_budget_minutes": self.weekly_time_budget_minutes,
             "delegated_chore_cost_per_hour_cents": self.delegated_chore_cost_per_hour_cents,
             "reactive_childcare_cost_per_hour_cents": self.reactive_childcare_cost_per_hour_cents,

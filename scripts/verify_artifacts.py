@@ -143,18 +143,32 @@ def main() -> None:
     checks["card_and_manifest_have_hash"] = HASH in card and manifest.get("engine_config_hash") == HASH
 
     card_baselines: dict[str, tuple[float, float]] = {}
-    for match in re.finditer(r"^\| ([a-z0-9-]+) \| ([0-9]+\.[0-9]+) \| ([0-9]+\.[0-9]+) \|$", card, re.M):
+    card_counted: dict[str, float | None] = {}
+    for match in re.finditer(
+        r"^\| ([a-z0-9-]+) \| ([0-9]+\.[0-9]+) \| ([0-9]+\.[0-9]+|—) \| ([0-9]+\.[0-9]+) \| ([0-9]+\.[0-9]+|—) \|",
+        card,
+        re.M,
+    ):
         if match.group(1) in stored52["summaries"]:
-            card_baselines[match.group(1)] = (float(match.group(2)), float(match.group(3)))
+            card_baselines[match.group(1)] = (float(match.group(2)), float(match.group(4)))
+            card_counted[match.group(1)] = None if match.group(3) == "—" else float(match.group(3))
     checks["card_baseline_numbers_match"] = len(card_baselines) == 6 and all(
         card_baselines[policy] == (round(summary["mean_final_1rm_kg"], 2), round(summary["seed_std_kg"], 2))
+        for policy, summary in stored52["summaries"].items()
+    )
+    checks["card_counted_baseline_numbers_match"] = len(card_counted) == 6 and all(
+        card_counted[policy] == (
+            round(summary["counted_mean_final_1rm_kg"], 2)
+            if summary.get("counted_mean_final_1rm_kg") is not None
+            else None
+        )
         for policy, summary in stored52["summaries"].items()
     )
 
     gap_match = re.search(r"expert–random gap is ([0-9]+\.[0-9]+) kg, or ([0-9]+\.[0-9]+) pooled", card)
     diagnostic_match = re.search(r"12-week diagnostic has ([0-9]+\.[0-9]+)σ", card)
     adversarial_match = re.search(
-        r"best valid candidate scored ([0-9]+\.[0-9]+) kg against\s+the\s+([0-9]+\.[0-9]+) kg expert", card
+        r"best valid candidate\s+scored ([0-9]+\.[0-9]+) kg\s+against\s+the\s+([0-9]+\.[0-9]+) kg expert", card
     )
     checks["card_gate_numbers_match"] = bool(gap_match) and float(gap_match.group(1)) == round(stored52["gate"]["expert_minus_random_kg"], 3) and float(gap_match.group(2)) == round(stored52["gate"]["separation_ratio"], 3)
     checks["card_diagnostic_numbers_match"] = bool(diagnostic_match) and float(diagnostic_match.group(1)) == round(stored12["gate"]["separation_ratio"], 3)

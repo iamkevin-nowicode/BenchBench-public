@@ -33,6 +33,7 @@ ReactiveResponder = Callable[[InterruptObservation], ReactiveAction | dict[str, 
 # These tests are hidden from the acting model. They are hypothetical
 # standardized-test reads and do not mutate the episode state.
 HIDDEN_STANDARDIZED_TEST_WEEKS = (44, 48, 52)
+HOUSEHOLD_SHOCK_COST_CENTS = 4_500
 
 
 def _clamp(value: float, low: float, high: float) -> float:
@@ -57,7 +58,11 @@ class _WeekRuntime:
     meal_support_level: float = 0.8
     nutrition_band: str = "adequate"
     planned_sessions: int = 0
+    transformed_sessions: int = 0
+    attempted_sessions: int = 0
     completed_sessions: int = 0
+    # Completed sessions whose executed focus is fallback. Authored or
+    # coerced fallback attempts that miss do not count here.
     fallback_sessions: int = 0
     missed_sessions: int = 0
     pain_days: int = 0
@@ -69,6 +74,9 @@ class _WeekRuntime:
     weekly_stimulus: float = 0.0
     ledger_minutes_remaining: int = 0
     ledger_minutes_committed: int = 0
+    # Money held back for every household shock still scheduled in this
+    # week. Reactive choices may spend only outside this reserve.
+    shock_reserve_cents: int = 0
 
 
 @dataclass
@@ -99,6 +107,9 @@ class _State:
     meal_subscription: bool = False
     stretch_project_weeks: int = 0
     total_spend_cents: int = 0
+    planned_sessions: int = 0
+    transformed_sessions: int = 0
+    attempted_sessions: int = 0
     completed_sessions: int = 0
     missed_sessions: int = 0
     fallback_sessions: int = 0
@@ -139,6 +150,8 @@ class SessionFailure:
 class WeekOutcome:
     week: int
     planned_sessions: int
+    transformed_sessions: int
+    attempted_sessions: int
     completed_sessions: int
     fallback_sessions: int
     missed_sessions: int
@@ -163,6 +176,9 @@ class FinalResult:
     final_1rm_kg: float
     estimated_1rm_kg: float
     improvement_kg: float
+    planned_sessions: int
+    transformed_sessions: int
+    attempted_sessions: int
     completed_sessions: int
     missed_sessions: int
     fallback_sessions: int
@@ -321,7 +337,11 @@ class BenchEnvironment:
         return cost
 
     def _scheduled_household_shock_cost(self) -> int:
-        return sum(4_500 for event in self.calendar.week(self._state.week).interrupts if event.kind == "household_shock")
+        return sum(
+            HOUSEHOLD_SHOCK_COST_CENTS
+            for event in self.calendar.week(self._state.week).interrupts
+            if event.kind == "household_shock"
+        )
 
     def _session_time_minutes(self, session: SessionPlan) -> int:
         commute = {
@@ -415,12 +435,20 @@ class BenchEnvironment:
             action.extra_spend_cents,
             math.ceil(action.extra_childcare_hours * self.config.reactive_childcare_cost_per_hour_cents),
         )
-        if event.kind == "household_shock":
-            required += 4_500
-        if required <= self._state.cash_cents:
+        runtime_reserve = (
+            runtime.shock_reserve_cents
+            if runtime is not None
+            else self._scheduled_household_shock_cost()
+        )
+        if required + runtime_reserve <= self._state.cash_cents:
             return action, None
+        reserve_text = (
+            f" plus {runtime_reserve} cents reserved for scheduled household shocks"
+            if runtime_reserve
+            else ""
+        )
         return None, (
-            f"reactive action requires {required} cents including the scheduled event cost, "
+            f"reactive action requires {required} cents{reserve_text}, "
             f"but only {self._state.cash_cents} cents is available"
         )
 
@@ -474,8 +502,10 @@ class BenchEnvironment:
             planned_sessions=len(action.sessions),
             ledger_minutes_remaining=self.config.weekly_time_budget_minutes - ledger_cost,
             ledger_minutes_committed=ledger_cost,
+            shock_reserve_cents=self._scheduled_household_shock_cost(),
         )
         self._active_runtime = runtime
+        self._state.planned_sessions += runtime.planned_sessions
         self._apply_life_allocation(action.life, runtime)
 
         week_record: dict[str, Any] = {
@@ -527,10 +557,16 @@ class BenchEnvironment:
                     runtime.session_failure_reasons.append(SessionFailure(day=day, reason="cancelled"))
                     day_note = "session cancelled by standing rule"
                 else:
-                    if session.focus == "fallback":
+                    if session != planned:
+                        runtime.transformed_sessions += 1
+                        self._state.transformed_sessions += 1
+                    runtime.attempted_sessions += 1
+                    self._state.attempted_sessions += 1
+                    session_is_fallback = session.focus == "fallback"
+                    session_result = self._execute_session(session, sleep, event, runtime)
+                    if session_result.get("status") == "completed" and session_is_fallback:
                         runtime.fallback_sessions += 1
                         self._state.fallback_sessions += 1
-                    session_result = self._execute_session(session, sleep, event, runtime)
                     pain_active_today = pain_active_today or self._pain_stage() >= 1
                     day_note = str(session_result["note"])
             if pain_active_today:
@@ -568,6 +604,9 @@ class BenchEnvironment:
             final_1rm_kg=round(final_capacity, 2),
             estimated_1rm_kg=round(self._estimate_1rm(), 2),
             improvement_kg=round(final_capacity - self.config.starting_estimated_1rm_kg, 2),
+            planned_sessions=self._state.planned_sessions,
+            transformed_sessions=self._state.transformed_sessions,
+            attempted_sessions=self._state.attempted_sessions,
             completed_sessions=self._state.completed_sessions,
             missed_sessions=self._state.missed_sessions,
             fallback_sessions=self._state.fallback_sessions,
@@ -720,6 +759,8 @@ class BenchEnvironment:
         return WeekOutcome(
             week=self._state.week,
             planned_sessions=runtime.planned_sessions if runtime is not None else 0,
+            transformed_sessions=runtime.transformed_sessions if runtime is not None else 0,
+            attempted_sessions=runtime.attempted_sessions if runtime is not None else 0,
             completed_sessions=runtime.completed_sessions if runtime is not None else 0,
             fallback_sessions=runtime.fallback_sessions if runtime is not None else 0,
             missed_sessions=runtime.missed_sessions if runtime is not None else 0,
@@ -807,9 +848,14 @@ class BenchEnvironment:
             else:
                 runtime.cancelled_days.add(event.day)
         elif event.kind == "household_shock":
-            self._charge(4_500, "household shock exhausted available budget")
-            self._state.total_spend_cents += 4_500
-            self._state.current_month_spend_cents += 4_500
+            if runtime.shock_reserve_cents < HOUSEHOLD_SHOCK_COST_CENTS:
+                raise _BudgetInsolvency(
+                    "household shock reserve was exhausted before the scheduled shock"
+                )
+            self._charge(HOUSEHOLD_SHOCK_COST_CENTS, "household shock exhausted available budget")
+            runtime.shock_reserve_cents -= HOUSEHOLD_SHOCK_COST_CENTS
+            self._state.total_spend_cents += HOUSEHOLD_SHOCK_COST_CENTS
+            self._state.current_month_spend_cents += HOUSEHOLD_SHOCK_COST_CENTS
             if self.config.enable_household_system:
                 self._state.household_strain = _clamp(self._state.household_strain + 0.13, 0.0, 1.0)
 
@@ -1012,7 +1058,10 @@ class BenchEnvironment:
         # ceiling. Do not silently rewrite them here; only sessions coerced
         # by `_as_fallback` arrive pre-transformed.
         executed_load_kg = session.load_kg
-        load_ratio = _clamp(executed_load_kg / max(60.0, true_capacity), 0.35, 1.20)
+        # Do not turn an authored zero/very-light load into a 35%-capacity
+        # session.  The meaningful-load threshold below makes warm-up-only
+        # prescriptions non-productive without silently rewriting the action.
+        load_ratio = _clamp(executed_load_kg / max(1.0, true_capacity), 0.0, 1.20)
         if session.location == "home" and session.focus in ("heavy", "test"):
             # A home rack has no spotter.  It remains useful for ordinary
             # volume and technique work, but true near-max work is capped.
@@ -1026,12 +1075,23 @@ class BenchEnvironment:
         rep_max_reps = math.floor(37.0 - (36.0 * ceiling_load_kg / ceiling_1rm_kg))
         rep_max_reps = max(1, rep_max_reps)
         executed_reps = min(session.reps, rep_max_reps)
+        duration_rep_limit = max(
+            1,
+            math.floor(
+                session.duration_min
+                * max(0.0, self.config.session_reps_per_minute)
+                / max(1, session.sets)
+            ),
+        )
+        executed_reps = min(executed_reps, duration_rep_limit)
         focus_factor = {"volume": 0.92, "heavy": 1.05, "technique": 0.56, "fallback": 0.60, "test": 0.86}[session.focus]
         effort_factor = _clamp(0.68 + (session.target_rpe - 5.0) * 0.065, 0.65, 1.02)
         volume_units = (session.sets * executed_reps / 20.0) * load_ratio
         recovery_multiplier = self._recovery_multiplier(sleep, runtime)
         raw_stimulus = volume_units * focus_factor * effort_factor * location_factor * recovery_multiplier
         raw_stimulus *= self.variation.volume_tolerance
+        if load_ratio < self.config.minimum_meaningful_load_ratio:
+            raw_stimulus = 0.0
         if self._state.injury_recovery_days > 0 and self.config.enable_injury_system:
             raw_stimulus *= 0.28
         effective_stimulus = self._apply_weekly_stimulus_cap(raw_stimulus, runtime)
@@ -1077,6 +1137,7 @@ class BenchEnvironment:
             self._state.injury_recovery_days = 42
         self._state.completed_sessions += 1
         runtime.completed_sessions += 1
+        stimulus_scale = _clamp(effective_stimulus, 0.0, 1.0)
         technique_learning = {
             "technique": 1.00,
             "volume": 0.80,
@@ -1087,7 +1148,7 @@ class BenchEnvironment:
         technique_rate = 1.0 - math.exp(-1.0 / max(1.0, self.config.technique_tau_sessions))
         self._state.technique = _clamp(
             self._state.technique
-            + (0.96 - self._state.technique) * technique_rate * technique_learning,
+            + (0.96 - self._state.technique) * technique_rate * technique_learning * stimulus_scale,
             0.0,
             0.96,
         )
@@ -1102,6 +1163,7 @@ class BenchEnvironment:
                 "reps": executed_reps,
                 "prescribed_reps": session.reps,
                 "rep_max_reps": rep_max_reps,
+                "duration_rep_limit": duration_rep_limit,
                 "sleep_hours": sleep,
                 "raw_stimulus": round(raw_stimulus, 5),
                 "stimulus": round(effective_stimulus, 5),
@@ -1147,7 +1209,11 @@ class BenchEnvironment:
 
     def _finish_week(self, runtime: _WeekRuntime) -> None:
         average_sleep = sum(runtime.sleep_hours) / max(1, len(runtime.sleep_hours))
-        productive = runtime.completed_sessions >= 2 and average_sleep >= 5.5 and self._pain_stage() <= 1
+        productive = (
+            runtime.weekly_stimulus >= self.config.productive_week_stimulus_threshold
+            and average_sleep >= 5.5
+            and self._pain_stage() <= 1
+        )
         if productive:
             self._state.productive_weeks += 1
             self._state.productive_streak_weeks += 1
@@ -1214,6 +1280,8 @@ class BenchEnvironment:
         return WeekOutcome(
             week=week,
             planned_sessions=runtime.planned_sessions,
+            transformed_sessions=runtime.transformed_sessions,
+            attempted_sessions=runtime.attempted_sessions,
             completed_sessions=completed,
             fallback_sessions=runtime.fallback_sessions,
             missed_sessions=runtime.missed_sessions,
@@ -1378,8 +1446,11 @@ class BenchEnvironment:
                 RecentWeek(
                     week=int(summary["week"]),
                     planned_sessions=int(summary["planned_sessions"]),
+                    transformed_sessions=int(summary["transformed_sessions"]),
+                    attempted_sessions=int(summary["attempted_sessions"]),
                     completed_sessions=int(summary["completed_sessions"]),
                     fallback_sessions=int(summary["fallback_sessions"]),
+                    missed_sessions=int(summary["missed_sessions"]),
                     average_sleep_hours=float(summary["average_sleep_hours"]),
                     estimated_1rm_kg=float(summary["estimated_1rm_kg"]),
                     headline=str(summary["headline"]),

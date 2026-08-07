@@ -3,15 +3,64 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import fields as dataclass_fields
 import json
 from pathlib import Path
 import re
 from statistics import fmean
 from typing import Any, Iterable
 
+from .engine import FinalResult, WeekOutcome, _State
 from .provenance import engine_config_hash
+from .scoring import PAIN_DAYS_LIMIT, score_fields
+from .schemas import (
+    InterruptObservation,
+    LifeAllocation,
+    PlannedEvent,
+    ReactiveAction,
+    RecentWeek,
+    SessionPlan,
+    StandingRules,
+    WeekAction,
+    WeekObservation,
+)
 
-_PRIVATE_PUBLIC_FIELDS = {"sleep_debt"}
+
+def _serialized_dataclass_fields(dataclass_type: type[Any]) -> set[str]:
+    """Return fields emitted by a public dataclass serializer.
+
+    The dummy object lets this derive omissions made by ``as_dict`` (notably
+    evaluator-only state) without duplicating a private-field allowlist here.
+    """
+    value = object.__new__(dataclass_type)
+    for field in dataclass_fields(dataclass_type):
+        object.__setattr__(value, field.name, None)
+    return set(dataclass_type.as_dict(value))  # type: ignore[attr-defined]
+
+
+_STATE_FIELDS = {field.name for field in dataclass_fields(_State)}
+_PUBLIC_SCHEMA_FIELDS = {
+    field_name
+    for schema_type in (
+        InterruptObservation,
+        LifeAllocation,
+        PlannedEvent,
+        ReactiveAction,
+        RecentWeek,
+        SessionPlan,
+        StandingRules,
+        WeekAction,
+        WeekObservation,
+    )
+    for field_name in schema_type.model_fields
+}
+_PUBLIC_SCHEMA_FIELDS.update(_serialized_dataclass_fields(WeekOutcome))
+_PUBLIC_SCHEMA_FIELDS.update(_serialized_dataclass_fields(FinalResult))
+
+# The vocabulary is derived from the engine's state surface and the fields
+# explicitly declared at the public boundary.  A newly added evaluator-only
+# state field therefore becomes auditable without another hand-maintained set.
+_PRIVATE_PUBLIC_FIELDS = _STATE_FIELDS - _PUBLIC_SCHEMA_FIELDS
 
 
 def _private_field_hits(value: Any, hits: set[str] | None = None) -> set[str]:
@@ -85,9 +134,15 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
     purchases = [purchase for turn in turns for purchase in turn["action"].get("life", {}).get("purchases", [])]
     final_result = end.get("result", {})
     invalid_reason = final_result.get("invalid_reason")
+    score = score_fields(
+        final_result.get("final_1rm_kg"),
+        invalid_reason=invalid_reason,
+        pain_days=final_result.get("pain_days"),
+    )
     exclusion_reasons: list[str] = []
     if invalid_reason is not None:
         exclusion_reasons.append(f"invalid: {invalid_reason}")
+    exclusion_reasons.extend(f"constraint: {violation}" for violation in score["constraint_violations"])
     if transcript_violations:
         exclusion_reasons.extend(f"transcript: {violation}" for violation in transcript_violations)
     if transport_errors:
@@ -116,8 +171,20 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         "valid": not exclusion_reasons and "final_1rm_kg" in final_result,
         "invalid_reason": invalid_reason,
         "exclusion_reasons": exclusion_reasons,
-        "final_1rm_kg": float(final_result.get("final_1rm_kg", 0.0)),
+        # Keep the legacy field as the raw engine result for compatibility;
+        # leaderboard aggregates use counted_final_1rm_kg below.
+        "final_1rm_kg": score["raw_final_1rm_kg"] or 0.0,
+        "raw_final_1rm_kg": score["raw_final_1rm_kg"],
+        "counted_final_1rm_kg": score["counted_final_1rm_kg"] if not exclusion_reasons else None,
+        "constraint_violations": score["constraint_violations"],
+        "violations": score["constraint_violations"],
+        "pain_days": int(final_result.get("pain_days", 0)),
+        "planned_sessions": int(final_result.get("planned_sessions", 0)),
+        "transformed_sessions": int(final_result.get("transformed_sessions", 0)),
+        "attempted_sessions": int(final_result.get("attempted_sessions", 0)),
         "completed_sessions": int(final_result.get("completed_sessions", 0)),
+        "missed_sessions": int(final_result.get("missed_sessions", 0)),
+        "fallback_sessions": int(final_result.get("fallback_sessions", 0)),
         "model_calls": int(end.get("model_calls", 0)),
         "repair_calls": int(end.get("repair_calls", 0)),
         "total_cost_usd": float(end.get("total_cost_usd", 0.0)),
@@ -183,21 +250,35 @@ def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
         description,
         "",
         f"- Engine/config hash: `{engine_config_hash()}`",
-        "| Model | Valid seeds | Excluded | Mean final 1RM (kg) | Seed std (kg) | Mean calls | Mean cost | Repairs |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| Model | Valid seeds | Excluded | Counted mean final 1RM (kg) | Counted seed std (kg) | Mean calls | Mean cost | Repairs | Violations | Raw mean final 1RM (kg) |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---|---:|",
     ]
     for model in sorted(all_grouped):
         model_records = grouped.get(model, [])
         excluded_count = len(all_grouped[model]) - len(model_records)
-        scores = [record["final_1rm_kg"] for record in model_records]
+        scores = [record["counted_final_1rm_kg"] for record in model_records if record.get("counted_final_1rm_kg") is not None]
+        raw_scores = [
+            record["raw_final_1rm_kg"]
+            for record in all_grouped[model]
+            if record.get("raw_final_1rm_kg") is not None
+        ]
+        violation_counts: dict[str, int] = defaultdict(int)
+        for record in all_grouped[model]:
+            for violation in record.get("constraint_violations", record.get("violations", [])):
+                violation_counts[str(violation)] += 1
+        violations = ", ".join(f"{name} ({count})" for name, count in sorted(violation_counts.items())) or "—"
         mean = fmean(scores) if scores else 0.0
         variance = fmean((score - mean) ** 2 for score in scores) if scores else 0.0
+        raw_mean = fmean(raw_scores) if raw_scores else None
         if model_records:
             lines.append(
-                f"| {model} | {len(scores)} | {excluded_count} | {mean:.2f} | {variance ** 0.5:.2f} | {fmean(record['model_calls'] for record in model_records):.1f} | ${fmean(record['total_cost_usd'] for record in model_records):.4f} | {sum(record['repair_calls'] for record in model_records)} |"
+                f"| {model} | {len(scores)} | {excluded_count} | {mean:.2f} | {variance ** 0.5:.2f} | {fmean(record['model_calls'] for record in model_records):.1f} | ${fmean(record['total_cost_usd'] for record in model_records):.4f} | {sum(record['repair_calls'] for record in model_records)} | {violations} | {raw_mean:.2f} |"
+                if scores
+                else
+                f"| {model} | 0 | {excluded_count} | — | — | {fmean(record['model_calls'] for record in model_records):.1f} | ${fmean(record['total_cost_usd'] for record in model_records):.4f} | {sum(record['repair_calls'] for record in model_records)} | {violations} | {raw_mean:.2f} |"
             )
         else:
-            lines.append(f"| {model} | 0 | {excluded_count} | — | — | — | — | — |")
+            lines.append(f"| {model} | 0 | {excluded_count} | — | — | — | — | — | {violations} | {raw_mean:.2f} |" if raw_mean is not None else f"| {model} | 0 | {excluded_count} | — | — | — | — | — | {violations} | — |")
     endpoint_values = {_endpoint_label(record) for record in all_values}
     privacy_counts: dict[str, int] = defaultdict(int)
     transcript_counts: dict[str, int] = defaultdict(int)
@@ -236,6 +317,7 @@ def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
     else:
         lines.append("- Transcript-structure audit: PASS (configured weeks are unique and complete).")
     invalid_records = [record for record in all_values if record.get("invalid_reason") is not None]
+    constraint_records = [record for record in all_values if record.get("constraint_violations") or record.get("violations")]
     excluded_records = [record for record in all_values if not record.get("valid", record.get("invalid_reason") is None)]
     if invalid_records:
         invalid_counts: dict[str, int] = defaultdict(int)
@@ -245,6 +327,15 @@ def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
         lines.append(f"- Invalid-episode audit: EXCLUDED {len(invalid_records)}/{len(all_values)} transcripts ({details}).")
     else:
         lines.append("- Invalid-episode audit: PASS (no invalid episodes detected).")
+    if constraint_records:
+        violation_counts: dict[str, int] = defaultdict(int)
+        for record in constraint_records:
+            for violation in record.get("constraint_violations", record.get("violations", [])):
+                violation_counts[str(violation)] += 1
+        details = ", ".join(f"{violation}: {count}" for violation, count in sorted(violation_counts.items()))
+        lines.append(f"- Hard-constraint audit: EXCLUDED {len(constraint_records)}/{len(all_values)} transcripts ({details}); raw scores retained.")
+    else:
+        lines.append(f"- Hard-constraint audit: PASS (pain days ≤{PAIN_DAYS_LIMIT} on all transcripts).")
     if len(excluded_records) > len(invalid_records):
         lines.append(f"- Exclusion audit: EXCLUDED {len(excluded_records)}/{len(all_values)} records after validity checks.")
     lines.extend(["", "## Observed transcript behaviors", ""])
@@ -258,9 +349,9 @@ def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
     else:
         lines.append("- No exploit signature crossed the analyzer thresholds.")
     method = (
-        "The analyzer reads public model transcripts and re-evaluated final results. Invalid episodes remain in the audit records but are excluded from score aggregates."
+        "The analyzer reads public model transcripts and re-evaluated final results. Structurally invalid or pain-violating episodes remain in audit records, their raw final 1RM is retained, and only counted scores enter aggregates."
         if replayed
-        else "The analyzer reads only public model transcripts and final results. Invalid episodes remain in the audit records but are excluded from score aggregates."
+        else "The analyzer reads only public model transcripts and final results. Structurally invalid or pain-violating episodes remain in audit records, their raw final 1RM is retained, and only counted scores enter aggregates."
     )
     lines.extend(["", "## Method", "", method + " It flags repeated high-intensity sessions, sleep protection choices, reciprocity imbalance, final-week intensity, capital stacking, and format repairs; these are triage signals for human transcript reading, not extra score components.", ""])
     return "\n".join(lines)
@@ -272,6 +363,7 @@ def write_analysis(records: list[dict[str, Any]], json_path: str | Path, markdow
     json_path.parent.mkdir(parents=True, exist_ok=True)
     markdown_path.parent.mkdir(parents=True, exist_ok=True)
     invalid_records = [record for record in records if record.get("invalid_reason") is not None]
+    constraint_records = [record for record in records if record.get("constraint_violations") or record.get("violations")]
     excluded_records = [record for record in records if not record.get("valid", record.get("invalid_reason") is None)]
     json_path.write_text(
         json.dumps(
@@ -280,6 +372,7 @@ def write_analysis(records: list[dict[str, Any]], json_path: str | Path, markdow
                 "records": records,
                 "valid_record_count": len(records) - len(excluded_records),
                 "excluded_invalid_count": len(invalid_records),
+                "constraint_violating_count": len(constraint_records),
                 "excluded_record_count": len(excluded_records),
             },
             indent=2,

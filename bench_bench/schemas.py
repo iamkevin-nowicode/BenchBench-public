@@ -128,8 +128,11 @@ class PlannedEvent(SchemaBase):
 class RecentWeek(SchemaBase):
     week: int = Field(ge=0, le=52)
     planned_sessions: int = Field(ge=0, le=5)
+    transformed_sessions: int = Field(ge=0, le=5)
+    attempted_sessions: int = Field(ge=0, le=5)
     completed_sessions: int = Field(ge=0, le=5)
     fallback_sessions: int = Field(ge=0, le=5)
+    missed_sessions: int = Field(ge=0, le=5)
     average_sleep_hours: float = Field(ge=0.0, le=12.0)
     estimated_1rm_kg: float = Field(ge=0.0, le=300.0)
     headline: str

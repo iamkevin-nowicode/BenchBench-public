@@ -287,6 +287,110 @@ def test_planned_fallback_sessions_are_counted() -> None:
     assert env.final_result().fallback_sessions == 1
 
 
+def test_session_accounting_separates_transforms_attempts_and_misses() -> None:
+    config = SimConfig(
+        weeks=1,
+        weekly_time_budget_minutes=1_440,
+        enable_event_system=False,
+        enable_household_system=False,
+        enable_money_system=False,
+    )
+    transformed = BenchEnvironment(3, config)
+    transformed._state.tendon_irritation = 2.0
+    transformed_outcome = transformed.submit_week(
+        WeekAction(
+            sessions=[SessionPlan(day=1, focus="heavy", sets=3, reps=3, load_kg=65, duration_min=35)],
+            life=LifeAllocation(partner_coverage_hours=8, partner_giveback_hours=8),
+            rules=StandingRules(on_pain_warning="fallback"),
+        )
+    )
+    assert transformed_outcome.as_dict()["planned_sessions"] == 1
+    assert transformed_outcome.as_dict()["transformed_sessions"] == 1
+    assert transformed_outcome.as_dict()["attempted_sessions"] == 1
+    assert transformed_outcome.completed_sessions == 1
+    assert transformed_outcome.missed_sessions == 0
+    assert transformed_outcome.fallback_sessions == 1
+
+    missed = BenchEnvironment(3, config)
+    missed_outcome = missed.submit_week(
+        WeekAction(
+            sessions=[SessionPlan(day=1, location="home", focus="fallback", sets=2, reps=5, load_kg=40, duration_min=20)],
+            life=LifeAllocation(partner_coverage_hours=8, partner_giveback_hours=8),
+        )
+    )
+    assert missed_outcome.as_dict()["planned_sessions"] == 1
+    assert missed_outcome.as_dict()["transformed_sessions"] == 0
+    assert missed_outcome.as_dict()["attempted_sessions"] == 1
+    assert missed_outcome.completed_sessions == 0
+    assert missed_outcome.missed_sessions == 1
+    assert missed_outcome.fallback_sessions == 0
+    result = missed.final_result().as_dict()
+    assert result["planned_sessions"] == 1
+    assert result["attempted_sessions"] == 1
+    assert result["completed_sessions"] == 0
+    assert result["missed_sessions"] == 1
+
+
+def test_zero_load_sessions_do_not_earn_stimulus_or_productive_credit() -> None:
+    config = SimConfig(
+        weeks=4,
+        weekly_time_budget_minutes=1_440,
+        enable_event_system=False,
+        enable_injury_system=False,
+        enable_household_system=False,
+        enable_money_system=False,
+    )
+    env = BenchEnvironment(3, config)
+    starting_technique = env.private_snapshot()["state"]["technique"]
+    action = WeekAction(
+        sessions=[
+            SessionPlan(day=day, focus="volume", sets=3, reps=10, load_kg=0, duration_min=10)
+            for day in (1, 3, 5)
+        ],
+        life=LifeAllocation(meal_prep_hours=0, partner_coverage_hours=8, partner_giveback_hours=8),
+    )
+    while not env.done:
+        env.submit_week(action)
+    state = env.private_snapshot()["state"]
+    result = env.final_result()
+    assert result.planned_sessions == 12
+    assert result.attempted_sessions == 12
+    assert result.completed_sessions + result.missed_sessions == 12
+    assert state["fitness_signal"] == 0.0
+    assert state["technique"] == starting_technique
+    assert result.productive_weeks == 0
+    assert all(row["stimulus"] == 0.0 for row in state["session_history"])
+
+
+def test_duration_limits_work_for_non_fallback_volume() -> None:
+    config = SimConfig(
+        weeks=1,
+        weekly_time_budget_minutes=1_440,
+        enable_event_system=False,
+        enable_injury_system=False,
+        enable_household_system=False,
+        enable_money_system=False,
+    )
+
+    def run(duration: int) -> dict[str, float | int]:
+        env = BenchEnvironment(3, config)
+        env.submit_week(
+            WeekAction(
+                sessions=[SessionPlan(day=1, focus="volume", sets=8, reps=15, load_kg=60, duration_min=duration)],
+                life=LifeAllocation(partner_coverage_hours=8, partner_giveback_hours=8),
+            )
+        )
+        return env.private_snapshot()["state"]["session_history"][0]
+
+    short = run(10)
+    medium = run(45)
+    long = run(120)
+    assert short["duration_rep_limit"] == 1
+    assert medium["duration_rep_limit"] == 5
+    assert long["duration_rep_limit"] == 15
+    assert short["stimulus"] < medium["stimulus"] < long["stimulus"]
+
+
 def test_pain_days_count_active_pain_without_sleep_gate() -> None:
     config = SimConfig(
         weeks=1,
@@ -539,6 +643,32 @@ def test_budget_overspending_is_rejected_and_repaired_before_simulation() -> Non
     assert result.invalid_reason is None
     assert result.total_spend_cents == 1_000
     assert env.observation.budget_available_cents == 24_000
+
+
+def test_intra_week_shock_reserve_rejects_earlier_reactive_spend() -> None:
+    # Seed 8/week 23 has a daycare closure before a scheduled household
+    # shock.  The earlier reactive action is deliberately larger than the
+    # non-reserved cash, but the validator must reject it while preserving the
+    # 4,500-cent shock reserve; the safe reactive response then lets the shock
+    # execute without invalidating the episode.
+    env = BenchEnvironment(8, SimConfig(weeks=23))
+    quiet = WeekAction(life=LifeAllocation(meal_prep_hours=0, partner_coverage_hours=0, partner_giveback_hours=0))
+    while env.observation.episode_week < 23:
+        env.submit_week(quiet)
+    env._state.cash_cents = 10_000
+    env.submit_week(
+        quiet,
+        reactive_responder=lambda observation: ReactiveAction(
+            extra_spend_cents=15_000 if observation.kind != "household_shock" else 0
+        ),
+    )
+
+    assert env.done is True
+    result = env.final_result()
+    assert result.invalid_reason is None
+    week_record = next(record for record in env.log_records if record.get("type") == "week" and record.get("week") == 23)
+    assert week_record["interrupts"][0]["reactive_action"]["extra_spend_cents"] == 0
+    assert week_record["interrupts"][1]["kind"] == "household_shock"
 
 
 def test_execution_budget_invariant_terminates_episode_as_invalid() -> None:

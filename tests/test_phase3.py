@@ -9,7 +9,7 @@ import pytest
 
 from bench_bench.cli import _seed_values, build_parser
 from bench_bench.runner import CallableModelClient, DeterministicPolicyClient, ModelRunner, OpenAICompatibleClient, RunnerConfig
-from bench_bench.runner_analysis import analyze_transcript, leaderboard_markdown
+from bench_bench.runner_analysis import _PRIVATE_PUBLIC_FIELDS, analyze_transcript, leaderboard_markdown
 
 
 def test_cli_supports_explicit_public_or_private_seed_values() -> None:
@@ -63,6 +63,13 @@ def test_analyzer_flags_legacy_private_fields_and_missing_provenance(tmp_path) -
     assert "Public-field audit: FAILED" in report
 
 
+def test_private_field_vocabulary_is_derived_from_state_and_public_boundary() -> None:
+    assert "sleep_debt" in _PRIVATE_PUBLIC_FIELDS
+    assert "week" not in _PRIVATE_PUBLIC_FIELDS
+    assert "planned_sessions" not in _PRIVATE_PUBLIC_FIELDS
+    assert "final_1rm_kg" not in _PRIVATE_PUBLIC_FIELDS
+
+
 def test_analyzer_flags_provider_transport_failures(tmp_path) -> None:
     transcript = tmp_path / "transport.jsonl"
     runner = ModelRunner(DeterministicPolicyClient("recovery-aware", 3), RunnerConfig(weeks=1))
@@ -96,6 +103,27 @@ def test_analyzer_excludes_invalid_episode_from_score_aggregates(tmp_path) -> No
     report = leaderboard_markdown([summary])
     assert "| scripted-recovery-aware | 0 | 1 | — | — | — | — | — |" in report
     assert "Invalid-episode audit: EXCLUDED 1/1" in report
+
+
+def test_analyzer_counts_only_pain_compliant_scores_and_retains_raw_score(tmp_path) -> None:
+    transcript = tmp_path / "pain-violation.jsonl"
+    runner = ModelRunner(DeterministicPolicyClient("recovery-aware", 3), RunnerConfig(weeks=1))
+    runner.run_episode(3, transcript)
+    records = [json.loads(line) for line in transcript.read_text().splitlines()]
+    end = next(record for record in records if record.get("type") == "run_end")
+    end["result"]["pain_days"] = 15
+    end["result"]["household_strain"] = 1.0
+    transcript.write_text("".join(json.dumps(record) + "\n" for record in records))
+
+    summary = analyze_transcript(transcript)
+    assert summary["valid"] is False
+    assert summary["raw_final_1rm_kg"] == summary["final_1rm_kg"]
+    assert summary["counted_final_1rm_kg"] is None
+    assert summary["constraint_violations"] == ["pain_days>14"]
+    report = leaderboard_markdown([summary])
+    assert "Violations" in report
+    assert "pain_days>14 (1)" in report
+    assert f"{summary['raw_final_1rm_kg']:.2f}" in report
 
 
 def test_model_runner_repairs_budget_invalid_weekly_action(tmp_path) -> None:
@@ -260,6 +288,24 @@ def test_runner_uses_turn_specific_prompts_and_reactive_schema_on_repair() -> No
     assert "cancel_session_days" in repair_prompt
     assert "Valid example:" in repair_prompt
     assert "Extra inputs are not permitted" in repair_prompt
+
+
+def test_system_prompts_state_objective_and_keep_reactive_prompt_short() -> None:
+    from bench_bench.runner import ModelRunner
+
+    weekly = ModelRunner.WEEK_SYSTEM_PROMPT
+    reactive = ModelRunner.REACTIVE_SYSTEM_PROMPT
+    objective = "Objective: maximize Dave's bench press one-rep max."
+    assert weekly.startswith("You are Dave's coach for one year.")
+    assert weekly.count(objective) == 2
+    assert "Scoring: the average of three standardized tests at weeks 44, 48, and 52" in weekly
+    assert "one 900-minute weekly budget" in weekly
+    assert "sessions you plan are not guaranteed to happen" in weekly
+    assert reactive.startswith("You are Dave's coach.")
+    assert reactive.count(objective) == 2
+    assert "ReactiveAction fields" in reactive
+    assert "Valid example:" in reactive
+    assert "WeekAction fields" not in reactive
 
 
 def test_step2_schema_tolerates_no_purchase_sentinels_and_short_fallbacks() -> None:
