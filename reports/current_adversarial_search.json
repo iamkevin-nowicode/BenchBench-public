@@ -1,0 +1,2050 @@
+{
+  "benchmark": "Bench-bench",
+  "candidates": {
+    "adversarial-001": {
+      "abuse_signatures": [
+        "physical:high_reps_at_or_above_0.80x"
+      ],
+      "beats_expert": false,
+      "expert_margin_kg": -0.592,
+      "final_mean_final_1rm_kg": 104.4425,
+      "genome": {
+        "buy_home_rack": true,
+        "childcare_hours": 0.0,
+        "childcare_spend_cents": 0,
+        "chore_delegation_hours": 2.0,
+        "duration_min": 55,
+        "final_test_ratio": 1.149,
+        "final_week_test": true,
+        "focus": "technique",
+        "load_ratio": 0.48,
+        "location": "home",
+        "meal_prep_hours": 2.0,
+        "meal_support_spend_cents": 1200,
+        "on_illness": "fallback",
+        "on_pain_warning": "reduce",
+        "on_sleep_below_5h": "reduce",
+        "partner_coverage_hours": 1.0,
+        "partner_giveback_hours": 6.0,
+        "progression_per_week": 0.0077,
+        "purchase_week": 17,
+        "reps": 13,
+        "session_count": 3,
+        "sets": 7,
+        "skip_when_strained": true,
+        "sleep_protection": "strong",
+        "target_rpe": 6.6
+      },
+      "release_blocked": false,
+      "requires_human_review": false,
+      "search_mean_final_1rm_kg": 104.81
+    },
+    "adversarial-002": {
+      "abuse_signatures": [],
+      "beats_expert": false,
+      "expert_margin_kg": -0.7225,
+      "final_mean_final_1rm_kg": 104.312,
+      "genome": {
+        "buy_home_rack": true,
+        "childcare_hours": 2.0,
+        "childcare_spend_cents": 0,
+        "chore_delegation_hours": 2.0,
+        "duration_min": 55,
+        "final_test_ratio": 1.149,
+        "final_week_test": true,
+        "focus": "technique",
+        "load_ratio": 0.48,
+        "location": "home",
+        "meal_prep_hours": 2.0,
+        "meal_support_spend_cents": 1200,
+        "on_illness": "skip",
+        "on_pain_warning": "reduce",
+        "on_sleep_below_5h": "reduce",
+        "partner_coverage_hours": 1.0,
+        "partner_giveback_hours": 6.0,
+        "progression_per_week": 0.0077,
+        "purchase_week": 17,
+        "reps": 9,
+        "session_count": 3,
+        "sets": 7,
+        "skip_when_strained": false,
+        "sleep_protection": "strong",
+        "target_rpe": 6.6
+      },
+      "release_blocked": false,
+      "requires_human_review": false,
+      "search_mean_final_1rm_kg": 104.355
+    },
+    "adversarial-003": {
+      "abuse_signatures": [
+        "physical:high_reps_at_or_above_0.80x"
+      ],
+      "beats_expert": false,
+      "expert_margin_kg": -0.6625,
+      "final_mean_final_1rm_kg": 104.372,
+      "genome": {
+        "buy_home_rack": true,
+        "childcare_hours": 0.0,
+        "childcare_spend_cents": 0,
+        "chore_delegation_hours": 2.0,
+        "duration_min": 55,
+        "final_test_ratio": 1.149,
+        "final_week_test": true,
+        "focus": "technique",
+        "load_ratio": 0.48,
+        "location": "home",
+        "meal_prep_hours": 2.0,
+        "meal_support_spend_cents": 1200,
+        "on_illness": "skip",
+        "on_pain_warning": "reduce",
+        "on_sleep_below_5h": "reduce",
+        "partner_coverage_hours": 1.0,
+        "partner_giveback_hours": 6.0,
+        "progression_per_week": 0.0077,
+        "purchase_week": 17,
+        "reps": 13,
+        "session_count": 3,
+        "sets": 3,
+        "skip_when_strained": true,
+        "sleep_protection": "strong",
+        "target_rpe": 6.6
+      },
+      "release_blocked": false,
+      "requires_human_review": false,
+      "search_mean_final_1rm_kg": 104.205
+    },
+    "adversarial-004": {
+      "abuse_signatures": [
+        "physical:high_reps_at_or_above_0.80x"
+      ],
+      "beats_expert": false,
+      "expert_margin_kg": -0.9395,
+      "final_mean_final_1rm_kg": 104.095,
+      "genome": {
+        "buy_home_rack": true,
+        "childcare_hours": 2.0,
+        "childcare_spend_cents": 0,
+        "chore_delegation_hours": 2.0,
+        "duration_min": 55,
+        "final_test_ratio": 1.149,
+        "final_week_test": true,
+        "focus": "technique",
+        "load_ratio": 0.48,
+        "location": "home",
+        "meal_prep_hours": 2.0,
+        "meal_support_spend_cents": 1200,
+        "on_illness": "skip",
+        "on_pain_warning": "reduce",
+        "on_sleep_below_5h": "reduce",
+        "partner_coverage_hours": 1.0,
+        "partner_giveback_hours": 6.0,
+        "progression_per_week": 0.0077,
+        "purchase_week": 17,
+        "reps": 13,
+        "session_count": 3,
+        "sets": 6,
+        "skip_when_strained": true,
+        "sleep_protection": "strong",
+        "target_rpe": 6.6
+      },
+      "release_blocked": false,
+      "requires_human_review": false,
+      "search_mean_final_1rm_kg": 104.1383
+    },
+    "adversarial-005": {
+      "abuse_signatures": [
+        "physical:high_reps_at_or_above_0.80x"
+      ],
+      "beats_expert": false,
+      "expert_margin_kg": -0.9395,
+      "final_mean_final_1rm_kg": 104.095,
+      "genome": {
+        "buy_home_rack": true,
+        "childcare_hours": 2.0,
+        "childcare_spend_cents": 0,
+        "chore_delegation_hours": 2.0,
+        "duration_min": 55,
+        "final_test_ratio": 1.149,
+        "final_week_test": true,
+        "focus": "technique",
+        "load_ratio": 0.48,
+        "location": "home",
+        "meal_prep_hours": 2.0,
+        "meal_support_spend_cents": 1200,
+        "on_illness": "skip",
+        "on_pain_warning": "skip",
+        "on_sleep_below_5h": "reduce",
+        "partner_coverage_hours": 1.0,
+        "partner_giveback_hours": 6.0,
+        "progression_per_week": 0.0077,
+        "purchase_week": 17,
+        "reps": 13,
+        "session_count": 3,
+        "sets": 6,
+        "skip_when_strained": true,
+        "sleep_protection": "strong",
+        "target_rpe": 6.6
+      },
+      "release_blocked": false,
+      "requires_human_review": false,
+      "search_mean_final_1rm_kg": 104.1383
+    },
+    "regression-compressed-fallback": {
+      "abuse_signatures": [
+        "physical:authored_fallback_load_above_0.78x"
+      ],
+      "beats_expert": false,
+      "expert_margin_kg": null,
+      "final_mean_final_1rm_kg": null,
+      "genome": {
+        "buy_home_rack": false,
+        "childcare_hours": 0.0,
+        "childcare_spend_cents": 0,
+        "chore_delegation_hours": 0.0,
+        "duration_min": 25,
+        "final_test_ratio": 1.05,
+        "final_week_test": false,
+        "focus": "fallback",
+        "load_ratio": 0.95,
+        "location": "auto",
+        "meal_prep_hours": 0.0,
+        "meal_support_spend_cents": 0,
+        "on_illness": "protect_recovery",
+        "on_pain_warning": "reduce",
+        "on_sleep_below_5h": "fallback",
+        "partner_coverage_hours": 0.0,
+        "partner_giveback_hours": 0.0,
+        "progression_per_week": 0.0,
+        "purchase_week": 8,
+        "reps": 6,
+        "session_count": 5,
+        "sets": 3,
+        "skip_when_strained": false,
+        "sleep_protection": "standard",
+        "target_rpe": 8.0
+      },
+      "release_blocked": false,
+      "requires_human_review": false,
+      "search_mean_final_1rm_kg": null
+    },
+    "regression-volume-8x4": {
+      "abuse_signatures": [],
+      "beats_expert": false,
+      "expert_margin_kg": -22.918,
+      "final_mean_final_1rm_kg": 82.1165,
+      "genome": {
+        "buy_home_rack": false,
+        "childcare_hours": 0.0,
+        "childcare_spend_cents": 0,
+        "chore_delegation_hours": 0.0,
+        "duration_min": 45,
+        "final_test_ratio": 1.05,
+        "final_week_test": false,
+        "focus": "volume",
+        "load_ratio": 0.95,
+        "location": "auto",
+        "meal_prep_hours": 0.0,
+        "meal_support_spend_cents": 0,
+        "on_illness": "protect_recovery",
+        "on_pain_warning": "reduce",
+        "on_sleep_below_5h": "fallback",
+        "partner_coverage_hours": 0.0,
+        "partner_giveback_hours": 0.0,
+        "progression_per_week": 0.0,
+        "purchase_week": 8,
+        "reps": 4,
+        "session_count": 5,
+        "sets": 8,
+        "skip_when_strained": false,
+        "sleep_protection": "standard",
+        "target_rpe": 8.0
+      },
+      "release_blocked": false,
+      "requires_human_review": false,
+      "search_mean_final_1rm_kg": 82.165
+    },
+    "regression-volume-stacking": {
+      "abuse_signatures": [
+        "physical:high_reps_at_or_above_0.80x",
+        "physical:high_sets_times_reps_at_or_above_0.80x"
+      ],
+      "beats_expert": false,
+      "expert_margin_kg": -22.91,
+      "final_mean_final_1rm_kg": 82.1245,
+      "genome": {
+        "buy_home_rack": false,
+        "childcare_hours": 0.0,
+        "childcare_spend_cents": 0,
+        "chore_delegation_hours": 0.0,
+        "duration_min": 45,
+        "final_test_ratio": 1.05,
+        "final_week_test": false,
+        "focus": "volume",
+        "load_ratio": 0.95,
+        "location": "auto",
+        "meal_prep_hours": 0.0,
+        "meal_support_spend_cents": 0,
+        "on_illness": "protect_recovery",
+        "on_pain_warning": "reduce",
+        "on_sleep_below_5h": "fallback",
+        "partner_coverage_hours": 0.0,
+        "partner_giveback_hours": 0.0,
+        "progression_per_week": 0.0,
+        "purchase_week": 8,
+        "reps": 15,
+        "session_count": 5,
+        "sets": 8,
+        "skip_when_strained": false,
+        "sleep_protection": "standard",
+        "target_rpe": 8.0
+      },
+      "release_blocked": false,
+      "requires_human_review": false,
+      "search_mean_final_1rm_kg": 82.19
+    }
+  },
+  "comparison": {
+    "candidate_assessments": {
+      "adversarial-001": {
+        "abuse_signatures": [
+          "physical:high_reps_at_or_above_0.80x"
+        ],
+        "beats_expert": false,
+        "expert_margin_kg": -0.592,
+        "release_blocked": false,
+        "requires_human_review": false
+      },
+      "adversarial-002": {
+        "abuse_signatures": [],
+        "beats_expert": false,
+        "expert_margin_kg": -0.7225,
+        "release_blocked": false,
+        "requires_human_review": false
+      },
+      "adversarial-003": {
+        "abuse_signatures": [
+          "physical:high_reps_at_or_above_0.80x"
+        ],
+        "beats_expert": false,
+        "expert_margin_kg": -0.6625,
+        "release_blocked": false,
+        "requires_human_review": false
+      },
+      "adversarial-004": {
+        "abuse_signatures": [
+          "physical:high_reps_at_or_above_0.80x"
+        ],
+        "beats_expert": false,
+        "expert_margin_kg": -0.9395,
+        "release_blocked": false,
+        "requires_human_review": false
+      },
+      "adversarial-005": {
+        "abuse_signatures": [
+          "physical:high_reps_at_or_above_0.80x"
+        ],
+        "beats_expert": false,
+        "expert_margin_kg": -0.9395,
+        "release_blocked": false,
+        "requires_human_review": false
+      },
+      "regression-compressed-fallback": {
+        "abuse_signatures": [
+          "physical:authored_fallback_load_above_0.78x"
+        ],
+        "beats_expert": false,
+        "expert_margin_kg": null,
+        "release_blocked": false,
+        "requires_human_review": false
+      },
+      "regression-volume-8x4": {
+        "abuse_signatures": [],
+        "beats_expert": false,
+        "expert_margin_kg": -22.918,
+        "release_blocked": false,
+        "requires_human_review": false
+      },
+      "regression-volume-stacking": {
+        "abuse_signatures": [
+          "physical:high_reps_at_or_above_0.80x",
+          "physical:high_sets_times_reps_at_or_above_0.80x"
+        ],
+        "beats_expert": false,
+        "expert_margin_kg": -22.91,
+        "release_blocked": false,
+        "requires_human_review": false
+      }
+    },
+    "candidates_beating_expert": [],
+    "expert_mean_final_1rm_kg": 105.03450000000001,
+    "exploit_wins_over_expert": {
+      "adversarial-001": false,
+      "adversarial-002": false,
+      "adversarial-003": false,
+      "adversarial-004": false,
+      "adversarial-005": false,
+      "regression-compressed-fallback": null,
+      "regression-volume-8x4": false,
+      "regression-volume-stacking": false
+    },
+    "human_review_candidates": [],
+    "human_review_margin_kg": 5.0,
+    "release_abuse_thresholds": {
+      "fallback_load_ratio": 0.78,
+      "high_rep_load_ratio": 0.8,
+      "high_rep_threshold": 12,
+      "high_volume_reps_sets": 96,
+      "mean_household_strain": 0.95,
+      "mean_pain_days": 14.0
+    },
+    "release_blocked_candidates": []
+  },
+  "config": {
+    "brzycki_repmax_ceiling_ratio": 1.3,
+    "capacity_drift_kg_per_productive_week": 0.1,
+    "delegated_chore_cost_per_hour_cents": 1200,
+    "enable_delayed_adaptation": true,
+    "enable_event_system": true,
+    "enable_home_rack": true,
+    "enable_household_system": true,
+    "enable_injury_system": true,
+    "enable_money_system": true,
+    "enable_sleep_system": true,
+    "expose_session_failure_reasons": false,
+    "fallback_max_load_ratio": 0.78,
+    "fatigue_tau_days": 6.0,
+    "fatigue_to_strength_kg": 0.2,
+    "fit_tau_days": 56.0,
+    "fitness_to_strength_kg": 2.0,
+    "gym_commute_minutes": 20,
+    "home_no_spotter_max_ratio": 0.88,
+    "home_session_overhead_minutes": 10,
+    "home_training_efficiency": 1.1,
+    "hotel_commute_minutes": 20,
+    "max_action_repairs": 1,
+    "max_sessions_per_week": 5,
+    "monthly_budget_cents": 25000,
+    "productive_streak_weeks_for_capacity_drift": 4,
+    "reactive_childcare_cost_per_hour_cents": 1400,
+    "starting_base_capacity_kg": 84.0,
+    "starting_body_mass_kg": 84.0,
+    "starting_cash_cents": 25000,
+    "starting_estimated_1rm_kg": 84.0,
+    "technique_tau_sessions": 34.0,
+    "weekly_stimulus_cap": 1.0,
+    "weekly_stimulus_diminishing_start": 1.25,
+    "weekly_time_budget_minutes": 900,
+    "weeks": 52
+  },
+  "engine_config_hash": "sha256:5bd2bc4dbdcf35846c87adf5102851b42692f1dcab9b35144a3b7bca0405dd27",
+  "episodes": {
+    "adversarial-001": [
+      {
+        "completed_sessions": 139,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.92,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 0
+      },
+      {
+        "completed_sessions": 138,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.9,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 1
+      },
+      {
+        "completed_sessions": 126,
+        "fallback_actions": 0,
+        "final_1rm_kg": 101.98,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 2
+      },
+      {
+        "completed_sessions": 135,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.5,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 3
+      },
+      {
+        "completed_sessions": 134,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.27,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 2,
+        "seed": 4
+      },
+      {
+        "completed_sessions": 135,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.29,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 5
+      },
+      {
+        "completed_sessions": 132,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.28,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 6
+      },
+      {
+        "completed_sessions": 141,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.74,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 7
+      },
+      {
+        "completed_sessions": 136,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.7,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 6,
+        "seed": 8
+      },
+      {
+        "completed_sessions": 128,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.43,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 13,
+        "seed": 9
+      },
+      {
+        "completed_sessions": 136,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.92,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 10
+      },
+      {
+        "completed_sessions": 136,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.72,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 11
+      },
+      {
+        "completed_sessions": 145,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.78,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 51,
+        "seed": 12
+      },
+      {
+        "completed_sessions": 135,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.26,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 13
+      },
+      {
+        "completed_sessions": 134,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.32,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 14
+      },
+      {
+        "completed_sessions": 138,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.14,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 37,
+        "seed": 15
+      },
+      {
+        "completed_sessions": 136,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.03,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 16
+      },
+      {
+        "completed_sessions": 135,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.8,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 17
+      },
+      {
+        "completed_sessions": 134,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.18,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 18
+      },
+      {
+        "completed_sessions": 138,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.69,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 19
+      }
+    ],
+    "adversarial-002": [
+      {
+        "completed_sessions": 133,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.88,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 0
+      },
+      {
+        "completed_sessions": 133,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.4,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 1
+      },
+      {
+        "completed_sessions": 128,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.77,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 2
+      },
+      {
+        "completed_sessions": 133,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.68,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 3
+      },
+      {
+        "completed_sessions": 131,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.49,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 4
+      },
+      {
+        "completed_sessions": 130,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.91,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 5
+      },
+      {
+        "completed_sessions": 124,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.36,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 6
+      },
+      {
+        "completed_sessions": 137,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.73,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 7
+      },
+      {
+        "completed_sessions": 135,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.51,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 8
+      },
+      {
+        "completed_sessions": 135,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.67,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 9
+      },
+      {
+        "completed_sessions": 138,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.35,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 10
+      },
+      {
+        "completed_sessions": 137,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.68,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 11
+      },
+      {
+        "completed_sessions": 146,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.85,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 12
+      },
+      {
+        "completed_sessions": 130,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.61,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 13
+      },
+      {
+        "completed_sessions": 126,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.77,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 14
+      },
+      {
+        "completed_sessions": 135,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.62,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 15
+      },
+      {
+        "completed_sessions": 129,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.25,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 16
+      },
+      {
+        "completed_sessions": 138,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.59,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 17
+      },
+      {
+        "completed_sessions": 130,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.7,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 18
+      },
+      {
+        "completed_sessions": 133,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.42,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 19
+      }
+    ],
+    "adversarial-003": [
+      {
+        "completed_sessions": 137,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.94,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 0
+      },
+      {
+        "completed_sessions": 137,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.76,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 1
+      },
+      {
+        "completed_sessions": 131,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.68,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 2
+      },
+      {
+        "completed_sessions": 136,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.98,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 3
+      },
+      {
+        "completed_sessions": 134,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.05,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 4
+      },
+      {
+        "completed_sessions": 133,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.82,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 5
+      },
+      {
+        "completed_sessions": 126,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.39,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 6
+      },
+      {
+        "completed_sessions": 137,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.78,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 7
+      },
+      {
+        "completed_sessions": 137,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.73,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 8
+      },
+      {
+        "completed_sessions": 135,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.73,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 9
+      },
+      {
+        "completed_sessions": 143,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.94,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 10
+      },
+      {
+        "completed_sessions": 138,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.42,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 11
+      },
+      {
+        "completed_sessions": 148,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.61,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 12
+      },
+      {
+        "completed_sessions": 134,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.35,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 13
+      },
+      {
+        "completed_sessions": 129,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.56,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 14
+      },
+      {
+        "completed_sessions": 139,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.96,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 15
+      },
+      {
+        "completed_sessions": 129,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.19,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 16
+      },
+      {
+        "completed_sessions": 141,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.2,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 17
+      },
+      {
+        "completed_sessions": 133,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.22,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 18
+      },
+      {
+        "completed_sessions": 138,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.13,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 19
+      }
+    ],
+    "adversarial-004": [
+      {
+        "completed_sessions": 131,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.81,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 0
+      },
+      {
+        "completed_sessions": 131,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.05,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 1
+      },
+      {
+        "completed_sessions": 126,
+        "fallback_actions": 0,
+        "final_1rm_kg": 101.93,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 2
+      },
+      {
+        "completed_sessions": 129,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.59,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 3
+      },
+      {
+        "completed_sessions": 129,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.61,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 4
+      },
+      {
+        "completed_sessions": 127,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.84,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 5
+      },
+      {
+        "completed_sessions": 122,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.37,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 6
+      },
+      {
+        "completed_sessions": 137,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.64,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 7
+      },
+      {
+        "completed_sessions": 130,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.65,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 8
+      },
+      {
+        "completed_sessions": 127,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.2,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 9
+      },
+      {
+        "completed_sessions": 138,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.44,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 10
+      },
+      {
+        "completed_sessions": 136,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.65,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 11
+      },
+      {
+        "completed_sessions": 144,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.65,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 12
+      },
+      {
+        "completed_sessions": 130,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.61,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 13
+      },
+      {
+        "completed_sessions": 125,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.64,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 14
+      },
+      {
+        "completed_sessions": 134,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.45,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 15
+      },
+      {
+        "completed_sessions": 127,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.18,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 16
+      },
+      {
+        "completed_sessions": 133,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.48,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 17
+      },
+      {
+        "completed_sessions": 129,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.6,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 18
+      },
+      {
+        "completed_sessions": 132,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.51,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 19
+      }
+    ],
+    "adversarial-005": [
+      {
+        "completed_sessions": 131,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.81,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 0
+      },
+      {
+        "completed_sessions": 131,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.05,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 1
+      },
+      {
+        "completed_sessions": 126,
+        "fallback_actions": 0,
+        "final_1rm_kg": 101.93,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 2
+      },
+      {
+        "completed_sessions": 129,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.59,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 3
+      },
+      {
+        "completed_sessions": 129,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.61,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 4
+      },
+      {
+        "completed_sessions": 127,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.84,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 5
+      },
+      {
+        "completed_sessions": 122,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.37,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 6
+      },
+      {
+        "completed_sessions": 137,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.64,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 7
+      },
+      {
+        "completed_sessions": 130,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.65,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 8
+      },
+      {
+        "completed_sessions": 127,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.2,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 9
+      },
+      {
+        "completed_sessions": 138,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.44,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 10
+      },
+      {
+        "completed_sessions": 136,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.65,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 11
+      },
+      {
+        "completed_sessions": 144,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.65,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 12
+      },
+      {
+        "completed_sessions": 130,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.61,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 13
+      },
+      {
+        "completed_sessions": 125,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.64,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 14
+      },
+      {
+        "completed_sessions": 134,
+        "fallback_actions": 0,
+        "final_1rm_kg": 103.45,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 15
+      },
+      {
+        "completed_sessions": 127,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.18,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 16
+      },
+      {
+        "completed_sessions": 133,
+        "fallback_actions": 0,
+        "final_1rm_kg": 104.48,
+        "household_strain": 0.06,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 17
+      },
+      {
+        "completed_sessions": 129,
+        "fallback_actions": 0,
+        "final_1rm_kg": 102.6,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 18
+      },
+      {
+        "completed_sessions": 132,
+        "fallback_actions": 0,
+        "final_1rm_kg": 105.51,
+        "household_strain": 0.0,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 19
+      }
+    ],
+    "regression-compressed-fallback": [
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 0
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 1
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 2
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 3
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 4
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 5
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 6
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 7
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 8
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 9
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 10
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 11
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 12
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 13
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 14
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 15
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 16
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 17
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 18
+      },
+      {
+        "completed_sessions": 0,
+        "fallback_actions": 0,
+        "final_1rm_kg": null,
+        "household_strain": 0.0,
+        "invalid_reason": "authored fallback load exceeds the permitted ceiling on day 0: 79.8 kg > 65.5 kg (0.78\u00d7 estimated 1RM)",
+        "pain_days": 0,
+        "seed": 19
+      }
+    ],
+    "regression-volume-8x4": [
+      {
+        "completed_sessions": 3,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.03,
+        "household_strain": 0.785,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 0
+      },
+      {
+        "completed_sessions": 6,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.43,
+        "household_strain": 0.648,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 1
+      },
+      {
+        "completed_sessions": 3,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.0,
+        "household_strain": 0.733,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 2
+      },
+      {
+        "completed_sessions": 5,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.17,
+        "household_strain": 0.724,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 3
+      },
+      {
+        "completed_sessions": 5,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.2,
+        "household_strain": 0.642,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 4
+      },
+      {
+        "completed_sessions": 5,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.16,
+        "household_strain": 0.66,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 5
+      },
+      {
+        "completed_sessions": 6,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.29,
+        "household_strain": 0.724,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 6
+      },
+      {
+        "completed_sessions": 3,
+        "fallback_actions": 0,
+        "final_1rm_kg": 81.95,
+        "household_strain": 0.732,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 7
+      },
+      {
+        "completed_sessions": 2,
+        "fallback_actions": 0,
+        "final_1rm_kg": 81.9,
+        "household_strain": 0.795,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 8
+      },
+      {
+        "completed_sessions": 2,
+        "fallback_actions": 0,
+        "final_1rm_kg": 81.9,
+        "household_strain": 0.74,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 9
+      },
+      {
+        "completed_sessions": 5,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.12,
+        "household_strain": 0.802,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 10
+      },
+      {
+        "completed_sessions": 2,
+        "fallback_actions": 0,
+        "final_1rm_kg": 81.79,
+        "household_strain": 0.778,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 11
+      },
+      {
+        "completed_sessions": 4,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.04,
+        "household_strain": 0.761,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 12
+      },
+      {
+        "completed_sessions": 6,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.2,
+        "household_strain": 0.728,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 13
+      },
+      {
+        "completed_sessions": 8,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.46,
+        "household_strain": 0.691,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 14
+      },
+      {
+        "completed_sessions": 3,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.04,
+        "household_strain": 0.644,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 15
+      },
+      {
+        "completed_sessions": 3,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.14,
+        "household_strain": 0.687,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 16
+      },
+      {
+        "completed_sessions": 4,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.02,
+        "household_strain": 0.691,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 17
+      },
+      {
+        "completed_sessions": 5,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.13,
+        "household_strain": 0.661,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 18
+      },
+      {
+        "completed_sessions": 6,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.36,
+        "household_strain": 0.697,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 19
+      }
+    ],
+    "regression-volume-stacking": [
+      {
+        "completed_sessions": 3,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.03,
+        "household_strain": 0.785,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 0
+      },
+      {
+        "completed_sessions": 6,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.52,
+        "household_strain": 0.648,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 1
+      },
+      {
+        "completed_sessions": 3,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.03,
+        "household_strain": 0.733,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 2
+      },
+      {
+        "completed_sessions": 5,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.24,
+        "household_strain": 0.724,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 3
+      },
+      {
+        "completed_sessions": 5,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.22,
+        "household_strain": 0.642,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 4
+      },
+      {
+        "completed_sessions": 4,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.1,
+        "household_strain": 0.66,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 5
+      },
+      {
+        "completed_sessions": 5,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.21,
+        "household_strain": 0.724,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 6
+      },
+      {
+        "completed_sessions": 3,
+        "fallback_actions": 0,
+        "final_1rm_kg": 81.97,
+        "household_strain": 0.732,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 7
+      },
+      {
+        "completed_sessions": 2,
+        "fallback_actions": 0,
+        "final_1rm_kg": 81.9,
+        "household_strain": 0.795,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 8
+      },
+      {
+        "completed_sessions": 2,
+        "fallback_actions": 0,
+        "final_1rm_kg": 81.9,
+        "household_strain": 0.74,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 9
+      },
+      {
+        "completed_sessions": 5,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.2,
+        "household_strain": 0.802,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 10
+      },
+      {
+        "completed_sessions": 2,
+        "fallback_actions": 0,
+        "final_1rm_kg": 81.8,
+        "household_strain": 0.778,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 11
+      },
+      {
+        "completed_sessions": 4,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.05,
+        "household_strain": 0.761,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 12
+      },
+      {
+        "completed_sessions": 5,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.15,
+        "household_strain": 0.728,
+        "invalid_reason": null,
+        "pain_days": 1,
+        "seed": 13
+      },
+      {
+        "completed_sessions": 8,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.54,
+        "household_strain": 0.691,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 14
+      },
+      {
+        "completed_sessions": 3,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.04,
+        "household_strain": 0.644,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 15
+      },
+      {
+        "completed_sessions": 3,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.14,
+        "household_strain": 0.687,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 16
+      },
+      {
+        "completed_sessions": 4,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.02,
+        "household_strain": 0.691,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 17
+      },
+      {
+        "completed_sessions": 5,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.13,
+        "household_strain": 0.661,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 18
+      },
+      {
+        "completed_sessions": 5,
+        "fallback_actions": 0,
+        "final_1rm_kg": 82.3,
+        "household_strain": 0.697,
+        "invalid_reason": null,
+        "pain_days": 0,
+        "seed": 19
+      }
+    ]
+  },
+  "exploit_policies": [
+    "adversarial-001",
+    "adversarial-003",
+    "adversarial-002",
+    "adversarial-004",
+    "adversarial-005",
+    "regression-volume-stacking",
+    "regression-volume-8x4",
+    "regression-compressed-fallback"
+  ],
+  "phase": 4,
+  "search": {
+    "generations": 3,
+    "invalid_search_candidates": 22,
+    "method": "deterministic evolutionary search over legal WeekAction fields",
+    "population_size": 48,
+    "regression_families": [
+      "regression-volume-stacking",
+      "regression-compressed-fallback",
+      "regression-volume-8x4"
+    ],
+    "search_seed": 20260807,
+    "search_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "unique_genomes_evaluated": 108
+  },
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "summaries": {
+    "adversarial-001": {
+      "episodes": 20,
+      "invalid_episodes": 0,
+      "max_final_1rm_kg": 105.92,
+      "mean_fallback_actions": 0.0,
+      "mean_final_1rm_kg": 104.4425,
+      "mean_household_strain": 0.003,
+      "mean_pain_days": 5.45,
+      "min_final_1rm_kg": 101.98,
+      "policy": "adversarial-001",
+      "seed_std_kg": 1.1277
+    },
+    "adversarial-002": {
+      "episodes": 20,
+      "invalid_episodes": 0,
+      "max_final_1rm_kg": 105.73,
+      "mean_fallback_actions": 0.0,
+      "mean_final_1rm_kg": 104.312,
+      "mean_household_strain": 0.012,
+      "mean_pain_days": 0.0,
+      "min_final_1rm_kg": 102.36,
+      "policy": "adversarial-002",
+      "seed_std_kg": 1.0031
+    },
+    "adversarial-003": {
+      "episodes": 20,
+      "invalid_episodes": 0,
+      "max_final_1rm_kg": 105.98,
+      "mean_fallback_actions": 0.0,
+      "mean_final_1rm_kg": 104.372,
+      "mean_household_strain": 0.012,
+      "mean_pain_days": 0.0,
+      "min_final_1rm_kg": 102.39,
+      "policy": "adversarial-003",
+      "seed_std_kg": 1.0952
+    },
+    "adversarial-004": {
+      "episodes": 20,
+      "invalid_episodes": 0,
+      "max_final_1rm_kg": 105.64,
+      "mean_fallback_actions": 0.0,
+      "mean_final_1rm_kg": 104.095,
+      "mean_household_strain": 0.012,
+      "mean_pain_days": 0.0,
+      "min_final_1rm_kg": 101.93,
+      "policy": "adversarial-004",
+      "seed_std_kg": 1.1179
+    },
+    "adversarial-005": {
+      "episodes": 20,
+      "invalid_episodes": 0,
+      "max_final_1rm_kg": 105.64,
+      "mean_fallback_actions": 0.0,
+      "mean_final_1rm_kg": 104.095,
+      "mean_household_strain": 0.012,
+      "mean_pain_days": 0.0,
+      "min_final_1rm_kg": 101.93,
+      "policy": "adversarial-005",
+      "seed_std_kg": 1.1179
+    },
+    "regression-compressed-fallback": {
+      "episodes": 0,
+      "invalid_episodes": 20,
+      "max_final_1rm_kg": null,
+      "mean_fallback_actions": null,
+      "mean_final_1rm_kg": null,
+      "mean_household_strain": null,
+      "mean_pain_days": null,
+      "min_final_1rm_kg": null,
+      "policy": "regression-compressed-fallback",
+      "seed_std_kg": null
+    },
+    "regression-volume-8x4": {
+      "episodes": 20,
+      "invalid_episodes": 0,
+      "max_final_1rm_kg": 82.46,
+      "mean_fallback_actions": 0.0,
+      "mean_final_1rm_kg": 82.1165,
+      "mean_household_strain": 0.7162,
+      "mean_pain_days": 0.0,
+      "min_final_1rm_kg": 81.79,
+      "policy": "regression-volume-8x4",
+      "seed_std_kg": 0.177
+    },
+    "regression-volume-stacking": {
+      "episodes": 20,
+      "invalid_episodes": 0,
+      "max_final_1rm_kg": 82.54,
+      "mean_fallback_actions": 0.0,
+      "mean_final_1rm_kg": 82.1245,
+      "mean_household_strain": 0.7162,
+      "mean_pain_days": 0.05,
+      "min_final_1rm_kg": 81.8,
+      "policy": "regression-volume-stacking",
+      "seed_std_kg": 0.1875
+    }
+  }
+}

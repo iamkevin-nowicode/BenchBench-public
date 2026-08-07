@@ -1,0 +1,11 @@
+{
+  "benchmark": "Bench-bench",
+  "version": "0.1.0",
+  "public_seed_values": [100, 101, 102, 103, 104, 105, 106, 107, 108, 109],
+  "private_seed_count": 10,
+  "private_seed_values": "ten fixed evaluator-held values supplied out-of-band; never included in model prompts or release artifacts",
+  "paired_evaluation": true,
+  "development_validation_seed_values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+  "development_note": "The 20 values above are burned reproducible development fixtures and are not public leaderboard or private evaluator values.",
+  "policy": "Every model receives the same public or private seed set. Private values are revealed only to the evaluator after submission; they are not a security claim against source disclosure."
+}

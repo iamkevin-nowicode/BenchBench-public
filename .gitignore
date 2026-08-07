@@ -1,0 +1,9 @@
+__pycache__/
+.pytest_cache/
+*.py[cod]
+runs/
+*.lock
+build/
+*.egg-info/
+.DS_Store
+.claude/

@@ -1,0 +1,157 @@
+{
+  "all_checks_pass": true,
+  "benchmark": "Bench-bench",
+  "card_reference_values": {
+    "adversarial": {
+      "best_candidate": "adversarial-001",
+      "best_candidate_mean_final_1rm_kg": 104.4425,
+      "candidates_beating_expert": [],
+      "expert_mean_final_1rm_kg": 105.03450000000001,
+      "human_review_candidates": [],
+      "release_blocked_candidates": []
+    },
+    "baseline_mean_final_1rm_kg": {
+      "random": 88.431,
+      "reckless-maximalist": 90.0985,
+      "recovery-aware": 101.0225,
+      "rigid-linear": 92.707,
+      "scripted-expert": 105.0345,
+      "skip-when-busy": 97.8935
+    },
+    "baseline_seed_std_kg": {
+      "random": 1.0648,
+      "reckless-maximalist": 0.9737,
+      "recovery-aware": 0.8537,
+      "rigid-linear": 1.4661,
+      "scripted-expert": 0.766,
+      "skip-when-busy": 1.1658
+    },
+    "gate": {
+      "adjacent_sigma": {
+        "random->reckless-maximalist": {
+          "gap_kg": 1.6675,
+          "pooled_seed_std_kg": 1.0203,
+          "sigma": 1.6344
+        },
+        "reckless-maximalist->rigid-linear": {
+          "gap_kg": 2.6085,
+          "pooled_seed_std_kg": 1.2445,
+          "sigma": 2.096
+        },
+        "recovery-aware->scripted-expert": {
+          "gap_kg": 4.012,
+          "pooled_seed_std_kg": 0.811,
+          "sigma": 4.9468
+        },
+        "rigid-linear->skip-when-busy": {
+          "gap_kg": 5.1865,
+          "pooled_seed_std_kg": 1.3245,
+          "sigma": 3.9159
+        },
+        "skip-when-busy->recovery-aware": {
+          "gap_kg": 3.129,
+          "pooled_seed_std_kg": 1.0217,
+          "sigma": 3.0624
+        }
+      },
+      "expert_minus_random_kg": 16.6035,
+      "gate_enforced": true,
+      "gate_pass": true,
+      "invalid_episode_free": true,
+      "ordering_pass": true,
+      "pairwise_order_rates": {
+        "random<reckless": 0.85,
+        "random<rigid": 1.0,
+        "recovery<expert": 1.0,
+        "rigid_or_reckless<skip": 1.0,
+        "skip<recovery": 1.0
+      },
+      "pooled_seed_std_kg": 0.9275,
+      "reckless_loses_endogenously": true,
+      "separation_ratio": 17.9011,
+      "stable_order_rate_threshold": 0.65,
+      "stable_ordering_pass": true
+    },
+    "public_leaderboard_seed_values": [
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109
+    ],
+    "public_leaderboard_status": "pending_independent_review_and_live_run",
+    "twelve_week_diagnostic": {
+      "adjacent_sigma": {
+        "random->reckless-maximalist": {
+          "gap_kg": 0.7415,
+          "pooled_seed_std_kg": 1.2442,
+          "sigma": 0.5959
+        },
+        "reckless-maximalist->rigid-linear": {
+          "gap_kg": 3.7095,
+          "pooled_seed_std_kg": 0.9329,
+          "sigma": 3.9762
+        },
+        "recovery-aware->scripted-expert": {
+          "gap_kg": 0.892,
+          "pooled_seed_std_kg": 0.9315,
+          "sigma": 0.9576
+        },
+        "rigid-linear->skip-when-busy": {
+          "gap_kg": 0.2175,
+          "pooled_seed_std_kg": 0.9574,
+          "sigma": 0.2272
+        },
+        "skip-when-busy->recovery-aware": {
+          "gap_kg": 2.208,
+          "pooled_seed_std_kg": 0.9489,
+          "sigma": 2.327
+        }
+      },
+      "expert_minus_random_kg": 7.7685,
+      "gate_enforced": false,
+      "gate_pass": null,
+      "invalid_episode_free": true,
+      "ordering_pass": true,
+      "pairwise_order_rates": {
+        "random<reckless": 0.7,
+        "random<rigid": 1.0,
+        "recovery<expert": 1.0,
+        "rigid_or_reckless<skip": 0.55,
+        "skip<recovery": 1.0
+      },
+      "pooled_seed_std_kg": 1.2497,
+      "reckless_loses_endogenously": true,
+      "separation_ratio": 6.2162,
+      "stable_order_rate_threshold": 0.65,
+      "stable_ordering_pass": false
+    }
+  },
+  "checks": {
+    "adversarial_search_reproduces": true,
+    "all_json_reports_have_hash": true,
+    "all_markdown_reports_have_hash": true,
+    "authoritative_leaderboard_not_generated_before_live_run": true,
+    "baseline_gate_reproduces": true,
+    "card_adversarial_numbers_match": true,
+    "card_and_manifest_have_hash": true,
+    "card_baseline_numbers_match": true,
+    "card_diagnostic_numbers_match": true,
+    "card_gate_numbers_match": true,
+    "card_public_status_matches": true,
+    "private_seed_git_history_clear": true,
+    "private_seed_values_not_materialized": true,
+    "public_leaderboard_pending": true,
+    "public_transcript_count": true,
+    "stale_run_directories_removed": true,
+    "transcripts_have_current_hash": true,
+    "twelve_week_diagnostic_reproduces": true
+  },
+  "engine_config_hash": "sha256:5bd2bc4dbdcf35846c87adf5102851b42692f1dcab9b35144a3b7bca0405dd27",
+  "public_transcript_count": 0
+}

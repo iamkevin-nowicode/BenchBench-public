@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bench-bench"
+version = "0.1.0"
+description = "A deterministic long-horizon decision-making benchmark about training through a difficult year."
+requires-python = ">=3.11"
+dependencies = [
+  "pydantic>=2.0,<3.0",
+]
+
+[project.scripts]
+bench-bench = "bench_bench.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["bench_bench*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

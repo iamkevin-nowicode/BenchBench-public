@@ -1,0 +1,121 @@
+"""Simulation configuration.
+
+The engine is 52-week native.  A shorter configuration is only a validation
+window; it does not switch the simulator to a different model.
+"""
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class SimConfig:
+    weeks: int = 52
+    monthly_budget_cents: int = 25_000
+    starting_cash_cents: int = 25_000
+    starting_body_mass_kg: float = 84.0
+    starting_estimated_1rm_kg: float = 84.0
+    starting_base_capacity_kg: float = 84.0
+    fit_tau_days: float = 56.0
+    fatigue_tau_days: float = 6.0
+    technique_tau_sessions: float = 34.0
+    # Brzycki-style coupling prevents a high-rep prescription from claiming
+    # the same stimulus as a plausible set at the requested load.  The small
+    # tolerance preserves ordinary training prescriptions while making the
+    # ceiling explicit and deterministic.
+    brzycki_repmax_ceiling_ratio: float = 1.30
+    # Directly authored fallback actions are rejected during validation when
+    # their load exceeds this visible estimated-1RM ratio. Coerced fallback
+    # sessions still receive the same conservative transform in the engine.
+    fallback_max_load_ratio: float = 0.78
+    # Stimulus is accumulated through a saturating weekly curve.  Fatigue and
+    # irritation still see the prescribed work, so extra work cannot become a
+    # free second dose of adaptation.
+    weekly_stimulus_cap: float = 1.0
+    weekly_stimulus_diminishing_start: float = 1.25
+    # One shared discretionary household-time pool. It covers training plus
+    # the life allocations in the weekly action.
+    weekly_time_budget_minutes: int = 900
+    delegated_chore_cost_per_hour_cents: int = 1_200
+    reactive_childcare_cost_per_hour_cents: int = 1_400
+    # Recalibrated after adding durable-capacity drift and multi-test scoring;
+    # the paired reduction keeps scripted-expert near the 105 kg target.
+    fitness_to_strength_kg: float = 2.00
+    fatigue_to_strength_kg: float = 0.20
+    # Sustained consistency can raise the athlete's durable base capacity.
+    # The engine starts applying this drift only after the configured
+    # consecutive productive-week streak has been established.
+    productive_streak_weeks_for_capacity_drift: int = 4
+    capacity_drift_kg_per_productive_week: float = 0.10
+    # A commercial-gym visit includes a modest round-trip commute.  The home
+    # rack still saves setup time, but it is not meant to dominate the model.
+    gym_commute_minutes: int = 20
+    home_session_overhead_minutes: int = 10
+    hotel_commute_minutes: int = 20
+    # Saved transition time improves the amount of productive work that fits
+    # in a week.  The no-spotter cap below is the countervailing limitation.
+    home_training_efficiency: float = 1.10
+    home_no_spotter_max_ratio: float = 0.88
+    enable_home_rack: bool = True
+    max_sessions_per_week: int = 5
+    max_action_repairs: int = 1
+    enable_sleep_system: bool = True
+    enable_delayed_adaptation: bool = True
+    enable_event_system: bool = True
+    enable_injury_system: bool = True
+    enable_household_system: bool = True
+    enable_money_system: bool = True
+    # Keep session failure causes opaque to the agent by default.  Evaluation
+    # and debugging runs can opt into a per-session reason in WeekOutcome.
+    expose_session_failure_reasons: bool = False
+
+    @property
+    def days(self) -> int:
+        return self.weeks * 7
+
+    @property
+    def weekly_budget_cents(self) -> int:
+        # A simple four-week accounting month keeps the benchmark readable.
+        return self.monthly_budget_cents // 4
+
+    @classmethod
+    def twelve_week(cls) -> "SimConfig":
+        return cls(weeks=12)
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "weeks": self.weeks,
+            "monthly_budget_cents": self.monthly_budget_cents,
+            "starting_cash_cents": self.starting_cash_cents,
+            "starting_body_mass_kg": self.starting_body_mass_kg,
+            "starting_estimated_1rm_kg": self.starting_estimated_1rm_kg,
+            "starting_base_capacity_kg": self.starting_base_capacity_kg,
+            "fit_tau_days": self.fit_tau_days,
+            "fatigue_tau_days": self.fatigue_tau_days,
+            "technique_tau_sessions": self.technique_tau_sessions,
+            "brzycki_repmax_ceiling_ratio": self.brzycki_repmax_ceiling_ratio,
+            "fallback_max_load_ratio": self.fallback_max_load_ratio,
+            "weekly_stimulus_cap": self.weekly_stimulus_cap,
+            "weekly_stimulus_diminishing_start": self.weekly_stimulus_diminishing_start,
+            "weekly_time_budget_minutes": self.weekly_time_budget_minutes,
+            "delegated_chore_cost_per_hour_cents": self.delegated_chore_cost_per_hour_cents,
+            "reactive_childcare_cost_per_hour_cents": self.reactive_childcare_cost_per_hour_cents,
+            "fitness_to_strength_kg": self.fitness_to_strength_kg,
+            "fatigue_to_strength_kg": self.fatigue_to_strength_kg,
+            "productive_streak_weeks_for_capacity_drift": self.productive_streak_weeks_for_capacity_drift,
+            "capacity_drift_kg_per_productive_week": self.capacity_drift_kg_per_productive_week,
+            "gym_commute_minutes": self.gym_commute_minutes,
+            "home_session_overhead_minutes": self.home_session_overhead_minutes,
+            "hotel_commute_minutes": self.hotel_commute_minutes,
+            "home_training_efficiency": self.home_training_efficiency,
+            "home_no_spotter_max_ratio": self.home_no_spotter_max_ratio,
+            "enable_home_rack": self.enable_home_rack,
+            "max_sessions_per_week": self.max_sessions_per_week,
+            "max_action_repairs": self.max_action_repairs,
+            "enable_sleep_system": self.enable_sleep_system,
+            "enable_delayed_adaptation": self.enable_delayed_adaptation,
+            "enable_event_system": self.enable_event_system,
+            "enable_injury_system": self.enable_injury_system,
+            "enable_household_system": self.enable_household_system,
+            "enable_money_system": self.enable_money_system,
+            "expose_session_failure_reasons": self.expose_session_failure_reasons,
+        }
