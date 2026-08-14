@@ -169,15 +169,60 @@ def test_analyzer_fails_closed_when_pain_days_is_missing(tmp_path) -> None:
     assert "transcript: missing_final_result_field:pain_days" in summary["exclusion_reasons"]
 
 
+def test_analyzer_fails_closed_when_household_exposure_is_missing(tmp_path) -> None:
+    transcript = tmp_path / "missing-household-exposure.jsonl"
+    runner = ModelRunner(DeterministicPolicyClient("recovery-aware", 3), RunnerConfig(weeks=1))
+    runner.run_episode(3, transcript)
+    records = [json.loads(line) for line in transcript.read_text().splitlines()]
+    end = next(record for record in records if record.get("type") == "run_end")
+    del end["result"]["household_strain_high_weeks"]
+    transcript.write_text("".join(json.dumps(record) + "\n" for record in records))
+
+    summary = analyze_transcript(transcript)
+    assert summary["valid"] is False
+    assert summary["counted_final_1rm_kg"] is None
+    assert "missing_household_strain_high_weeks" in summary["constraint_violations"]
+    assert "transcript: missing_final_result_field:household_strain_high_weeks" in summary["exclusion_reasons"]
+
+
 @pytest.mark.parametrize("pain_days", [True, "0", -1, 1.5, 365])
 def test_pain_days_requires_a_non_boolean_integer_in_episode_range(pain_days) -> None:
-    assert constraint_violations(pain_days=pain_days, household_strain=0.4) == ("invalid_pain_days",)
+    assert constraint_violations(
+        pain_days=pain_days,
+        household_strain_high_weeks=0,
+        final_third_mean_household_strain=0.4,
+    ) == ("invalid_pain_days",)
 
 
 def test_pain_days_boundary_values_are_valid() -> None:
-    assert constraint_violations(pain_days=0, household_strain=0.4) == ()
-    assert constraint_violations(pain_days=14, household_strain=0.4) == ()
-    assert constraint_violations(pain_days=15, household_strain=0.4) == ("pain_days>14",)
+    assert constraint_violations(pain_days=0, household_strain_high_weeks=0, final_third_mean_household_strain=0.4) == ()
+    assert constraint_violations(pain_days=14, household_strain_high_weeks=0, final_third_mean_household_strain=0.4) == ()
+    assert constraint_violations(pain_days=15, household_strain_high_weeks=0, final_third_mean_household_strain=0.4) == ("pain_days>14",)
+
+
+def test_household_constraint_requires_sustained_exposure() -> None:
+    assert constraint_violations(
+        pain_days=0,
+        household_strain_high_weeks=3,
+        final_third_mean_household_strain=0.75,
+    ) == ()
+    assert constraint_violations(
+        pain_days=0,
+        household_strain_high_weeks=4,
+        final_third_mean_household_strain=0.4,
+    ) == ("household_strain_high_weeks>=4",)
+    assert constraint_violations(
+        pain_days=0,
+        household_strain_high_weeks=0,
+        final_third_mean_household_strain=0.751,
+    ) == ("final_third_household_strain>0.75",)
+
+
+def test_constraint_evaluation_fails_closed_when_household_exposure_is_missing() -> None:
+    assert constraint_violations(pain_days=0) == (
+        "missing_household_strain_high_weeks",
+        "missing_final_third_household_strain",
+    )
 
 
 def test_analyzer_excludes_hash_mismatched_transcript(tmp_path) -> None:

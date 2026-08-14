@@ -93,6 +93,20 @@ def _session(
     )
 
 
+def _conservative_session_minutes(sessions: list[SessionPlan]) -> int:
+    """Reserve the engine's maximum visible per-session logistics cost."""
+    overhead = {"gym": 26, "home": 10, "hotel": 20}
+    return sum(session.duration_min + overhead[session.location] for session in sessions)
+
+
+def _visible_external_time_reserve(observation: WeekObservation) -> int:
+    """Reserve the announced week-14 childcare block for scripted policies."""
+    return 240 if any(
+        event.week == observation.episode_week and event.title == "grandparents visit"
+        for event in observation.upcoming_known_events
+    ) else 0
+
+
 class ScriptedPolicy(ABC):
     name: str
 
@@ -138,12 +152,28 @@ class RandomPolicy(ScriptedPolicy):
                         rpe=round(self.rng.uniform(6.0, 9.5), 1),
                     )
                 )
+        # Randomness is inside the legal action space.  The old generator
+        # independently sampled training and household hours, so it emitted
+        # ledger-invalid weeks and measured the safe fallback instead of a
+        # random policy.  Reserve the fixed household block, the announced
+        # week-14 childcare block, and maximum gym crowding before sampling
+        # optional life allocations.
+        budget = max(0, observation.weekly_time_budget_minutes)
+        fixed = max(0, observation.weekly_fixed_household_minutes)
+        required = fixed + _conservative_session_minutes(sessions) + _visible_external_time_reserve(observation)
+        while sessions and required > budget:
+            sessions.pop()
+            required = fixed + _conservative_session_minutes(sessions) + _visible_external_time_reserve(observation)
+        remaining_hours = max(0, (budget - required) // 60)
+        meal_prep = min(float(self.rng.choice([0, 1, 2, 4])), remaining_hours)
+        remaining_hours -= int(meal_prep)
+        coverage = min(float(self.rng.choice([0, 1, 2, 3, 4])), remaining_hours)
+        remaining_hours -= int(coverage)
+        giveback = min(float(self.rng.choice([0, 1, 2, 3, 4])), remaining_hours)
         sleep = self.rng.choice(["none", "standard", "strong"])
-        coverage = float(self.rng.choice([0, 1, 2, 3, 4]))
-        giveback = float(self.rng.choice([0, 1, 2, 3, 4]))
         return WeekAction(
             sessions=sessions,
-            life=_life(meal_prep=float(self.rng.choice([0, 1, 2, 4])), sleep=sleep, coverage=coverage, giveback=giveback),
+            life=_life(meal_prep=meal_prep, sleep=sleep, coverage=coverage, giveback=giveback),
             rules=_rules(
                 sleep=self.rng.choice(["fallback", "skip", "reduce"]),
                 pain=self.rng.choice(["reduce", "fallback", "skip"]),
@@ -190,12 +220,16 @@ class RecklessMaximalistPolicy(ScriptedPolicy):
     def action(self, observation: WeekObservation) -> WeekAction:
         load = observation.estimated_1rm_kg * 1.02 + 2.0
         sessions = [
-            _session(day, focus="heavy", sets=4, reps=4, load=load + index * 0.8, duration=80, rpe=9.7)
+            _session(day, focus="heavy", sets=4, reps=4, load=load + index * 0.8, duration=60, rpe=9.7)
             for index, day in enumerate([0, 1, 2, 3])
         ]
         return WeekAction(
             sessions=sessions,
-            life=_life(meal_prep=0.0, sleep="none", coverage=6.0, giveback=0.0),
+            # Reckless behavior is now physiological and recovery-related,
+            # not a disguised ledger-invalid action: four high-RPE sessions,
+            # no sleep protection, two hours of coverage, and no giveback.
+            # The plan remains legal even in the announced week-14 reserve.
+            life=_life(meal_prep=0.0, sleep="none", coverage=2.0, giveback=0.0),
             rules=_rules(sleep="reduce", pain="reduce", illness="fallback"),
         )
 
@@ -297,8 +331,7 @@ class ScriptedExpertPolicy(ScriptedPolicy):
         Reserving that surcharge keeps the public reference policy valid even
         when the exact crowding draw is not observable.
         """
-        overhead = {"gym": 26, "home": 10, "hotel": 20}
-        return sum(session.duration_min + overhead[session.location] for session in sessions)
+        return _conservative_session_minutes(sessions)
 
     @staticmethod
     def _visible_external_time_reserve(observation: WeekObservation) -> int:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from bench_bench.adversarial import _reference_expert_mean
-from bench_bench.evaluation import run_suite
+from bench_bench.evaluation import run_episode, run_suite
 from bench_bench.config import SimConfig
 from bench_bench.engine import BenchEnvironment
 from bench_bench.policies import POLICY_NAMES, make_policy
@@ -56,6 +56,19 @@ def test_scripted_expert_never_submits_an_infeasible_900_minute_plan() -> None:
             for record in env.log_records
             if record.get("type") == "week"
         )
+
+
+def test_scripted_baselines_play_their_authored_policies() -> None:
+    config = SimConfig(weeks=52)
+    seeds = range(300, 308)
+    for name in POLICY_NAMES:
+        episodes = [run_episode(name, seed, config) for seed in seeds]
+        fallback_rate = sum(episode.fallback_actions for episode in episodes) / (len(episodes) * config.weeks)
+        assert fallback_rate <= 0.05, (name, fallback_rate)
+    reckless = [run_episode("reckless-maximalist", seed, config) for seed in seeds]
+    assert all(episode.attempted_sessions > 0 for episode in reckless)
+    assert all(episode.fallback_actions == 0 for episode in reckless)
+    assert all(episode.pain_days > 14 for episode in reckless)
 
 
 def test_adversarial_reference_uses_the_counted_expert_mean() -> None:

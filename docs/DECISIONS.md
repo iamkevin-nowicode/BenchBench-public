@@ -231,8 +231,10 @@ artifact commit.
   volume/tolerance exposure. A normal sub-onset session is not automatically
   painful; repeated excess work, sleep loss, and high effort can still create
   injury burden.
-- Household strain peak above 0.75 is a hard score constraint chosen from the
-  persona before observing baseline results. Sleep debt remains a reported
+- Sustained household strain is a hard score constraint chosen from the
+  persona before observing baseline results: four weeks at or above 0.75, or a
+  final-third 13-week mean above 0.75, voids the counted score. A one-week peak
+  is reported but does not void an episode. Sleep debt remains a reported
   diagnostic because it already reduces readiness and recovery. The standing
   rule is that no unscored resource may be free.
 - The six scripted policies are diagnostic fixtures. The v0.2 release gate is

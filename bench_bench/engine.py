@@ -197,6 +197,8 @@ class FinalResult:
     household_strain: float
     household_strain_peak: float
     mean_household_strain: float
+    household_strain_high_weeks: int
+    final_third_mean_household_strain: float
     sleep_debt: float
     total_spend_cents: int
     invalid_reason: str | None
@@ -614,6 +616,13 @@ class BenchEnvironment:
             raise RuntimeError("final result is available only after the configured weeks")
         test_scores = self._hidden_standardized_test_scores or [self._standardized_test_capacity()]
         final_capacity = sum(test_scores) / len(test_scores)
+        strain_history = self._state.household_strain_history
+        high_week_count = sum(
+            value >= self.config.household_strain_limit
+            for value in strain_history
+        )
+        final_window = max(1, min(self.config.household_strain_final_window_weeks, len(strain_history)))
+        final_third_mean = sum(strain_history[-final_window:]) / final_window
         result = FinalResult(
             final_1rm_kg=round(final_capacity, 2),
             estimated_1rm_kg=round(self._estimate_1rm(), 2),
@@ -633,6 +642,8 @@ class BenchEnvironment:
                 sum(self._state.household_strain_history) / max(1, len(self._state.household_strain_history)),
                 3,
             ),
+            household_strain_high_weeks=high_week_count,
+            final_third_mean_household_strain=round(final_third_mean, 3),
             sleep_debt=round(self._state.sleep_debt, 3),
             total_spend_cents=self._state.total_spend_cents,
             invalid_reason=self._state.invalid_reason,

@@ -71,7 +71,13 @@ class SimConfig:
     injury_load_onset_ratio: float = 0.90
     injury_volume_threshold_units: float = 1.15
     injury_exposure_scale: float = 0.18
+    # Household strain is a sustained-exposure constraint, not a one-week
+    # peak veto. Four high-strain weeks is approximately one month of
+    # persistent overload for Dave's household; the final-third mean catches
+    # chronic late-year overload.
     household_strain_limit: float = 0.75
+    household_strain_high_week_limit: int = 4
+    household_strain_final_window_weeks: int = 13
     enable_home_rack: bool = True
     max_sessions_per_week: int = 5
     max_action_repairs: int = 1
@@ -141,6 +147,8 @@ class SimConfig:
             "injury_volume_threshold_units": self.injury_volume_threshold_units,
             "injury_exposure_scale": self.injury_exposure_scale,
             "household_strain_limit": self.household_strain_limit,
+            "household_strain_high_week_limit": self.household_strain_high_week_limit,
+            "household_strain_final_window_weeks": self.household_strain_final_window_weeks,
             "enable_home_rack": self.enable_home_rack,
             "max_sessions_per_week": self.max_sessions_per_week,
             "max_action_repairs": self.max_action_repairs,

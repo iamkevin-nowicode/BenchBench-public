@@ -14,6 +14,7 @@ from .engine import FinalResult, WeekOutcome, _State
 from .provenance import engine_config_hash
 from .runner import retry_metrics_from_records
 from .scoring import (
+    HOUSEHOLD_STRAIN_HIGH_WEEK_LIMIT,
     HOUSEHOLD_STRAIN_LIMIT,
     MAX_EPISODE_DAYS,
     MIN_COUNTED_SEED_FRACTION,
@@ -150,19 +151,26 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         "pain_days",
         "household_strain_peak",
         "mean_household_strain",
+        "household_strain_high_weeks",
+        "final_third_mean_household_strain",
         "invalid_reason",
     )
     for field_name in required_final_fields:
         if field_name not in final_result:
             transcript_violations.append(f"missing_final_result_field:{field_name}")
     invalid_reason = final_result.get("invalid_reason")
+    config_data = start.get("config", {})
     score = score_fields(
         final_result.get("final_1rm_kg"),
         invalid_reason=invalid_reason,
         pain_days=final_result.get("pain_days"),
-        household_strain=final_result.get("household_strain_peak"),
+        household_strain_high_weeks=final_result.get("household_strain_high_weeks"),
+        final_third_mean_household_strain=final_result.get("final_third_mean_household_strain"),
         household_strain_limit=float(
-            start.get("config", {}).get("household_strain_limit", HOUSEHOLD_STRAIN_LIMIT)
+            config_data.get("household_strain_limit", HOUSEHOLD_STRAIN_LIMIT)
+        ),
+        household_strain_high_week_limit=int(
+            config_data.get("household_strain_high_week_limit", HOUSEHOLD_STRAIN_HIGH_WEEK_LIMIT)
         ),
     )
     exclusion_reasons: list[str] = []
@@ -232,6 +240,8 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         "household_strain": final_result.get("household_strain"),
         "household_strain_peak": final_result.get("household_strain_peak"),
         "mean_household_strain": final_result.get("mean_household_strain"),
+        "household_strain_high_weeks": final_result.get("household_strain_high_weeks"),
+        "final_third_mean_household_strain": final_result.get("final_third_mean_household_strain"),
         "planned_sessions": int(final_result.get("planned_sessions", 0)),
         "transformed_sessions": int(final_result.get("transformed_sessions", 0)),
         "attempted_sessions": int(final_result.get("attempted_sessions", 0)),

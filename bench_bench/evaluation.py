@@ -40,6 +40,8 @@ class EpisodeStats:
     household_strain: float
     household_strain_peak: float
     mean_household_strain: float
+    household_strain_high_weeks: int
+    final_third_mean_household_strain: float
     sleep_debt: float
     total_spend_cents: int
     invalid_reason: str | None
@@ -79,6 +81,8 @@ class PolicySummary:
     mean_pain_days: float
     mean_household_strain: float
     mean_household_strain_peak: float
+    mean_household_strain_high_weeks: float
+    mean_final_third_household_strain: float
     mean_sleep_debt: float
     mean_action_repairs: float
     invalid_episodes: int
@@ -129,6 +133,8 @@ def run_episode(policy_name: str, seed: int, config: SimConfig | None = None) ->
         household_strain=result.household_strain,
         household_strain_peak=result.household_strain_peak,
         mean_household_strain=result.mean_household_strain,
+        household_strain_high_weeks=result.household_strain_high_weeks,
+        final_third_mean_household_strain=result.final_third_mean_household_strain,
         sleep_debt=result.sleep_debt,
         total_spend_cents=result.total_spend_cents,
         invalid_reason=result.invalid_reason,
@@ -141,8 +147,10 @@ def run_episode(policy_name: str, seed: int, config: SimConfig | None = None) ->
         capital_purchases=capital_purchases,
         constraint_violations=constraint_violations(
             pain_days=result.pain_days,
-            household_strain=result.household_strain_peak,
+            household_strain_high_weeks=result.household_strain_high_weeks,
+            final_third_mean_household_strain=result.final_third_mean_household_strain,
             household_strain_limit=config.household_strain_limit,
+            household_strain_high_week_limit=config.household_strain_high_week_limit,
         ),
     )
 
@@ -173,8 +181,8 @@ def markdown_exploit_report(report: dict[str, Any], expert_mean: float | None = 
         "",
         "A candidate blocks release only when it beats the scripted expert and has at least one simulator-abuse signature.",
         "",
-        "| Candidate | Counted mean final 1RM (kg) | Raw mean final 1RM (kg) | Seed std | Pain days | Household strain | Violations | Beats expert | Abuse signatures | Human review | Blocks release |",
-        "|---|---:|---:|---:|---:|---:|---|:---:|---|:---:|:---:|",
+        "| Candidate | Counted mean final 1RM (kg) | Raw mean final 1RM (kg) | Seed std | Pain days | Final strain | Peak strain | High-strain weeks | Final-third strain | Violations | Beats expert | Abuse signatures | Human review | Blocks release |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---|:---:|---|:---:|:---:|",
     ]
     for name in report["exploit_policies"]:
         summary = report["summaries"][name]
@@ -192,7 +200,7 @@ def markdown_exploit_report(report: dict[str, Any], expert_mean: float | None = 
         violation_counts = summary.get("constraint_violation_counts", {})
         violations = ", ".join(f"{violation}: {count}" for violation, count in sorted(violation_counts.items())) or "—"
         lines.append(
-            f"| {name} | {score} | {raw_score} | {summary['seed_std_kg'] if summary['seed_std_kg'] is not None else '—'} | {summary['mean_pain_days'] if summary['mean_pain_days'] is not None else '—'} | {summary['mean_household_strain'] if summary['mean_household_strain'] is not None else '—'} | {violations} | {'yes' if candidate.get('beats_expert') else 'no'} | {signatures} | {'yes' if candidate.get('requires_human_review') else 'no'} | {'yes' if candidate.get('release_blocked') else 'no'} |"
+            f"| {name} | {score} | {raw_score} | {summary['seed_std_kg'] if summary['seed_std_kg'] is not None else '—'} | {summary['mean_pain_days'] if summary['mean_pain_days'] is not None else '—'} | {summary['mean_household_strain'] if summary['mean_household_strain'] is not None else '—'} | {summary.get('mean_household_strain_peak', '—')} | {summary.get('mean_household_strain_high_weeks', '—')} | {summary.get('mean_final_third_household_strain', '—')} | {violations} | {'yes' if candidate.get('beats_expert') else 'no'} | {signatures} | {'yes' if candidate.get('requires_human_review') else 'no'} | {'yes' if candidate.get('release_blocked') else 'no'} |"
         )
     if reference_mean is not None:
         lines.extend(["", f"Scripted-expert reference mean: **{reference_mean:.2f} kg**.", ""])
@@ -319,6 +327,8 @@ def summarize(episodes: Iterable[EpisodeStats], policy: str) -> PolicySummary:
         mean_pain_days=average("pain_days"),
         mean_household_strain=average("household_strain"),
         mean_household_strain_peak=average("household_strain_peak"),
+        mean_household_strain_high_weeks=average("household_strain_high_weeks"),
+        mean_final_third_household_strain=average("final_third_mean_household_strain"),
         mean_sleep_debt=average("sleep_debt"),
         mean_action_repairs=average("action_repairs"),
         invalid_episodes=sum(episode.invalid_reason is not None for episode in all_values),
@@ -549,7 +559,7 @@ def markdown_report(report: dict[str, Any]) -> str:
         f"- Config: {report['config']['weeks']} weeks",
         f"- Seeds: {report['seeds']}",
         f"- Separation: {gate['expert_minus_random_kg']:.3f} kg / {gate['pooled_seed_std_kg']:.3f} kg = **{gate['separation_ratio']:.3f}** (required ≥ 3.0)",
-        f"- Headline-score constraint: pain days ≤{PAIN_DAYS_LIMIT}; raw final 1RM remains reported for every structurally valid episode. Household strain and sleep debt are diagnostics only.",
+        f"- Headline-score constraint: pain days ≤{PAIN_DAYS_LIMIT}; household strain is invalid at ≥{report['config'].get('household_strain_high_week_limit', 4)} weeks at or above {report['config'].get('household_strain_limit', 0.75):g} or when the final {report['config'].get('household_strain_final_window_weeks', 13)}-week mean exceeds that threshold. Raw final 1RM remains reported; peak strain and sleep debt are diagnostics.",
         f"- Counted aggregate rule: a counted mean and seed SD are reportable only when every expected seed is counted (minimum fraction {MIN_COUNTED_SEED_FRACTION:.0%}); otherwise they are shown as — and raw results remain diagnostic.",
         f"- Ordering: {'PASS' if gate['ordering_pass'] else 'FAIL'}; stable ordering: {'PASS' if gate['stable_ordering_pass'] else 'FAIL'} (paired rate ≥ {gate.get('stable_order_rate_threshold', 0.65):.0%})",
         f"- Reckless loses endogenously: {'PASS' if gate['reckless_loses_endogenously'] else 'FAIL'}",
@@ -557,8 +567,8 @@ def markdown_report(report: dict[str, Any]) -> str:
         "",
         "## Baseline results",
         "",
-        "| Policy | Raw mean final 1RM (kg) | Counted mean final 1RM (kg) | Raw seed SD | Counted seed SD | Counted seeds | Counted fraction | Planned | Transformed | Attempted | Completed | Missed | Pain days | Household strain | Violations | Invalid episodes |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|",
+        "| Policy | Raw mean final 1RM (kg) | Counted mean final 1RM (kg) | Raw seed SD | Counted seed SD | Counted seeds | Counted fraction | Planned | Transformed | Attempted | Completed | Missed | Pain days | Final household strain | Peak strain | High-strain weeks | Final-third strain | Violations | Invalid episodes |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|",
     ]
     for name in report["policies"]:
         summary = report["summaries"][name]
@@ -567,7 +577,7 @@ def markdown_report(report: dict[str, Any]) -> str:
         violation_counts = summary.get("constraint_violation_counts", {})
         violations = ", ".join(f"{violation}: {count}" for violation, count in sorted(violation_counts.items())) or "—"
         lines.append(
-            f"| {name} | {summary['mean_final_1rm_kg']:.2f} | {f'{counted_mean:.2f}' if counted_mean is not None else '—'} | {summary['seed_std_kg']:.2f} | {f'{counted_sd:.2f}' if counted_sd is not None else '—'} | {summary['counted_episodes']}/{summary['episodes'] + summary['invalid_episodes']} | {summary['counted_seed_fraction']:.2f} | {summary['mean_planned_sessions']:.1f} | {summary['mean_transformed_sessions']:.1f} | {summary['mean_attempted_sessions']:.1f} | {summary['mean_completed_sessions']:.1f} | {summary['mean_missed_sessions']:.1f} | {summary['mean_pain_days']:.1f} | {summary['mean_household_strain']:.3f} | {violations} | {summary['invalid_episodes']} |"
+            f"| {name} | {summary['mean_final_1rm_kg']:.2f} | {f'{counted_mean:.2f}' if counted_mean is not None else '—'} | {summary['seed_std_kg']:.2f} | {f'{counted_sd:.2f}' if counted_sd is not None else '—'} | {summary['counted_episodes']}/{summary['episodes'] + summary['invalid_episodes']} | {summary['counted_seed_fraction']:.2f} | {summary['mean_planned_sessions']:.1f} | {summary['mean_transformed_sessions']:.1f} | {summary['mean_attempted_sessions']:.1f} | {summary['mean_completed_sessions']:.1f} | {summary['mean_missed_sessions']:.1f} | {summary['mean_pain_days']:.1f} | {summary['mean_household_strain']:.3f} | {summary['mean_household_strain_peak']:.3f} | {summary['mean_household_strain_high_weeks']:.1f} | {summary['mean_final_third_household_strain']:.3f} | {violations} | {summary['invalid_episodes']} |"
         )
     lines.extend(["", "## Paired ordering rates", ""])
     for name, rate in gate["pairwise_order_rates"].items():
@@ -611,7 +621,7 @@ def markdown_report(report: dict[str, Any]) -> str:
             "",
             "## Interpretation",
             "",
-            "The six policies are fixed scripts, not optimized searches. Raw score is the average of hidden standardized-test projections at weeks 44, 48, and 52; the counted column applies the pain-days ≤14 and peak-household-strain ≤0.75 constraints. Sleep debt, adherence, and invalid-action counts remain visible diagnostics.",
+            "The six policies are fixed scripts, not optimized searches. Raw score is the average of hidden standardized-test projections at weeks 44, 48, and 52; the counted column applies pain days ≤14 plus sustained household strain: at least four weeks at or above 0.75, or a final-third (13-week) mean above 0.75. Final strain, peak strain, sleep debt, adherence, and invalid-action counts remain visible diagnostics.",
             "The historical separation and ordering fields remain visible for calibration and regression analysis. They are not a release claim and do not replace the held-out Phase 3 gate.",
             "",
         ]

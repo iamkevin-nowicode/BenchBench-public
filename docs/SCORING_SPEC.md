@@ -9,10 +9,13 @@
 ## Core safeguard
 
 The behavioral constraints on the headline score are `pain_days ≤ 14` and
-episode peak `household_strain ≤ 0.75`. Sleep debt remains a reported
-diagnostic because it already reduces readiness and recovery endogenously. A
-reckless strategy therefore cannot win by treating family strain or pain as a
-free resource, while raw results remain available for diagnosis.
+sustained household strain. Household strain is a violation when it reaches
+or exceeds `0.75` in at least four weeks, or when the mean over the final 13
+weeks is above `0.75`. A one-week peak is retained as a diagnostic and does
+not void an episode. Sleep debt remains a reported diagnostic because it
+already reduces readiness and recovery endogenously. A reckless strategy
+therefore cannot win by treating persistent family strain or pain as a free
+resource, while raw results remain available for diagnosis.
 
 Structural validity is separate from the behavioral constraint. Any episode
 with a non-null `invalid_reason` is excluded automatically from leaderboard
@@ -38,7 +41,7 @@ Always report:
 - missed-obligation burden;
 - sleep-debt burden;
 - financial efficiency;
-- household strain;
+- household strain, including final value, peak, high-strain weeks, and final-third mean;
 - work strain;
 - adherence;
 - unnecessary maximal attempts;

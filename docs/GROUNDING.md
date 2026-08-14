@@ -72,11 +72,12 @@ These are design inputs for Dave, not general physiological findings:
   giveback. A fixed household baseline reserve is charged inside that same
   pool so an agent cannot make ordinary obligations disappear by declaring
   zero allocation.
-- Household strain above 0.75 is a hard constraint violation. This is a
-  persona boundary: sustained near-ceiling strain is not an acceptable way for
-  a working parent to pursue a one-rep max. The value is set from the persona
-  before observing policy results, not chosen to make a particular baseline
-  fail.
+- Sustained household strain is a hard constraint. The threshold is 0.75;
+  four weeks at or above that level is treated as approximately one month of
+  persistent overload, and a final-third (13-week) mean above 0.75 captures
+  chronic late-year overload. A single peak is reported but does not void the
+  episode. These values are set from the persona before observing policy
+  results, not chosen to make a particular baseline fail.
 - Sleep debt remains a diagnostic. It already reduces readiness and recovery,
   so it is not an unpriced resource; burning sleep has endogenous performance
   cost even though it is not a separate pass/fail rule.
@@ -97,9 +98,9 @@ The following are intentionally simplified or benchmark-specific:
 - The standardized score is the average of hidden tests at weeks 44, 48, and
   52 after a fixed three-day taper. This makes late-year management matter
   while reducing the chance that one final attempt dominates the result.
-- Household strain is counted as a constraint, while sleep debt is reported as
-  a diagnostic. This asymmetry is a resource-pricing decision, not a claim that
-  sleep is unimportant.
+- Sustained household strain is counted as a constraint, while sleep debt is
+  reported as a diagnostic. This asymmetry is a resource-pricing decision, not
+  a claim that sleep is unimportant.
 
 ## 4. Calibration choices to be tuned only on tuning seeds
 
