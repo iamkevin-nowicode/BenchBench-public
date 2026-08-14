@@ -225,8 +225,10 @@ class SkipWhenBusyPolicy(ScriptedPolicy):
                 _session(days[1], focus="technique", sets=3, reps=5, load=load * 0.86, duration=35, rpe=6.5),
                 _session(days[2], focus="volume", sets=4, reps=4, load=load * 1.04, duration=45, rpe=7.5),
             ]
-            if open_day_count == 3:
-                sessions = sessions[:2]
+            # This baseline deliberately leaves one good training window on
+            # the table; its defining behavior is protecting the calendar by
+            # skipping rather than adapting the plan into that window.
+            sessions = sessions[:2]
         return WeekAction(
             sessions=sessions,
             life=_life(meal_prep=2.5, sleep="strong", coverage=3.0, giveback=3.0),
@@ -265,7 +267,10 @@ class RecoveryAwarePolicy(ScriptedPolicy):
         ]
         return WeekAction(
             sessions=sessions,
-            life=_life(meal_prep=3.0, sleep="strong", coverage=3.0, giveback=3.0, chores=2.0),
+            # Keep the reference policy feasible under the v0.2 fixed
+            # household reserve; recovery management is the behavior under
+            # test, not repeated ledger rejection.
+            life=_life(meal_prep=1.5, sleep="strong", coverage=1.5, giveback=1.5, chores=0.5),
             rules=_rules(sleep="fallback", pain="fallback", illness="protect_recovery"),
         )
 
@@ -321,6 +326,7 @@ class ScriptedExpertPolicy(ScriptedPolicy):
         """
         budget = max(0, observation.weekly_time_budget_minutes)
         external_reserve = self._visible_external_time_reserve(observation)
+        fixed_household_reserve = max(0, observation.weekly_fixed_household_minutes)
         life_options = [
             _life(meal_prep=3.0, sleep="strong", coverage=3.0, giveback=3.0, chores=2.0, purchases=purchases),
             _life(meal_prep=2.0, sleep="strong", coverage=2.0, giveback=2.0, chores=1.0, purchases=purchases),
@@ -330,21 +336,25 @@ class ScriptedExpertPolicy(ScriptedPolicy):
             _life(meal_prep=0.0, sleep="strong", coverage=0.0, giveback=0.0, chores=0.0, purchases=purchases),
         ]
         session_options = [sessions, sessions[:2], sessions[:1], []]
-        for life in life_options:
-            life_minutes = math.ceil(
-                60.0
-                * (
-                    life.meal_prep_hours
-                    + life.childcare_hours
-                    + life.chore_delegation_hours
-                    + life.partner_coverage_hours
-                    + life.partner_giveback_hours
+        # Preserve the strongest training plan first, then reduce optional
+        # household allocations.  Iterating life first would accept an empty
+        # training week as soon as the most generous life bundle fits.
+        for candidate_sessions in session_options:
+            for life in life_options:
+                life_minutes = math.ceil(
+                    60.0
+                    * (
+                        life.meal_prep_hours
+                        + life.childcare_hours
+                        + life.chore_delegation_hours
+                        + life.partner_coverage_hours
+                        + life.partner_giveback_hours
+                    )
                 )
-            )
-            for candidate_sessions in session_options:
                 required = (
                     self._conservative_session_minutes(candidate_sessions)
                     + life_minutes
+                    + fixed_household_reserve
                     + external_reserve
                 )
                 if required <= budget:

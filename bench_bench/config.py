@@ -16,7 +16,7 @@ class SimConfig:
     starting_estimated_1rm_kg: float = 84.0
     starting_base_capacity_kg: float = 84.0
     fit_tau_days: float = 56.0
-    fatigue_tau_days: float = 6.0
+    fatigue_tau_days: float = 10.0
     technique_tau_sessions: float = 34.0
     # Brzycki-style coupling prevents a high-rep prescription from claiming
     # the same stimulus as a plausible set at the requested load.  The small
@@ -27,14 +27,13 @@ class SimConfig:
     # their load exceeds this visible estimated-1RM ratio. Coerced fallback
     # sessions still receive the same conservative transform in the engine.
     fallback_max_load_ratio: float = 0.78
-    # Stimulus is accumulated through a saturating weekly curve.  Fatigue and
-    # irritation still see the prescribed work, so extra work cannot become a
-    # free second dose of adaptation.
-    weekly_stimulus_cap: float = 1.0
-    # With a 1.0 weekly cap, diminishing returns begin below the cap.  The
-    # curve therefore has a genuine nonlinear tail instead of silently
-    # clamping its start point to the cap.
-    weekly_stimulus_diminishing_start: float = 0.75
+    # The v0.2 curve has no hard weekly stimulus cap.  It has a hidden,
+    # per-episode optimum and a smooth over-reaching penalty beyond it.
+    weekly_stimulus_optimum: float = 0.90
+    weekly_overreach_penalty_strength: float = 0.90
+    # Backwards-compatible input name for old offline experiments.  It is an
+    # optimum override, never a hard output cap.
+    weekly_stimulus_cap: float | None = None
     # Loads below this ratio are warm-up-only: they may occupy a session, but
     # do not produce strength stimulus or technique credit.
     minimum_meaningful_load_ratio: float = 0.35
@@ -45,12 +44,15 @@ class SimConfig:
     # One shared discretionary household-time pool. It covers training plus
     # the life allocations in the weekly action.
     weekly_time_budget_minutes: int = 900
+    # Unavoidable childcare, chores, and household administration are charged
+    # from the same pool before an authored allocation is considered.
+    weekly_fixed_household_minutes: int = 180
     delegated_chore_cost_per_hour_cents: int = 1_200
     reactive_childcare_cost_per_hour_cents: int = 1_400
     # Calibration adopted after durable-capacity drift and multi-test scoring;
     # later stimulus-curve corrections are accepted without retuning these
     # strength coefficients to restore an earlier headline score.
-    fitness_to_strength_kg: float = 2.00
+    fitness_to_strength_kg: float = 2.40
     fatigue_to_strength_kg: float = 0.20
     # Sustained consistency can raise the athlete's durable base capacity.
     # The engine starts applying this drift only after the configured
@@ -66,6 +68,10 @@ class SimConfig:
     # in a week.  The no-spotter cap below is the countervailing limitation.
     home_training_efficiency: float = 1.10
     home_no_spotter_max_ratio: float = 0.88
+    injury_load_onset_ratio: float = 0.90
+    injury_volume_threshold_units: float = 1.15
+    injury_exposure_scale: float = 0.18
+    household_strain_limit: float = 0.75
     enable_home_rack: bool = True
     max_sessions_per_week: int = 5
     max_action_repairs: int = 1
@@ -88,6 +94,13 @@ class SimConfig:
         # A simple four-week accounting month keeps the benchmark readable.
         return self.monthly_budget_cents // 4
 
+    @property
+    def effective_weekly_stimulus_optimum(self) -> float:
+        """Return the smooth-curve optimum, honoring the legacy alias."""
+        if self.weekly_stimulus_cap is not None:
+            return max(0.05, float(self.weekly_stimulus_cap))
+        return max(0.05, float(self.weekly_stimulus_optimum))
+
     @classmethod
     def twelve_week(cls) -> "SimConfig":
         return cls(weeks=12)
@@ -106,11 +119,13 @@ class SimConfig:
             "brzycki_repmax_ceiling_ratio": self.brzycki_repmax_ceiling_ratio,
             "fallback_max_load_ratio": self.fallback_max_load_ratio,
             "weekly_stimulus_cap": self.weekly_stimulus_cap,
-            "weekly_stimulus_diminishing_start": self.weekly_stimulus_diminishing_start,
+            "weekly_stimulus_optimum": self.weekly_stimulus_optimum,
+            "weekly_overreach_penalty_strength": self.weekly_overreach_penalty_strength,
             "minimum_meaningful_load_ratio": self.minimum_meaningful_load_ratio,
             "session_reps_per_minute": self.session_reps_per_minute,
             "productive_week_stimulus_threshold": self.productive_week_stimulus_threshold,
             "weekly_time_budget_minutes": self.weekly_time_budget_minutes,
+            "weekly_fixed_household_minutes": self.weekly_fixed_household_minutes,
             "delegated_chore_cost_per_hour_cents": self.delegated_chore_cost_per_hour_cents,
             "reactive_childcare_cost_per_hour_cents": self.reactive_childcare_cost_per_hour_cents,
             "fitness_to_strength_kg": self.fitness_to_strength_kg,
@@ -122,6 +137,10 @@ class SimConfig:
             "hotel_commute_minutes": self.hotel_commute_minutes,
             "home_training_efficiency": self.home_training_efficiency,
             "home_no_spotter_max_ratio": self.home_no_spotter_max_ratio,
+            "injury_load_onset_ratio": self.injury_load_onset_ratio,
+            "injury_volume_threshold_units": self.injury_volume_threshold_units,
+            "injury_exposure_scale": self.injury_exposure_scale,
+            "household_strain_limit": self.household_strain_limit,
             "enable_home_rack": self.enable_home_rack,
             "max_sessions_per_week": self.max_sessions_per_week,
             "max_action_repairs": self.max_action_repairs,

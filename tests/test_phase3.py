@@ -171,13 +171,13 @@ def test_analyzer_fails_closed_when_pain_days_is_missing(tmp_path) -> None:
 
 @pytest.mark.parametrize("pain_days", [True, "0", -1, 1.5, 365])
 def test_pain_days_requires_a_non_boolean_integer_in_episode_range(pain_days) -> None:
-    assert constraint_violations(pain_days=pain_days) == ("invalid_pain_days",)
+    assert constraint_violations(pain_days=pain_days, household_strain=0.4) == ("invalid_pain_days",)
 
 
 def test_pain_days_boundary_values_are_valid() -> None:
-    assert constraint_violations(pain_days=0) == ()
-    assert constraint_violations(pain_days=14) == ()
-    assert constraint_violations(pain_days=15) == ("pain_days>14",)
+    assert constraint_violations(pain_days=0, household_strain=0.4) == ()
+    assert constraint_violations(pain_days=14, household_strain=0.4) == ()
+    assert constraint_violations(pain_days=15, household_strain=0.4) == ("pain_days>14",)
 
 
 def test_analyzer_excludes_hash_mismatched_transcript(tmp_path) -> None:

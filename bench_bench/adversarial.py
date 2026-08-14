@@ -216,6 +216,8 @@ class CandidateEpisode:
     fallback_actions: int
     invalid_reason: str | None
     constraint_violations: tuple[str, ...] = ()
+    household_strain_peak: float = 0.0
+    mean_household_strain: float = 0.0
 
     def as_dict(self) -> dict[str, Any]:
         values = asdict(self)
@@ -243,6 +245,8 @@ class CandidateEvaluation:
     mean_pain_days: float | None
     mean_household_strain: float | None
     mean_fallback_actions: float | None
+    mean_household_strain_peak: float | None = None
+    mean_week_household_strain: float | None = None
     raw_mean_final_1rm_kg: float | None = None
     raw_seed_std_kg: float | None = None
     counted_episodes: int = 0
@@ -261,6 +265,8 @@ class CandidateEvaluation:
             "raw_seed_std_kg": self.raw_seed_std_kg,
             "mean_pain_days": self.mean_pain_days,
             "mean_household_strain": self.mean_household_strain,
+            "mean_household_strain_peak": self.mean_household_strain_peak,
+            "mean_week_household_strain": self.mean_week_household_strain,
             "mean_fallback_actions": self.mean_fallback_actions,
             "invalid_episodes": self.invalid_episodes,
             "total_episodes": len(self.episodes),
@@ -420,7 +426,12 @@ class AdversarialPolicy:
             event.week == observation.episode_week and event.title == "grandparents visit"
             for event in observation.upcoming_known_events
         ) else 0
-        return math.ceil(training + life_minutes + external)
+        return math.ceil(
+            training
+            + life_minutes
+            + external
+            + max(0, observation.weekly_fixed_household_minutes)
+        )
 
     def _legalize(self, observation: WeekObservation, sessions: list[SessionPlan], life: LifeAllocation, rules: StandingRules) -> WeekAction:
         budget = max(0, observation.weekly_time_budget_minutes)
@@ -685,7 +696,13 @@ def _evaluate_genome(name: str, genome: AdversarialGenome, seeds: list[int], con
                 household_strain=result.household_strain,
                 fallback_actions=sum(1 for record in week_records if record["validation"]["fallback_used"]),
                 invalid_reason=result.invalid_reason,
-                constraint_violations=constraint_violations(pain_days=result.pain_days),
+                constraint_violations=constraint_violations(
+                    pain_days=result.pain_days,
+                    household_strain=result.household_strain_peak,
+                    household_strain_limit=config.household_strain_limit,
+                ),
+                household_strain_peak=result.household_strain_peak,
+                mean_household_strain=result.mean_household_strain,
             )
         )
     structural_valid = [
@@ -713,6 +730,8 @@ def _evaluate_genome(name: str, genome: AdversarialGenome, seeds: list[int], con
             mean_pain_days=round(fmean(episode.pain_days for episode in structural_valid), 4) if structural_valid else None,
             mean_household_strain=round(fmean(episode.household_strain for episode in structural_valid), 4) if structural_valid else None,
             mean_fallback_actions=round(fmean(episode.fallback_actions for episode in structural_valid), 4) if structural_valid else None,
+            mean_household_strain_peak=round(fmean(episode.household_strain_peak for episode in structural_valid), 4) if structural_valid else None,
+            mean_week_household_strain=round(fmean(episode.mean_household_strain for episode in structural_valid), 4) if structural_valid else None,
             raw_mean_final_1rm_kg=round(fmean(raw_scores), 4) if raw_scores else None,
             raw_seed_std_kg=round(stdev(raw_scores), 4) if len(raw_scores) > 1 else (0.0 if raw_scores else None),
             counted_episodes=0,
@@ -735,6 +754,8 @@ def _evaluate_genome(name: str, genome: AdversarialGenome, seeds: list[int], con
         mean_pain_days=round(fmean(episode.pain_days for episode in structural_valid), 4),
         mean_household_strain=round(fmean(episode.household_strain for episode in structural_valid), 4),
         mean_fallback_actions=round(fmean(episode.fallback_actions for episode in structural_valid), 4),
+        mean_household_strain_peak=round(fmean(episode.household_strain_peak for episode in structural_valid), 4),
+        mean_week_household_strain=round(fmean(episode.mean_household_strain for episode in structural_valid), 4),
         raw_mean_final_1rm_kg=round(fmean(raw_scores), 4),
         raw_seed_std_kg=round(stdev(raw_scores), 4) if len(raw_scores) > 1 else 0.0,
         counted_episodes=len(valid),
@@ -855,7 +876,11 @@ def _reference_expert_mean(seeds: list[int], config: SimConfig) -> float | None:
         counted = counted_score(
             result.final_1rm_kg,
             invalid_reason=result.invalid_reason,
-            violations=constraint_violations(pain_days=result.pain_days),
+            violations=constraint_violations(
+                pain_days=result.pain_days,
+                household_strain=result.household_strain_peak,
+                household_strain_limit=config.household_strain_limit,
+            ),
         )
         if counted is not None:
             scores.append(counted)

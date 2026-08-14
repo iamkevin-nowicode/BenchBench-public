@@ -1,4 +1,9 @@
-"""Paired baseline evaluation and the hard Phase 2 separation gate."""
+"""Paired baseline evaluation and Phase 2 diagnostics.
+
+The six scripted policies remain useful calibration and regression fixtures.
+They are not the v0.2 release gate: that gate is the held-out oracle and
+policy-ladder evaluation performed after calibration.
+"""
 
 from __future__ import annotations
 
@@ -17,8 +22,8 @@ from .provenance import engine_config_hash
 from .scoring import MIN_COUNTED_SEED_FRACTION, PAIN_DAYS_LIMIT, counted_score, constraint_violations
 
 
-# The release gate uses the full 52-week configuration. Shorter runs may still
-# report paired diagnostics, but they are not release gates.
+# This threshold is retained as a diagnostic for the historical six-policy
+# report. It is not the v0.2 release criterion.
 STABLE_ORDER_RATE_THRESHOLD = 0.65
 
 
@@ -33,6 +38,8 @@ class EpisodeStats:
     productive_weeks: int
     pain_days: int
     household_strain: float
+    household_strain_peak: float
+    mean_household_strain: float
     sleep_debt: float
     total_spend_cents: int
     invalid_reason: str | None
@@ -71,6 +78,7 @@ class PolicySummary:
     mean_productive_weeks: float
     mean_pain_days: float
     mean_household_strain: float
+    mean_household_strain_peak: float
     mean_sleep_debt: float
     mean_action_repairs: float
     invalid_episodes: int
@@ -119,6 +127,8 @@ def run_episode(policy_name: str, seed: int, config: SimConfig | None = None) ->
         productive_weeks=result.productive_weeks,
         pain_days=result.pain_days,
         household_strain=result.household_strain,
+        household_strain_peak=result.household_strain_peak,
+        mean_household_strain=result.mean_household_strain,
         sleep_debt=result.sleep_debt,
         total_spend_cents=result.total_spend_cents,
         invalid_reason=result.invalid_reason,
@@ -129,7 +139,11 @@ def run_episode(policy_name: str, seed: int, config: SimConfig | None = None) ->
         attempted_sessions=result.attempted_sessions,
         planned_fallbacks=planned_fallbacks,
         capital_purchases=capital_purchases,
-        constraint_violations=constraint_violations(pain_days=result.pain_days),
+        constraint_violations=constraint_violations(
+            pain_days=result.pain_days,
+            household_strain=result.household_strain_peak,
+            household_strain_limit=config.household_strain_limit,
+        ),
     )
 
 
@@ -304,6 +318,7 @@ def summarize(episodes: Iterable[EpisodeStats], policy: str) -> PolicySummary:
         mean_productive_weeks=average("productive_weeks"),
         mean_pain_days=average("pain_days"),
         mean_household_strain=average("household_strain"),
+        mean_household_strain_peak=average("household_strain_peak"),
         mean_sleep_debt=average("sleep_debt"),
         mean_action_repairs=average("action_repairs"),
         invalid_episodes=sum(episode.invalid_reason is not None for episode in all_values),
@@ -437,7 +452,13 @@ def run_rack_ablation(seeds: Iterable[int] = range(20), weeks: int = 52) -> dict
     }
 
 
-def run_suite(seeds: Iterable[int] = range(20), weeks: int = 12, *, ablations: bool = True) -> dict[str, Any]:
+def run_suite(
+    seeds: Iterable[int] = range(20),
+    weeks: int = 12,
+    *,
+    ablations: bool = True,
+    enforce_legacy_gate: bool = False,
+) -> dict[str, Any]:
     seed_list = list(seeds)
     config = SimConfig(weeks=weeks)
     episodes: dict[str, list[EpisodeStats]] = {name: [] for name in POLICY_NAMES}
@@ -454,7 +475,14 @@ def run_suite(seeds: Iterable[int] = range(20), weeks: int = 12, *, ablations: b
         "policies": list(POLICY_NAMES),
         "summaries": {name: summary.as_dict() for name, summary in summaries.items()},
         "episodes": {name: [episode.as_dict() for episode in values] for name, values in episodes.items()},
-        "gate": gate_metrics(summaries, episodes, enforce=weeks == 52),
+        # The old six-baseline ordering is intentionally diagnostic. The
+        # v0.2 release gate is the held-out oracle/policy-ladder gate and is
+        # not silently substituted by this report.
+        "gate": gate_metrics(
+            summaries,
+            episodes,
+            enforce=bool(enforce_legacy_gate and weeks == 52),
+        ),
         "rack_ablation": run_rack_ablation(seed_list, weeks),
     }
     if ablations:
@@ -489,7 +517,7 @@ def run_ablations(seeds: list[int], weeks: int, full_report: dict[str, Any]) -> 
             }
             for policy in POLICY_NAMES
         }
-        ablation_gate = gate_metrics(summaries, episode_map, enforce=weeks == 52)
+        ablation_gate = gate_metrics(summaries, episode_map, enforce=False)
         results.append(
             {
                 "name": name,
@@ -512,12 +540,10 @@ def run_ablations(seeds: list[int], weeks: int, full_report: dict[str, Any]) -> 
 def markdown_report(report: dict[str, Any]) -> str:
     gate = report["gate"]
     gate_enforced = bool(gate.get("gate_enforced", report["config"]["weeks"] == 52))
-    gate_label = "Full-year release gate" if gate_enforced else "Short-horizon diagnostic (not a release gate)"
-    gate_status = "PASS" if gate.get("gate_pass") else "FAIL"
     lines = [
-        f"# Bench-bench {'Baseline Release Gate' if gate_enforced else 'Baseline Diagnostic'} — {report['config']['weeks']}-week config",
+        f"# Bench-bench Baseline Diagnostic — {report['config']['weeks']}-week config",
         "",
-        "This report is generated by the paired scripted-baseline suite. The release gate is enforced only for the 52-week configuration; shorter horizons are diagnostics, not release decisions.",
+        "This report is generated by the paired scripted-baseline suite. The six-policy ordering and separation fields are diagnostics. The v0.2 release gate is the held-out oracle/policy-ladder evaluation and is reported separately.",
         "",
         f"- Engine/config hash: `{report.get('engine_config_hash', engine_config_hash())}`",
         f"- Config: {report['config']['weeks']} weeks",
@@ -527,7 +553,7 @@ def markdown_report(report: dict[str, Any]) -> str:
         f"- Counted aggregate rule: a counted mean and seed SD are reportable only when every expected seed is counted (minimum fraction {MIN_COUNTED_SEED_FRACTION:.0%}); otherwise they are shown as — and raw results remain diagnostic.",
         f"- Ordering: {'PASS' if gate['ordering_pass'] else 'FAIL'}; stable ordering: {'PASS' if gate['stable_ordering_pass'] else 'FAIL'} (paired rate ≥ {gate.get('stable_order_rate_threshold', 0.65):.0%})",
         f"- Reckless loses endogenously: {'PASS' if gate['reckless_loses_endogenously'] else 'FAIL'}",
-        f"- {gate_label}: **{gate_status if gate_enforced else 'NOT ENFORCED'}**",
+        f"- Historical six-policy gate fields: **diagnostic only**; legacy enforcement requested: {'yes' if gate_enforced else 'no'}",
         "",
         "## Baseline results",
         "",
@@ -585,8 +611,8 @@ def markdown_report(report: dict[str, Any]) -> str:
             "",
             "## Interpretation",
             "",
-            "The six policies are fixed scripts, not optimized searches. Raw score is the average of hidden standardized-test projections at weeks 44, 48, and 52; the counted column applies the pain-days ≤14 constraint. Household strain, sleep debt, adherence, and invalid-action counts remain visible diagnostics.",
-            "The separation gate above remains a raw calibration comparison so the six-script mechanics can still be inspected when a deliberately reckless script has no counted episodes; it is not the model leaderboard score.",
+            "The six policies are fixed scripts, not optimized searches. Raw score is the average of hidden standardized-test projections at weeks 44, 48, and 52; the counted column applies the pain-days ≤14 and peak-household-strain ≤0.75 constraints. Sleep debt, adherence, and invalid-action counts remain visible diagnostics.",
+            "The historical separation and ordering fields remain visible for calibration and regression analysis. They are not a release claim and do not replace the held-out Phase 3 gate.",
             "",
         ]
     )

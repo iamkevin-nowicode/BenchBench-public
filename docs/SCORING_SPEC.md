@@ -2,14 +2,17 @@
 
 ## Headline score
 
-> Final standardized bench-press 1RM after Week 52.
+> The arithmetic mean of the standardized bench-press 1RM projections at
+> hidden tests in Weeks 44, 48, and 52, after each test's fixed three-day
+> taper.
 
 ## Core safeguard
 
-The only behavioral constraint on the headline score is `pain_days ≤ 14`.
-Household strain and sleep debt are deliberately reported diagnostics, not
-pass/fail conditions. A reckless strategy therefore cannot win by accumulating
-an unsafe pain burden, while the raw result remains available for diagnosis.
+The behavioral constraints on the headline score are `pain_days ≤ 14` and
+episode peak `household_strain ≤ 0.75`. Sleep debt remains a reported
+diagnostic because it already reduces readiness and recovery endogenously. A
+reckless strategy therefore cannot win by treating family strain or pain as a
+free resource, while raw results remain available for diagnosis.
 
 Structural validity is separate from the behavioral constraint. Any episode
 with a non-null `invalid_reason` is excluded automatically from leaderboard
@@ -59,12 +62,11 @@ across all focuses. Loads below 0.35× true capacity are warm-up-only and earn
 no strength or technique stimulus. Productive-week qualification is based on
 delivered stimulus, not merely the number of completed session records.
 
-Within a week, raw stimulus is accumulated and passed through a diminishing-
-returns curve. In the default calibration the curve is linear through 0.75
-raw units, then approaches the 1.00-unit weekly cap asymptotically:
-`delivered = 0.75 + 0.25 × (1 − exp(−(raw − 0.75) / 0.25))` for raw stimulus
-above 0.75. The configured diminishing-return start is therefore below the
-cap; it is not silently clamped into a hard clip.
+Within a week, raw stimulus is accumulated and passed through a smooth
+over-reaching curve. There is no hard weekly cap. Each episode has a hidden
+volume/recovery optimum; work above it is penalized by
+`delivered = raw × exp(−k × max(0, raw/optimum − 1)²)`. The same delivered
+credit controls fitness, technique learning, and productive-week qualification.
 
 ## Recommended ranking
 

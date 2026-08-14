@@ -13,7 +13,13 @@ from typing import Any, Iterable
 from .engine import FinalResult, WeekOutcome, _State
 from .provenance import engine_config_hash
 from .runner import retry_metrics_from_records
-from .scoring import MAX_EPISODE_DAYS, MIN_COUNTED_SEED_FRACTION, PAIN_DAYS_LIMIT, score_fields
+from .scoring import (
+    HOUSEHOLD_STRAIN_LIMIT,
+    MAX_EPISODE_DAYS,
+    MIN_COUNTED_SEED_FRACTION,
+    PAIN_DAYS_LIMIT,
+    score_fields,
+)
 from .schemas import (
     InterruptObservation,
     LifeAllocation,
@@ -139,7 +145,13 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
     final_result = end.get("result", {})
     if not isinstance(final_result, dict):
         final_result = {}
-    required_final_fields = ("final_1rm_kg", "pain_days", "invalid_reason")
+    required_final_fields = (
+        "final_1rm_kg",
+        "pain_days",
+        "household_strain_peak",
+        "mean_household_strain",
+        "invalid_reason",
+    )
     for field_name in required_final_fields:
         if field_name not in final_result:
             transcript_violations.append(f"missing_final_result_field:{field_name}")
@@ -148,6 +160,10 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         final_result.get("final_1rm_kg"),
         invalid_reason=invalid_reason,
         pain_days=final_result.get("pain_days"),
+        household_strain=final_result.get("household_strain_peak"),
+        household_strain_limit=float(
+            start.get("config", {}).get("household_strain_limit", HOUSEHOLD_STRAIN_LIMIT)
+        ),
     )
     exclusion_reasons: list[str] = []
     if invalid_reason is not None:
@@ -213,6 +229,9 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         "constraint_violations": score["constraint_violations"],
         "violations": score["constraint_violations"],
         "pain_days": valid_pain_days,
+        "household_strain": final_result.get("household_strain"),
+        "household_strain_peak": final_result.get("household_strain_peak"),
+        "mean_household_strain": final_result.get("mean_household_strain"),
         "planned_sessions": int(final_result.get("planned_sessions", 0)),
         "transformed_sessions": int(final_result.get("transformed_sessions", 0)),
         "attempted_sessions": int(final_result.get("attempted_sessions", 0)),

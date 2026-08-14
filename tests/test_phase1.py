@@ -449,28 +449,22 @@ def test_pain_days_count_active_pain_without_sleep_gate() -> None:
     assert result.pain_days == 7
 
 
-def test_weekly_stimulus_has_a_diminishing_returns_cap() -> None:
-    config = SimConfig(
-        weeks=1,
-        weekly_time_budget_minutes=1_440,
-        enable_event_system=False,
-        enable_injury_system=False,
-        enable_household_system=False,
-        enable_money_system=False,
-        weekly_stimulus_cap=0.5,
-        weekly_stimulus_diminishing_start=0.0,
-    )
-    env = BenchEnvironment(3, config)
-    action = WeekAction(
-        sessions=[
-            SessionPlan(day=day, focus="volume", sets=8, reps=15, load_kg=96.6, duration_min=45, target_rpe=9.5)
-            for day in (0, 1, 2, 3, 4)
-        ],
-        life=LifeAllocation(partner_coverage_hours=8, partner_giveback_hours=8),
-    )
-    env.submit_week(action)
-    delivered = sum(row["stimulus"] for row in env.private_snapshot()["state"]["session_history"])
-    assert delivered <= config.weekly_stimulus_cap + 0.01
+def test_weekly_stimulus_uses_smooth_overreach_without_a_hard_cap() -> None:
+    env = BenchEnvironment(3, SimConfig(weeks=1, weekly_stimulus_optimum=0.5, weekly_overreach_penalty_strength=0.9))
+    below = env._smooth_weekly_stimulus(0.4)
+    above = env._smooth_weekly_stimulus(1.0)
+    extreme = env._smooth_weekly_stimulus(4.0)
+    assert below == pytest.approx(0.4)
+    assert 0.0 < above < 1.0
+    assert 0.0 < extreme < above
+
+
+def test_hidden_volume_tolerance_shifts_the_weekly_optimum() -> None:
+    low = BenchEnvironment(3, SimConfig(weeks=1))
+    high = BenchEnvironment(3, SimConfig(weeks=1))
+    low.variation = replace(low.variation, volume_tolerance=0.84)
+    high.variation = replace(high.variation, volume_tolerance=1.16)
+    assert low._weekly_stimulus_optimum() < high._weekly_stimulus_optimum()
 
 
 def test_shared_time_ledger_rejects_the_8x4_variant() -> None:
@@ -490,7 +484,7 @@ def test_shared_time_ledger_rejects_the_8x4_variant() -> None:
     validation = env.validate_action(action)
     assert validation.fallback_used is True
     assert "shared time/resource ledger" in validation.errors[0]
-    assert "1555" in validation.errors[0]
+    assert "1735" in validation.errors[0]
 
 
 def test_shared_ledger_charges_delegation_and_reactive_childcare() -> None:

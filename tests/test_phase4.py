@@ -9,9 +9,10 @@ from bench_bench.schemas import WeekAction
 from bench_bench.viewer import render_replay
 
 
-def test_full_year_baseline_gate_rechecks_the_same_contract() -> None:
+def test_full_year_baseline_report_is_diagnostic_before_phase3_gate() -> None:
     report = run_suite(range(20), weeks=52, ablations=False)
-    assert report["gate"]["gate_pass"] is True
+    assert report["gate"]["gate_enforced"] is False
+    assert report["gate"]["gate_pass"] is None
     assert report["gate"]["separation_ratio"] >= 3.0
 
 

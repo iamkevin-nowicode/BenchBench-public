@@ -203,3 +203,40 @@ This section supersedes earlier seed and leaderboard decisions.
   include a valid example. Grok flattened `life` into `action` on both seed
   100 and seed 101 in week 1; this is recorded as a v0.2 prompt-clarity finding
   and a candidate for a complete weekly example.
+
+## v0.2 Phase 1 and Phase 2 redesign — 2026-08-14
+
+This section supersedes the v0.1 release-gate and scoring-constraint claims
+above for the v0.2 branch. The v0.1 pilot remains frozen at its tagged
+artifact commit.
+
+- The v0.2 seed pools are disjoint: tuning 300–319, certification 320–339,
+  fixed regression policies 340–349, and public leaderboard 400–409. Private
+  evaluator values remain out of band and are not stored in this repository.
+- `docs/GROUNDING.md` is the required pre-calibration record. It separates
+  evidence-supported ranges, Dave-specific assumptions, deliberate simulator
+  deviations, and calibration choices. No coefficient retuning is permitted
+  against certification, regression, or public seeds.
+- Hidden recovery capacity and volume tolerance shift the location of the
+  episode's weekly over-reaching optimum; they do not multiply every reward.
+  Weekly raw stimulus is converted through a smooth over-reaching penalty with
+  no hard output cap. Delivered stimulus controls fitness, technique learning,
+  and productive-week qualification.
+- A shared 900-minute weekly ledger includes training, commute, meal prep,
+  childcare, chores, partner coverage, giveback, reactive childcare, and a
+  fixed 180-minute household reserve. Delegation and reactive childcare remain
+  cash charges. The reserve is a logistics assumption for the parent persona,
+  not a free resource.
+- Injury exposure has a conservative 0.90 load-onset boundary plus cumulative
+  volume/tolerance exposure. A normal sub-onset session is not automatically
+  painful; repeated excess work, sleep loss, and high effort can still create
+  injury burden.
+- Household strain peak above 0.75 is a hard score constraint chosen from the
+  persona before observing baseline results. Sleep debt remains a reported
+  diagnostic because it already reduces readiness and recovery. The standing
+  rule is that no unscored resource may be free.
+- The six scripted policies are diagnostic fixtures. The v0.2 release gate is
+  the held-out certification evaluation: oracle adaptation headroom of at least
+  three certification-seed standard deviations and separation of adjacent
+  policy-ladder rungs at the intended seed count. The historical six-policy
+  ordering is not used as a substitute gate.

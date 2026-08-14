@@ -75,6 +75,7 @@ class _WeekRuntime:
     interrupt_records: list[dict[str, Any]] = field(default_factory=list)
     raw_stimulus: float = 0.0
     weekly_stimulus: float = 0.0
+    technique_credit: float = 0.0
     ledger_minutes_remaining: int = 0
     ledger_minutes_committed: int = 0
     # Money held back for every household shock still scheduled in this
@@ -98,6 +99,8 @@ class _State:
     sleep_debt: float = 0.0
     motivation: float = 0.65
     household_strain: float = 0.4
+    household_strain_peak: float = 0.4
+    household_strain_history: list[float] = field(default_factory=list)
     reciprocity_debt: float = 0.0
     work_strain: float = 0.15
     nutrition_score: float = 0.8
@@ -192,6 +195,8 @@ class FinalResult:
     productive_weeks: int
     pain_days: int
     household_strain: float
+    household_strain_peak: float
+    mean_household_strain: float
     sleep_debt: float
     total_spend_cents: int
     invalid_reason: str | None
@@ -363,6 +368,11 @@ class BenchEnvironment:
         return session.duration_min + commute + crowding
 
     def _weekly_time_cost_minutes(self, action: WeekAction) -> int:
+        fixed_household_minutes = (
+            self.config.weekly_fixed_household_minutes
+            if self.config.enable_household_system
+            else 0
+        )
         external_childcare_hours = 0.0
         if self.config.enable_event_system and self._state.week == 14:
             external_childcare_hours += 4.0
@@ -377,7 +387,7 @@ class BenchEnvironment:
             + external_childcare_hours
         )
         training_minutes = sum(self._session_time_minutes(session) for session in action.sessions)
-        return math.ceil(training_minutes + allocation_hours * 60.0)
+        return math.ceil(fixed_household_minutes + training_minutes + allocation_hours * 60.0)
 
     def _fallback_load_error_for_week_action(self, action: WeekAction) -> str | None:
         ceiling = max(0.0, self._current_observation.estimated_1rm_kg * self.config.fallback_max_load_ratio)
@@ -618,6 +628,11 @@ class BenchEnvironment:
             productive_weeks=self._state.productive_weeks,
             pain_days=self._state.pain_days,
             household_strain=round(self._state.household_strain, 3),
+            household_strain_peak=round(self._state.household_strain_peak, 3),
+            mean_household_strain=round(
+                sum(self._state.household_strain_history) / max(1, len(self._state.household_strain_history)),
+                3,
+            ),
             sleep_debt=round(self._state.sleep_debt, 3),
             total_spend_cents=self._state.total_spend_cents,
             invalid_reason=self._state.invalid_reason,
@@ -657,6 +672,13 @@ class BenchEnvironment:
             return "; ".join(error.get("msg", "invalid action") for error in exc.errors())
         return str(exc) or "invalid action"
 
+    def _set_household_strain(self, value: float) -> None:
+        self._state.household_strain = _clamp(value, 0.0, 1.0)
+        self._state.household_strain_peak = max(
+            self._state.household_strain_peak,
+            self._state.household_strain,
+        )
+
     def _start_week(self, action: WeekAction) -> None:
         if self._state.week > 1:
             self._state.cash_cents += self.config.weekly_budget_cents
@@ -666,7 +688,7 @@ class BenchEnvironment:
         if self._state.stretch_project_weeks > 0:
             self._state.stretch_project_weeks -= 1
         if self.config.enable_household_system:
-            self._state.household_strain = _clamp(self._state.household_strain * 0.92, 0.0, 1.0)
+            self._set_household_strain(self._state.household_strain * 0.92)
             self._state.reciprocity_debt = _clamp(self._state.reciprocity_debt * 0.82, 0.0, 1.0)
 
     def _available_coverage_minutes(self, life: LifeAllocation) -> float:
@@ -731,17 +753,15 @@ class BenchEnvironment:
                 0.0,
                 1.0,
             )
-            self._state.household_strain = _clamp(
+            self._set_household_strain(
                 self._state.household_strain
                 - delegation_effect
                 + reciprocity_gap * 0.04
                 + self._state.reciprocity_debt * 0.025
                 - reciprocity_repair * 0.025,
-                0.0,
-                1.0,
             )
             if life.sleep_protection == "strong" and reciprocity_gap:
-                self._state.household_strain = _clamp(self._state.household_strain + reciprocity_gap * 0.015, 0.0, 1.0)
+                self._set_household_strain(self._state.household_strain + reciprocity_gap * 0.015)
 
     def _terminate_invalid_episode(self, reason: str) -> WeekOutcome:
         self._state.invalid_reason = reason
@@ -908,15 +928,15 @@ class BenchEnvironment:
             self._state.total_spend_cents += HOUSEHOLD_SHOCK_COST_CENTS
             self._state.current_month_spend_cents += HOUSEHOLD_SHOCK_COST_CENTS
             if self.config.enable_household_system:
-                self._state.household_strain = _clamp(self._state.household_strain + 0.13, 0.0, 1.0)
+                self._set_household_strain(self._state.household_strain + 0.13)
 
         if reactive.response == "protect_recovery":
             runtime.fallback_days.add(event.day)
             if self.config.enable_household_system:
-                self._state.household_strain = _clamp(self._state.household_strain - 0.025, 0.0, 1.0)
+                self._set_household_strain(self._state.household_strain - 0.025)
         elif reactive.response == "preserve_training":
             if self.config.enable_household_system:
-                self._state.household_strain = _clamp(self._state.household_strain + 0.07, 0.0, 1.0)
+                self._set_household_strain(self._state.household_strain + 0.07)
 
     def _start_day_effects(self) -> None:
         pass
@@ -1111,7 +1131,7 @@ class BenchEnvironment:
             readiness += 0.035
         motivation_factor = 0.72 + self._state.motivation * 0.42
         adherence_probability = _clamp(
-            readiness * motivation_factor * (0.94 + self.variation.recovery_capacity * 0.06),
+            readiness * motivation_factor,
             0.18,
             0.97,
         )
@@ -1186,12 +1206,16 @@ class BenchEnvironment:
         volume_units = (session.sets * executed_reps / 20.0) * load_ratio
         recovery_multiplier = self._recovery_multiplier(sleep, runtime)
         raw_stimulus = volume_units * focus_factor * effort_factor * location_factor * recovery_multiplier
-        raw_stimulus *= self.variation.volume_tolerance
         if load_ratio < self.config.minimum_meaningful_load_ratio:
             raw_stimulus = 0.0
         if self._state.injury_recovery_days > 0 and self.config.enable_injury_system:
             raw_stimulus *= 0.28
-        effective_stimulus = self._apply_weekly_stimulus_cap(raw_stimulus, runtime)
+        # Fitness credit is settled once at the end of the week, after the
+        # hidden episode-specific optimum and smooth over-reaching penalty are
+        # known.  This keeps session order from becoming a reward exploit.
+        effective_stimulus = raw_stimulus
+        runtime.raw_stimulus += effective_stimulus
+        runtime.weekly_stimulus = self._smooth_weekly_stimulus(runtime.raw_stimulus)
         fatigue_cost = volume_units * (0.72 + session.target_rpe * 0.038)
         fatigue_cost *= 1.0 + max(0.0, 6.5 - sleep) * 0.08
         if session.duration_min > 75:
@@ -1199,14 +1223,24 @@ class BenchEnvironment:
         if session.focus == "fallback":
             fatigue_cost *= 0.58
         if self.config.enable_delayed_adaptation:
-            self._state.fitness_signal += effective_stimulus
             self._state.fatigue_signal += fatigue_cost
         else:
-            # Ablation: adaptation is immediate and fatigue has no delayed
-            # impulse. This removes the planning value of taper and spacing.
-            self._state.immediate_gain += effective_stimulus
+            # Fitness is still settled at the week boundary so the ablation
+            # shares the same smooth over-reaching accounting.
+            pass
 
-        irritation = (volume_units * 0.06) + max(0.0, load_ratio - 0.82) * 0.26
+        # Injury exposure has two independent routes: excessive weekly work
+        # relative to the episode's hidden volume tolerance, and load above a
+        # conservative onset boundary.  A normal 0.89× session therefore does
+        # not create an acute load injury merely by being heavy; repeated
+        # over-volume or above-threshold loading still accumulates irritation.
+        volume_excess = max(
+            0.0,
+            volume_units / max(0.1, self.variation.volume_tolerance)
+            - self.config.injury_volume_threshold_units,
+        )
+        load_exposure = max(0.0, load_ratio - self.config.injury_load_onset_ratio)
+        irritation = volume_excess * self.config.injury_exposure_scale + load_exposure * 1.4
         irritation += max(0.0, session.target_rpe - 8.0) * 0.14
         irritation += max(0.0, 6.0 - sleep) * 0.09
         if session.focus == "fallback" or session.focus == "technique":
@@ -1224,7 +1258,6 @@ class BenchEnvironment:
             joint_factor = 1.16 if session.focus in ("volume", "technique") else 0.95
         pain_noise = 1.0 + self.noise.pain_noise[self._state.day_index]
         irritation *= joint_factor * pain_noise
-        irritation /= self.variation.volume_tolerance
         if self.config.enable_injury_system:
             self._state.tendon_irritation = _clamp(self._state.tendon_irritation + irritation, 0.0, 5.0)
         else:
@@ -1234,7 +1267,7 @@ class BenchEnvironment:
             self._state.injury_recovery_days = 42
         self._state.completed_sessions += 1
         runtime.completed_sessions += 1
-        stimulus_scale = _clamp(effective_stimulus, 0.0, 1.0)
+        stimulus_scale = max(0.0, effective_stimulus)
         technique_learning = {
             "technique": 1.00,
             "volume": 0.80,
@@ -1242,13 +1275,7 @@ class BenchEnvironment:
             "heavy": 0.25,
             "test": 0.18,
         }[session.focus]
-        technique_rate = 1.0 - math.exp(-1.0 / max(1.0, self.config.technique_tau_sessions))
-        self._state.technique = _clamp(
-            self._state.technique
-            + (0.96 - self._state.technique) * technique_rate * technique_learning * stimulus_scale,
-            0.0,
-            0.96,
-        )
+        runtime.technique_credit += technique_learning * stimulus_scale
         self._state.motivation = _clamp(self._state.motivation + 0.012, 0.25, 0.95)
         self._state.session_history.append(
             {
@@ -1276,25 +1303,42 @@ class BenchEnvironment:
             "pain_stage": self._pain_stage(),
         }
 
-    def _apply_weekly_stimulus_cap(self, raw_stimulus: float, runtime: _WeekRuntime) -> float:
-        """Apply a deterministic diminishing-returns curve within one week."""
+    def _weekly_stimulus_optimum(self) -> float:
+        """Return the hidden episode-specific onset of over-reaching."""
+        return max(
+            0.05,
+            self.config.effective_weekly_stimulus_optimum
+            * self.variation.volume_tolerance
+            * self.variation.recovery_capacity,
+        )
+
+    def _smooth_weekly_stimulus(self, raw_stimulus: float) -> float:
+        """Convert raw weekly work into smooth, non-capped adaptation credit."""
         raw_stimulus = max(0.0, raw_stimulus)
-        cap = max(0.0, self.config.weekly_stimulus_cap)
-        if cap == 0.0:
+        if raw_stimulus == 0.0:
             return 0.0
-        start = _clamp(self.config.weekly_stimulus_diminishing_start, 0.0, cap)
+        optimum = self._weekly_stimulus_optimum()
+        excess_ratio = max(0.0, raw_stimulus / optimum - 1.0)
+        penalty = math.exp(-max(0.0, self.config.weekly_overreach_penalty_strength) * excess_ratio**2)
+        return raw_stimulus * penalty
 
-        def delivered(raw_total: float) -> float:
-            if raw_total <= start:
-                return raw_total
-            tail = max(1e-9, cap - start)
-            return start + tail * (1.0 - math.exp(-(raw_total - start) / tail))
-
-        before = delivered(runtime.raw_stimulus)
-        runtime.raw_stimulus += raw_stimulus
-        after = delivered(runtime.raw_stimulus)
-        runtime.weekly_stimulus = after
-        return max(0.0, after - before)
+    def _settle_weekly_adaptation(self, runtime: _WeekRuntime) -> None:
+        """Apply the order-independent weekly adaptation and technique credit."""
+        delivered = self._smooth_weekly_stimulus(runtime.raw_stimulus)
+        runtime.weekly_stimulus = delivered
+        credit_ratio = delivered / runtime.raw_stimulus if runtime.raw_stimulus > 0 else 0.0
+        if self.config.enable_delayed_adaptation:
+            self._state.fitness_signal += delivered
+        else:
+            self._state.immediate_gain += delivered
+        technique_rate = 1.0 - math.exp(-1.0 / max(1.0, self.config.technique_tau_sessions))
+        technique_credit = runtime.technique_credit * credit_ratio
+        self._state.technique = _clamp(
+            self._state.technique
+            + (0.96 - self._state.technique) * technique_rate * technique_credit,
+            0.0,
+            0.96,
+        )
 
     def _recovery_multiplier(self, sleep: float, runtime: _WeekRuntime) -> float:
         sleep_factor = _clamp(sleep / 7.2, 0.48, 1.10) if self.config.enable_sleep_system else 1.0
@@ -1302,9 +1346,10 @@ class BenchEnvironment:
         stress_factor = _clamp(1.0 - household_penalty - self._state.work_strain * 0.08, 0.68, 1.0)
         illness_factor = 0.62 if self._state.illness_days > 0 else 1.0
         nutrition_factor = _clamp(self._state.nutrition_score, 0.55, 1.12)
-        return _clamp(sleep_factor * stress_factor * illness_factor * nutrition_factor * self.variation.recovery_capacity, 0.35, 1.16)
+        return _clamp(sleep_factor * stress_factor * illness_factor * nutrition_factor, 0.35, 1.16)
 
     def _finish_week(self, runtime: _WeekRuntime) -> None:
+        self._settle_weekly_adaptation(runtime)
         average_sleep = sum(runtime.sleep_hours) / max(1, len(runtime.sleep_hours))
         productive = (
             runtime.weekly_stimulus >= self.config.productive_week_stimulus_threshold
@@ -1336,15 +1381,17 @@ class BenchEnvironment:
         self._state.last_body_mass_kg = self._state.body_mass_kg
         self._state.body_mass_kg = _clamp(self._state.body_mass_kg + mass_delta, 72.0, 110.0)
         if self.config.enable_household_system and self._state.body_mass_kg - 84.0 > 8.0:
-            self._state.household_strain = _clamp(self._state.household_strain + 0.015, 0.0, 1.0)
+            self._set_household_strain(self._state.household_strain + 0.015)
 
         # A little household goodwill is recovered by a good week, but not by
         # a single heroic session.
         if self.config.enable_household_system:
             if runtime.completed_sessions == 0:
-                self._state.household_strain = _clamp(self._state.household_strain + 0.06, 0.0, 1.0)
+                self._set_household_strain(self._state.household_strain + 0.06)
             elif runtime.completed_sessions >= 2 and runtime.action.life.partner_giveback_hours >= runtime.action.life.partner_coverage_hours:
-                self._state.household_strain = _clamp(self._state.household_strain - 0.035, 0.0, 1.0)
+                self._set_household_strain(self._state.household_strain - 0.035)
+
+        self._state.household_strain_history.append(round(self._state.household_strain, 6))
 
         self._state.work_strain = _clamp(
             self._state.work_strain
@@ -1579,6 +1626,7 @@ class BenchEnvironment:
             budget_available_cents=max(0, self._state.cash_cents),
             current_month_spend_cents=max(0, self._state.current_month_spend_cents),
             weekly_time_budget_minutes=max(0, self.config.weekly_time_budget_minutes),
+            weekly_fixed_household_minutes=max(0, self.config.weekly_fixed_household_minutes),
             equipment=equipment,
             household_strain_band=self._household_band(),  # type: ignore[arg-type]
             work_strain_band=self._work_band(),  # type: ignore[arg-type]

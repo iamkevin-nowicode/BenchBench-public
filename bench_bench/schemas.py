@@ -148,6 +148,7 @@ class WeekObservation(SchemaBase):
     budget_available_cents: int = Field(ge=0)
     current_month_spend_cents: int = Field(ge=0)
     weekly_time_budget_minutes: int = Field(default=900, ge=0)
+    weekly_fixed_household_minutes: int = Field(default=180, ge=0)
     equipment: list[str]
     household_strain_band: Literal["low", "medium", "high", "critical"]
     work_strain_band: Literal["low", "medium", "high"]

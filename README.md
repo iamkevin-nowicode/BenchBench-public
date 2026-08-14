@@ -12,15 +12,13 @@ A long-horizon decision-making benchmark for AI agents: manage one simulated yea
 
 ## Status
 
-The v0.1 release path is implemented. The 12-week run is a diagnostic vertical
-slice; the enforced release gate is the 52-week configuration on 20 burned
-development seeds, with the original 65% adjacent-order threshold and
-expert-vs-random separation requirement. The provider-neutral model-only
-runner, resumable transcripts, exploit checks, and self-contained replay viewer
-are included. The public leaderboard is intentionally pending independent
-review and a live 52-week run on public seeds 100–109; no model leaderboard is
-present in this checkout. The runnable Phase 1 slice remains available for
-human play.
+The v0.1 pilot is preserved as a reproducible archive. v0.2 is in free
+engine redesign and calibration: the six scripted policies are diagnostics,
+while the planned release gate is held-out oracle headroom plus a policy
+ladder. No model leaderboard is claimed by this checkout. v0.2's public
+leaderboard pool is seeds 400–409; its tuning, certification, and regression
+pools are disjoint. The provider-neutral model-only runner, resumable
+transcripts, exploit checks, and self-contained replay viewer are included.
 
 ## Quickstart
 
@@ -57,7 +55,7 @@ python3 -m bench_bench run-model \
   --weeks 12 --seed-count 5
 ```
 
-Use `--seed-values 100,101,102,103,104` when the evaluator needs an exact
+Use `--seed-values 400,401,402,403,404` when the evaluator needs an exact
 public seed list;
 it overrides `--seed-count` and also supports out-of-band private values.
 
@@ -106,7 +104,7 @@ python3 -m bench_bench run-model-suite \
   --base-url https://api.openai.com/v1 \
   --models gpt-5.4,gpt-5.4-mini,gpt-5.3-chat-latest,gpt-4.1 \
   --weeks 52 --temperature 0.2 --api-key-env BENCH_BENCH_API_KEY \
-  --seed-values 100,101,102,103,104,105,106,107,108,109 \
+  --seed-values 400,401,402,403,404,405,406,407,408,409 \
   --request-retries 2 --retry-backoff-seconds 1 \
   --output-dir runs/public-leaderboard \
   --analysis-json reports/PUBLIC_LEADERBOARD.json \
@@ -124,7 +122,7 @@ python3 -m bench_bench build-leaderboard \
   --input-dir runs/public-leaderboard \
   --json reports/PUBLIC_LEADERBOARD.json \
   --markdown reports/PUBLIC_LEADERBOARD.md
-python3 -m bench_bench verify-transcript runs/public-leaderboard/gpt-4.1-seed-100.jsonl \
-  --output /tmp/gpt-4.1-seed-100.current-engine.jsonl
-python3 -m bench_bench render-replay runs/public-leaderboard/gpt-4.1-seed-100.jsonl --output /tmp/bench-bench-replay.html
+python3 -m bench_bench verify-transcript runs/public-leaderboard/gpt-4.1-seed-400.jsonl \
+  --output /tmp/gpt-4.1-seed-400.current-engine.jsonl
+python3 -m bench_bench render-replay runs/public-leaderboard/gpt-4.1-seed-400.jsonl --output /tmp/bench-bench-replay.html
 ```
