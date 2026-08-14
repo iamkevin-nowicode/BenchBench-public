@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from bench_bench.adversarial import _reference_expert_mean
 from bench_bench.evaluation import run_suite
 from bench_bench.config import SimConfig
 from bench_bench.engine import BenchEnvironment
@@ -53,3 +54,10 @@ def test_scripted_expert_never_submits_an_infeasible_900_minute_plan() -> None:
             for record in env.log_records
             if record.get("type") == "week"
         )
+
+
+def test_adversarial_reference_uses_the_counted_expert_mean() -> None:
+    seeds = list(range(3))
+    report = run_suite(seeds, weeks=52, ablations=False)
+    reference = _reference_expert_mean(seeds, SimConfig(weeks=52))
+    assert reference == report["summaries"]["scripted-expert"]["counted_mean_final_1rm_kg"]

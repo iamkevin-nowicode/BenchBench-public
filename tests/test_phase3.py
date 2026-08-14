@@ -8,8 +8,9 @@ from urllib.error import HTTPError
 import pytest
 
 from bench_bench.cli import _seed_values, build_parser
-from bench_bench.runner import CallableModelClient, DeterministicPolicyClient, ModelRunner, OpenAICompatibleClient, RunnerConfig
-from bench_bench.runner_analysis import _PRIVATE_PUBLIC_FIELDS, analyze_transcript, leaderboard_markdown
+from bench_bench.runner import AnthropicMessagesClient, CallableModelClient, DeterministicPolicyClient, ModelRunner, OpenAICompatibleClient, RunnerConfig
+from bench_bench.runner_analysis import _PRIVATE_PUBLIC_FIELDS, analyze_transcript, leaderboard_aggregates, leaderboard_markdown
+from bench_bench.scoring import constraint_violations
 
 
 def test_cli_supports_explicit_public_or_private_seed_values() -> None:
@@ -85,6 +86,8 @@ def test_analyzer_flags_provider_transport_failures(tmp_path) -> None:
 
     summary = analyze_transcript(transcript)
     assert summary["transport_errors"] == {"http_429": 1}
+    assert summary["repair_calls"] == 0
+    assert summary["transport_failures"] == 1
     assert "Transport-error audit: FAILED" in leaderboard_markdown([summary])
 
 
@@ -101,7 +104,7 @@ def test_analyzer_excludes_invalid_episode_from_score_aggregates(tmp_path) -> No
     assert summary["valid"] is False
     assert summary["invalid_reason"] == "weekly life allocation exceeded available budget"
     report = leaderboard_markdown([summary])
-    assert "| scripted-recovery-aware | 0 | 1 | — | — | — | — | — |" in report
+    assert "| scripted-recovery-aware | 0 | 1 | — | — | 1 | — | — | 0 | 0 | 0 | 0 | 0 |" in report
     assert "Invalid-episode audit: EXCLUDED 1/1" in report
 
 
@@ -126,6 +129,29 @@ def test_analyzer_counts_only_pain_compliant_scores_and_retains_raw_score(tmp_pa
     assert f"{summary['raw_final_1rm_kg']:.2f}" in report
 
 
+def test_leaderboard_does_not_report_a_survivor_mean(tmp_path) -> None:
+    summaries = []
+    for index in range(10):
+        transcript = tmp_path / f"survivor-{index}.jsonl"
+        runner = ModelRunner(DeterministicPolicyClient("recovery-aware", index), RunnerConfig(weeks=1))
+        runner.run_episode(index, transcript)
+        records = [json.loads(line) for line in transcript.read_text().splitlines()]
+        if index >= 3:
+            end = next(record for record in records if record.get("type") == "run_end")
+            end["result"]["pain_days"] = 15
+            transcript.write_text("".join(json.dumps(record) + "\n" for record in records))
+        summaries.append(analyze_transcript(transcript))
+
+    aggregate = leaderboard_aggregates(summaries)["scripted-recovery-aware"]
+    assert aggregate["total_seeds"] == 10
+    assert aggregate["counted_seeds"] == 3
+    assert aggregate["counted_seed_fraction"] == 0.3
+    assert aggregate["counted_mean_final_1rm_kg"] is None
+    report = leaderboard_markdown(summaries)
+    assert "| scripted-recovery-aware | 3 | 7 | — | — |" in report
+    assert "minimum counted-seed fraction 100%" in report
+
+
 def test_analyzer_fails_closed_when_pain_days_is_missing(tmp_path) -> None:
     transcript = tmp_path / "missing-pain.jsonl"
     runner = ModelRunner(DeterministicPolicyClient("recovery-aware", 3), RunnerConfig(weeks=1))
@@ -141,6 +167,34 @@ def test_analyzer_fails_closed_when_pain_days_is_missing(tmp_path) -> None:
     assert summary["pain_days"] is None
     assert summary["constraint_violations"] == ["missing_pain_days"]
     assert "transcript: missing_final_result_field:pain_days" in summary["exclusion_reasons"]
+
+
+@pytest.mark.parametrize("pain_days", [True, "0", -1, 1.5, 365])
+def test_pain_days_requires_a_non_boolean_integer_in_episode_range(pain_days) -> None:
+    assert constraint_violations(pain_days=pain_days) == ("invalid_pain_days",)
+
+
+def test_pain_days_boundary_values_are_valid() -> None:
+    assert constraint_violations(pain_days=0) == ()
+    assert constraint_violations(pain_days=14) == ()
+    assert constraint_violations(pain_days=15) == ("pain_days>14",)
+
+
+def test_analyzer_excludes_hash_mismatched_transcript(tmp_path) -> None:
+    transcript = tmp_path / "hash-mismatch.jsonl"
+    runner = ModelRunner(DeterministicPolicyClient("recovery-aware", 3), RunnerConfig(weeks=1))
+    runner.run_episode(3, transcript)
+    records = [json.loads(line) for line in transcript.read_text().splitlines()]
+    start = next(record for record in records if record.get("type") == "run_start")
+    start["engine_config_hash"] = "sha256:stale"
+    transcript.write_text("".join(json.dumps(record) + "\n" for record in records))
+
+    summary = analyze_transcript(transcript)
+    assert summary["engine_config_hash_matches"] is False
+    assert summary["valid"] is False
+    assert summary["counted_final_1rm_kg"] is None
+    assert "engine_config_hash_mismatch" in summary["transcript_violations"]
+    assert any("transcript: engine_config_hash_mismatch" == reason for reason in summary["exclusion_reasons"])
 
 
 def test_model_runner_repairs_budget_invalid_weekly_action(tmp_path) -> None:
@@ -318,10 +372,16 @@ def test_system_prompts_state_objective_and_keep_reactive_prompt_short() -> None
     assert "Scoring: the average of three standardized tests at weeks 44, 48, and 52" in weekly
     assert "one 900-minute weekly budget" in weekly
     assert "sessions you plan are not guaranteed to happen" in weekly
+    assert "When focus is fallback, the session is capped at" in weekly
+    assert "25 minutes, 3 sets, and 6 reps" in weekly
+    assert "Coverage and giveback are separate costs, so do not maximize both." not in weekly
+    assert "Use zero or defaults for allocations you do not need." not in weekly
     assert reactive.startswith("You are Dave's coach.")
     assert reactive.count(objective) == 2
     assert "ReactiveAction fields" in reactive
     assert "Valid example:" in reactive
+    assert "draws from the remaining weekly time/resource ledger" in reactive
+    assert "minutes remaining in the interrupt observation" in reactive
     assert "WeekAction fields" not in reactive
 
 
@@ -378,6 +438,7 @@ def test_openai_compatible_adapter_parses_a_chat_completion_response(tmp_path, m
     client = OpenAICompatibleClient(
         "http://endpoint.example/v1",
         "local-model",
+        effort="medium",
         input_price_per_million=1.0,
         output_price_per_million=2.0,
     )
@@ -386,9 +447,10 @@ def test_openai_compatible_adapter_parses_a_chat_completion_response(tmp_path, m
     assert result.total_tokens >= 15
     assert result.total_cost_usd > 0
     assert requests and requests[0]["response_format"] == {"type": "json_object"}
+    assert requests[0]["reasoning_effort"] == "medium"
     records = [json.loads(line) for line in (tmp_path / "http.jsonl").read_text().splitlines()]
     start = next(record for record in records if record["type"] == "run_start")
-    assert start["sampling"] == {"temperature": 0.2}
+    assert start["sampling"] == {"temperature": 0.2, "effort": "medium"}
     assert start["pricing"]["source"] == "explicit"
     assert start["pricing"]["input_price_per_million"] == 1.0
     assert client.endpoint_metadata == {
@@ -405,6 +467,152 @@ def test_known_model_pricing_is_available_without_cli_price_flags() -> None:
         "output_price_per_million": 15.0,
         "source": "model-default",
     }
+    assert OpenAICompatibleClient("http://endpoint.example/v1", "gpt-5.6-sol").pricing_metadata == {
+        "input_price_per_million": 5.0,
+        "cached_input_price_per_million": 0.5,
+        "output_price_per_million": 30.0,
+        "source": "model-default",
+    }
+    assert OpenAICompatibleClient("http://endpoint.example/v1", "kimi-k3").pricing_metadata == {
+        "input_price_per_million": 3.0,
+        "cached_input_price_per_million": 0.3,
+        "output_price_per_million": 15.0,
+        "source": "model-default",
+    }
+    assert OpenAICompatibleClient("http://endpoint.example/v1", "muse-spark-1.2").pricing_metadata == {
+        "input_price_per_million": 1.25,
+        "cached_input_price_per_million": 0.15,
+        "output_price_per_million": 4.25,
+        "source": "model-default",
+    }
+
+
+def test_grok_46_pricing_exposes_short_and_long_context_tiers() -> None:
+    client = OpenAICompatibleClient("https://api.x.ai/v1", "grok-4.6")
+    assert client.pricing_metadata == {
+        "input_price_per_million": 2.0,
+        "cached_input_price_per_million": 0.5,
+        "output_price_per_million": 6.0,
+        "long_context_threshold_tokens": 200_000,
+        "long_context_input_price_per_million": 4.0,
+        "long_context_cached_input_price_per_million": 1.0,
+        "long_context_output_price_per_million": 12.0,
+        "source": "model-default",
+    }
+
+
+def test_grok_46_switches_to_long_context_rates_at_threshold(monkeypatch) -> None:
+    responses = iter((199_999, 200_000))
+
+    class FakeResponse:
+        def __init__(self, prompt_tokens: int):
+            self.prompt_tokens = prompt_tokens
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return json_module.dumps(
+                {
+                    "id": "tiered-response",
+                    "choices": [{"message": {"content": "{}"}}],
+                    "usage": {
+                        "prompt_tokens": self.prompt_tokens,
+                        "completion_tokens": 1_000,
+                        "total_tokens": self.prompt_tokens + 1_000,
+                        "prompt_tokens_details": {"cached_tokens": 40_000},
+                    },
+                }
+            ).encode()
+
+    monkeypatch.setattr(
+        "bench_bench.runner.urlopen",
+        lambda request, timeout: FakeResponse(next(responses)),
+    )
+    client = OpenAICompatibleClient("https://api.x.ai/v1", "grok-4.6")
+
+    short = client.complete([{"role": "user", "content": "short"}])
+    long = client.complete([{"role": "user", "content": "long"}])
+
+    assert short.usage.pricing_tier == "short_context"
+    assert short.usage.cost_usd == pytest.approx(0.345998)
+    assert long.usage.pricing_tier == "long_context"
+    assert long.usage.cost_usd == pytest.approx(0.692)
+
+
+def test_anthropic_native_adapter_uses_structured_outputs_and_splits_thinking_tokens(monkeypatch) -> None:
+    requests: list[dict[str, object]] = []
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return json_module.dumps(
+                {
+                    "id": "msg_native",
+                    "model": "claude-opus-5",
+                    "content": [{"type": "text", "text": '{"action":{},"notebook_update":""}'}],
+                    "usage": {
+                        "input_tokens": 100,
+                        "output_tokens": 30,
+                        "output_tokens_details": {"thinking_tokens": 20},
+                    },
+                }
+            ).encode()
+
+    def fake_urlopen(request, timeout):
+        requests.append(
+            {
+                "url": request.full_url,
+                "headers": dict(request.header_items()),
+                "payload": json_module.loads(request.data),
+            }
+        )
+        return FakeResponse()
+
+    monkeypatch.setattr("bench_bench.runner.urlopen", fake_urlopen)
+    client = AnthropicMessagesClient(
+        "https://api.anthropic.com/v1/messages",
+        "claude-opus-5",
+        api_key="secret-that-must-not-be-logged",
+        temperature=1.0,
+        effort="medium",
+        input_price_per_million=5.0,
+        cached_input_price_per_million=0.5,
+        output_price_per_million=25.0,
+    )
+    response = client.complete(
+        [
+            {"role": "system", "content": "system"},
+            {"role": "user", "content": "<observation_json>{}</observation_json>"},
+        ]
+    )
+
+    assert response.provider == "anthropic"
+    assert response.model == "claude-opus-5"
+    assert response.usage.input_tokens == 100
+    assert response.usage.visible_output_tokens == 10
+    assert response.usage.thinking_tokens == 20
+    assert response.usage.cost_usd == pytest.approx(0.00125)
+    assert client.pricing_metadata["source"] == "explicit"
+    assert client.endpoint_metadata == {
+        "kind": "anthropic-messages",
+        "url": "https://api.anthropic.com/v1/messages",
+    }
+    assert "secret-that-must-not-be-logged" not in json_module.dumps(client.endpoint_metadata)
+    payload = requests[0]["payload"]
+    assert "response_format" not in payload
+    assert payload["model"] == "claude-opus-5"
+    assert payload["thinking"] == {"type": "adaptive"}
+    assert payload["output_config"]["effort"] == "medium"
+    assert payload["output_config"]["format"]["type"] == "json_schema"
 
 
 def test_openai_compatible_adapter_prices_cached_input_tokens(monkeypatch) -> None:

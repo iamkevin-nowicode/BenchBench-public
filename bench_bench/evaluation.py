@@ -14,7 +14,7 @@ from .config import SimConfig
 from .engine import BenchEnvironment
 from .policies import POLICY_NAMES, make_policy
 from .provenance import engine_config_hash
-from .scoring import PAIN_DAYS_LIMIT, counted_score, constraint_violations
+from .scoring import MIN_COUNTED_SEED_FRACTION, PAIN_DAYS_LIMIT, counted_score, constraint_violations
 
 
 # The release gate uses the full 52-week configuration. Shorter runs may still
@@ -84,6 +84,7 @@ class PolicySummary:
     counted_seed_std_kg: float | None
     counted_min_final_1rm_kg: float | None
     counted_max_final_1rm_kg: float | None
+    counted_seed_fraction: float
     constraint_violating_episodes: int
     constraint_violation_counts: dict[str, int]
 
@@ -166,7 +167,12 @@ def markdown_exploit_report(report: dict[str, Any], expert_mean: float | None = 
         candidate = report.get("candidates", {}).get(name, {})
         signatures = ", ".join(candidate.get("abuse_signatures", [])) or "none"
         mean = summary.get("mean_final_1rm_kg")
-        score = f"{mean:.2f}" if mean is not None else "invalid"
+        if mean is not None:
+            score = f"{mean:.2f}"
+        elif summary.get("counted_episodes", summary.get("episodes", 0)):
+            score = "not reportable"
+        else:
+            score = "invalid"
         raw_mean = summary.get("raw_mean_final_1rm_kg")
         raw_score = f"{raw_mean:.2f}" if raw_mean is not None else "—"
         violation_counts = summary.get("constraint_violation_counts", {})
@@ -177,9 +183,13 @@ def markdown_exploit_report(report: dict[str, Any], expert_mean: float | None = 
     if reference_mean is not None:
         lines.extend(["", f"Scripted-expert reference mean: **{reference_mean:.2f} kg**.", ""])
         for name in report["exploit_policies"]:
-            mean = report["summaries"][name]["mean_final_1rm_kg"]
+            summary = report["summaries"][name]
+            mean = summary["mean_final_1rm_kg"]
             if mean is None:
-                lines.append(f"- {name}: invalid candidate")
+                counted = summary.get("counted_episodes", summary.get("episodes", 0))
+                total = summary.get("total_episodes", counted)
+                label = "not reportable" if counted else "invalid candidate"
+                lines.append(f"- {name}: {label} ({counted}/{total} seeds counted)")
             else:
                 lines.append(f"- {name}: {'beats expert' if mean > reference_mean else 'does not beat expert'} ({mean - reference_mean:+.2f} kg)")
     if thresholds:
@@ -194,12 +204,34 @@ def markdown_exploit_report(report: dict[str, Any], expert_mean: float | None = 
                 "- Physical envelope: high-load/high-rep or over-loaded authored fallback sessions",
             ]
         )
+    diagnostic_ranking = report.get("search", {}).get("diagnostic_ranking", [])
+    if diagnostic_ranking:
+        lines.extend(
+            [
+                "",
+                "## Survivor-bias diagnostic ranking",
+                "",
+                "Diagnostic only: genomes are sorted by raw mean final 1RM on the search seeds. Counted means are shown only for genomes compliant on every search seed; no row here can make a comparison or release claim.",
+                "",
+                "| Rank | Genome | Raw mean (kg) | Counted fraction | Counted mean (kg) | All-seed eligible |",
+                "|---:|---|---:|---:|---:|:---:|",
+            ]
+        )
+        for rank, diagnostic in enumerate(diagnostic_ranking, start=1):
+            raw_mean = diagnostic.get("raw_mean_final_1rm_kg")
+            counted_mean = diagnostic.get("counted_mean_final_1rm_kg")
+            raw_text = f"{raw_mean:.2f}" if raw_mean is not None else "—"
+            counted_text = f"{counted_mean:.2f}" if counted_mean is not None else "—"
+            lines.append(
+                f"| {rank} | {diagnostic['name']} | {raw_text} | {diagnostic['counted_seed_fraction']:.1%} | {counted_text} | {'yes' if diagnostic['eligible_for_comparison'] else 'no'} |"
+            )
+        lines.append("Full genome fields and the complete ranking are in the JSON report.")
     lines.extend(
         [
             "",
             "## Patch status",
             "",
-            "The search includes volume-stacking, compressed-fallback, 8×4, mixed-focus, zero-load, and purchase-order boundary genomes as regression seeds; candidates are still generated and ranked by the search, not by a fixed exploit-policy registry.",
+            "The search includes volume-stacking, compressed-fallback, 8×4, mixed-focus, zero-load, purchase-order, and the two independent-reviewer boundary genomes as regression seeds; candidates are still generated and ranked by the search, not by a fixed exploit-policy registry. A candidate with incomplete counted-seed coverage remains visible as a diagnostic but cannot supply a leaderboard mean.",
             "",
         ]
     )
@@ -250,6 +282,10 @@ def summarize(episodes: Iterable[EpisodeStats], policy: str) -> PolicySummary:
         if not episode.constraint_violations
     ]
     counted_scores = [episode.final_1rm_kg for episode in counted]
+    # Structural invalid episodes are expected seeds too: they must reduce the
+    # coverage fraction rather than disappearing from the denominator.
+    counted_fraction = len(counted) / len(all_values) if all_values else 0.0
+    counted_aggregate_reportable = counted_fraction >= MIN_COUNTED_SEED_FRACTION
     violation_counts: dict[str, int] = {}
     for episode in values:
         for violation in episode.constraint_violations:
@@ -277,10 +313,11 @@ def summarize(episodes: Iterable[EpisodeStats], policy: str) -> PolicySummary:
         mean_planned_fallbacks=average("planned_fallbacks"),
         mean_capital_purchases=average("capital_purchases"),
         counted_episodes=len(counted),
-        counted_mean_final_1rm_kg=round(fmean(counted_scores), 4) if counted_scores else None,
-        counted_seed_std_kg=round(stdev(counted_scores), 4) if len(counted_scores) > 1 else (0.0 if counted_scores else None),
-        counted_min_final_1rm_kg=round(min(counted_scores), 4) if counted_scores else None,
-        counted_max_final_1rm_kg=round(max(counted_scores), 4) if counted_scores else None,
+        counted_mean_final_1rm_kg=round(fmean(counted_scores), 4) if counted_scores and counted_aggregate_reportable else None,
+        counted_seed_std_kg=round(stdev(counted_scores), 4) if len(counted_scores) > 1 and counted_aggregate_reportable else (0.0 if counted_scores and counted_aggregate_reportable else None),
+        counted_min_final_1rm_kg=round(min(counted_scores), 4) if counted_scores and counted_aggregate_reportable else None,
+        counted_max_final_1rm_kg=round(max(counted_scores), 4) if counted_scores and counted_aggregate_reportable else None,
+        counted_seed_fraction=round(counted_fraction, 4),
         constraint_violating_episodes=len(values) - len(counted),
         constraint_violation_counts=violation_counts,
     )
@@ -487,14 +524,15 @@ def markdown_report(report: dict[str, Any]) -> str:
         f"- Seeds: {report['seeds']}",
         f"- Separation: {gate['expert_minus_random_kg']:.3f} kg / {gate['pooled_seed_std_kg']:.3f} kg = **{gate['separation_ratio']:.3f}** (required ≥ 3.0)",
         f"- Headline-score constraint: pain days ≤{PAIN_DAYS_LIMIT}; raw final 1RM remains reported for every structurally valid episode. Household strain and sleep debt are diagnostics only.",
+        f"- Counted aggregate rule: a counted mean and seed SD are reportable only when every expected seed is counted (minimum fraction {MIN_COUNTED_SEED_FRACTION:.0%}); otherwise they are shown as — and raw results remain diagnostic.",
         f"- Ordering: {'PASS' if gate['ordering_pass'] else 'FAIL'}; stable ordering: {'PASS' if gate['stable_ordering_pass'] else 'FAIL'} (paired rate ≥ {gate.get('stable_order_rate_threshold', 0.65):.0%})",
         f"- Reckless loses endogenously: {'PASS' if gate['reckless_loses_endogenously'] else 'FAIL'}",
         f"- {gate_label}: **{gate_status if gate_enforced else 'NOT ENFORCED'}**",
         "",
         "## Baseline results",
         "",
-        "| Policy | Raw mean final 1RM (kg) | Counted mean final 1RM (kg) | Raw seed SD | Counted seed SD | Planned | Transformed | Attempted | Completed | Missed | Pain days | Household strain | Violations | Invalid episodes |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|",
+        "| Policy | Raw mean final 1RM (kg) | Counted mean final 1RM (kg) | Raw seed SD | Counted seed SD | Counted seeds | Counted fraction | Planned | Transformed | Attempted | Completed | Missed | Pain days | Household strain | Violations | Invalid episodes |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|",
     ]
     for name in report["policies"]:
         summary = report["summaries"][name]
@@ -503,7 +541,7 @@ def markdown_report(report: dict[str, Any]) -> str:
         violation_counts = summary.get("constraint_violation_counts", {})
         violations = ", ".join(f"{violation}: {count}" for violation, count in sorted(violation_counts.items())) or "—"
         lines.append(
-            f"| {name} | {summary['mean_final_1rm_kg']:.2f} | {f'{counted_mean:.2f}' if counted_mean is not None else '—'} | {summary['seed_std_kg']:.2f} | {f'{counted_sd:.2f}' if counted_sd is not None else '—'} | {summary['mean_planned_sessions']:.1f} | {summary['mean_transformed_sessions']:.1f} | {summary['mean_attempted_sessions']:.1f} | {summary['mean_completed_sessions']:.1f} | {summary['mean_missed_sessions']:.1f} | {summary['mean_pain_days']:.1f} | {summary['mean_household_strain']:.3f} | {violations} | {summary['invalid_episodes']} |"
+            f"| {name} | {summary['mean_final_1rm_kg']:.2f} | {f'{counted_mean:.2f}' if counted_mean is not None else '—'} | {summary['seed_std_kg']:.2f} | {f'{counted_sd:.2f}' if counted_sd is not None else '—'} | {summary['counted_episodes']}/{summary['episodes'] + summary['invalid_episodes']} | {summary['counted_seed_fraction']:.2f} | {summary['mean_planned_sessions']:.1f} | {summary['mean_transformed_sessions']:.1f} | {summary['mean_attempted_sessions']:.1f} | {summary['mean_completed_sessions']:.1f} | {summary['mean_missed_sessions']:.1f} | {summary['mean_pain_days']:.1f} | {summary['mean_household_strain']:.3f} | {violations} | {summary['invalid_episodes']} |"
         )
     lines.extend(["", "## Paired ordering rates", ""])
     for name, rate in gate["pairwise_order_rates"].items():

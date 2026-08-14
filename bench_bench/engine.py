@@ -888,6 +888,15 @@ class BenchEnvironment:
             if self._state.home_gym and reactive.response == "reallocate":
                 runtime.home_days.add(event.day)
             else:
+                if any(
+                    session.day == event.day and session.location == "gym"
+                    for session in runtime.action.sessions
+                ):
+                    self._record_session_transformation(
+                        runtime,
+                        event.day,
+                        "gym closure cancelled gym session (no home rack)",
+                    )
                 runtime.cancelled_days.add(event.day)
         elif event.kind == "household_shock":
             if runtime.shock_reserve_cents < HOUSEHOLD_SHOCK_COST_CENTS:

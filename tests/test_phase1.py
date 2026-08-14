@@ -713,6 +713,30 @@ def test_intra_week_shock_reserve_rejects_earlier_reactive_spend() -> None:
     assert week_record["interrupts"][1]["kind"] == "household_shock"
 
 
+def test_gym_closure_without_rack_is_recorded_as_session_transformation() -> None:
+    env = BenchEnvironment(0, SimConfig(weeks=14, enable_home_rack=False))
+    while env.observation.episode_week < 14:
+        env.submit_week(WeekAction())
+    outcome = env.submit_week(
+        WeekAction(
+            sessions=[
+                SessionPlan(
+                    day=3,
+                    location="gym",
+                    focus="volume",
+                    sets=2,
+                    reps=5,
+                    load_kg=50.0,
+                    duration_min=25,
+                )
+            ]
+        )
+    )
+    assert outcome.transformed_sessions == 1
+    assert "gym closure cancelled gym session (no home rack)" in outcome.transformation_reasons
+    assert outcome.missed_sessions == 1
+
+
 def test_execution_budget_invariant_terminates_episode_as_invalid() -> None:
     env = BenchEnvironment(3, SimConfig(weeks=1, enable_event_system=False))
     env._state.cash_cents = 0

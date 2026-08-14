@@ -28,6 +28,15 @@ def test_full_year_adversarial_gate_requires_implausibility() -> None:
     assert "regression-mixed-focus-week" in report["search"]["regression_families"]
     assert "regression-zero-load-boundary" in report["search"]["regression_families"]
     assert "regression-purchase-ordering" in report["search"]["regression_families"]
+    assert "regression-codex-4x1x11-ramp" in report["search"]["regression_families"]
+    assert "regression-claude-4x4x8-072" in report["search"]["regression_families"]
+    assert report["search"]["diagnostic_ranking"]
+    assert report["search"]["diagnostic_genomes"] == len(report["search"]["diagnostic_ranking"])
+    assert all(
+        {"raw_mean_final_1rm_kg", "counted_seed_fraction", "genome", "eligible_for_comparison"}
+        <= set(item)
+        for item in report["search"]["diagnostic_ranking"]
+    )
     assert all(
         report["candidates"][name]["release_blocked"]
         == (

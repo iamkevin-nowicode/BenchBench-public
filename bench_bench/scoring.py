@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 from typing import Any
 
 
@@ -10,19 +9,27 @@ from typing import Any
 # strain and sleep debt remain visible diagnostics and are deliberately not
 # included here.
 PAIN_DAYS_LIMIT = 14
+MAX_EPISODE_DAYS = 364
+
+# A counted aggregate must cover the complete expected seed set.  Reporting a
+# mean over only the surviving episodes creates a score-correlated selection
+# effect: a policy can sacrifice most seeds and rank on its easiest survivors.
+# The raw per-seed result remains available for diagnostics when this gate is
+# not met.
+MIN_COUNTED_SEED_FRACTION = 1.0
 
 
 def constraint_violations(*, pain_days: int | float | None) -> tuple[str, ...]:
     """Return the hard-score violations for an episode."""
-    if pain_days is None:
-        return ("missing_pain_days",)
-    try:
-        numeric_pain_days = float(pain_days)
-    except (TypeError, ValueError):
+    if (
+        not isinstance(pain_days, int)
+        or isinstance(pain_days, bool)
+        or not 0 <= pain_days <= MAX_EPISODE_DAYS
+    ):
+        if pain_days is None:
+            return ("missing_pain_days",)
         return ("invalid_pain_days",)
-    if not math.isfinite(numeric_pain_days):
-        return ("invalid_pain_days",)
-    if numeric_pain_days > PAIN_DAYS_LIMIT:
+    if pain_days > PAIN_DAYS_LIMIT:
         return (f"pain_days>{PAIN_DAYS_LIMIT}",)
     return ()
 

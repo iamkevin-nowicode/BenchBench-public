@@ -18,7 +18,7 @@ from .config import SimConfig
 from .engine import BenchEnvironment
 from .policies import _open_days, _rules, _session
 from .provenance import engine_config_hash
-from .scoring import counted_score, constraint_violations
+from .scoring import MIN_COUNTED_SEED_FRACTION, counted_score, constraint_violations
 from .schemas import InterruptObservation, LifeAllocation, ReactiveAction, SessionPlan, StandingRules, WeekAction, WeekObservation
 
 
@@ -263,6 +263,11 @@ class CandidateEvaluation:
             "mean_household_strain": self.mean_household_strain,
             "mean_fallback_actions": self.mean_fallback_actions,
             "invalid_episodes": self.invalid_episodes,
+            "total_episodes": len(self.episodes),
+            "counted_episodes": self.counted_episodes,
+            "counted_seed_fraction": round(
+                self.counted_episodes / len(self.episodes), 4
+            ) if self.episodes else 0.0,
             "constraint_violating_episodes": self.constraint_violating_episodes,
             "constraint_violation_counts": self.constraint_violation_counts or {},
         }
@@ -626,6 +631,30 @@ def _regression_genomes() -> tuple[tuple[str, AdversarialGenome], ...]:
                 purchase_spacing_weeks=4,
             ),
         ),
+        (
+            "regression-codex-4x1x11-ramp",
+            replace(
+                base,
+                session_count=4,
+                focus="volume",
+                sets=1,
+                reps=11,
+                load_ratio=0.449,
+                progression_per_week=0.0112,
+            ),
+        ),
+        (
+            "regression-claude-4x4x8-072",
+            replace(
+                base,
+                session_count=4,
+                focus="volume",
+                sets=4,
+                reps=8,
+                load_ratio=0.72,
+                duration_min=30,
+            ),
+        ),
     )
 
 
@@ -691,15 +720,17 @@ def _evaluate_genome(name: str, genome: AdversarialGenome, seeds: list[int], con
             constraint_violation_counts=violation_counts,
         )
     scores = [float(episode.final_1rm_kg) for episode in valid]
+    counted_fraction = len(valid) / len(episodes) if episodes else 0.0
+    counted_aggregate_reportable = counted_fraction >= MIN_COUNTED_SEED_FRACTION
     return CandidateEvaluation(
         name=name,
         genome=genome,
         episodes=tuple(episodes),
         search_mean_final_1rm_kg=None,
-        mean_final_1rm_kg=round(fmean(scores), 4),
-        seed_std_kg=round(stdev(scores), 4) if len(scores) > 1 else 0.0,
-        min_final_1rm_kg=round(min(scores), 4),
-        max_final_1rm_kg=round(max(scores), 4),
+        mean_final_1rm_kg=round(fmean(scores), 4) if counted_aggregate_reportable else None,
+        seed_std_kg=round(stdev(scores), 4) if len(scores) > 1 and counted_aggregate_reportable else (0.0 if scores and counted_aggregate_reportable else None),
+        min_final_1rm_kg=round(min(scores), 4) if counted_aggregate_reportable else None,
+        max_final_1rm_kg=round(max(scores), 4) if counted_aggregate_reportable else None,
         invalid_episodes=invalid,
         mean_pain_days=round(fmean(episode.pain_days for episode in structural_valid), 4),
         mean_household_strain=round(fmean(episode.household_strain for episode in structural_valid), 4),
@@ -713,9 +744,48 @@ def _evaluate_genome(name: str, genome: AdversarialGenome, seeds: list[int], con
 
 
 def _rank(evaluation: CandidateEvaluation) -> tuple[float, float]:
+    # Primary search ranking is deliberately restricted to candidates that
+    # are compliant on every search seed.  Survivor-bias candidates are kept
+    # in the separate diagnostic ranking below rather than being eligible for
+    # comparison or release claims.
     if evaluation.invalid_episodes or evaluation.constraint_violating_episodes or evaluation.mean_final_1rm_kg is None:
         return (-float("inf"), -float("inf"))
     return (evaluation.mean_final_1rm_kg, -(evaluation.mean_pain_days or 0.0))
+
+
+def _diagnostic_rank(evaluation: CandidateEvaluation) -> tuple[float, float, float]:
+    """Rank every searched genome for survivor-bias diagnosis only."""
+    return (
+        evaluation.raw_mean_final_1rm_kg if evaluation.raw_mean_final_1rm_kg is not None else -float("inf"),
+        evaluation.counted_episodes / len(evaluation.episodes) if evaluation.episodes else 0.0,
+        evaluation.mean_final_1rm_kg if evaluation.mean_final_1rm_kg is not None else -float("inf"),
+    )
+
+
+def _diagnostic_record(evaluation: CandidateEvaluation) -> dict[str, Any]:
+    total = len(evaluation.episodes)
+    counted_fraction = evaluation.counted_episodes / total if total else 0.0
+    all_seed_compliant = bool(
+        total
+        and evaluation.invalid_episodes == 0
+        and evaluation.constraint_violating_episodes == 0
+        and counted_fraction >= MIN_COUNTED_SEED_FRACTION
+    )
+    return {
+        "name": evaluation.name,
+        "genome": evaluation.genome.as_dict(),
+        "seed_scope": "search_seeds",
+        "total_seeds": total,
+        "counted_seeds": evaluation.counted_episodes,
+        "counted_seed_fraction": round(counted_fraction, 4),
+        "raw_mean_final_1rm_kg": evaluation.raw_mean_final_1rm_kg,
+        "raw_seed_std_kg": evaluation.raw_seed_std_kg,
+        "counted_mean_final_1rm_kg": evaluation.mean_final_1rm_kg if all_seed_compliant else None,
+        "eligible_for_comparison": all_seed_compliant,
+        "invalid_episodes": evaluation.invalid_episodes,
+        "constraint_violating_episodes": evaluation.constraint_violating_episodes,
+        "constraint_violation_counts": evaluation.constraint_violation_counts or {},
+    }
 
 
 def _physical_implausibility_reasons(genome: AdversarialGenome, config: SimConfig) -> list[str]:
@@ -750,10 +820,10 @@ def _physical_implausibility_reasons(genome: AdversarialGenome, config: SimConfi
     return list(dict.fromkeys(reasons))
 
 
-def _release_assessment(evaluation: CandidateEvaluation, expert_mean: float, config: SimConfig) -> dict[str, Any]:
+def _release_assessment(evaluation: CandidateEvaluation, expert_mean: float | None, config: SimConfig) -> dict[str, Any]:
     mean = evaluation.mean_final_1rm_kg
-    beats_expert = mean is not None and mean > expert_mean
-    margin = round(mean - expert_mean, 4) if mean is not None else None
+    beats_expert = mean is not None and expert_mean is not None and mean > expert_mean
+    margin = round(mean - expert_mean, 4) if mean is not None and expert_mean is not None else None
     signatures: list[str] = []
     if evaluation.mean_pain_days is not None and evaluation.mean_pain_days >= RELEASE_ABUSE_THRESHOLDS["mean_pain_days"]:
         signatures.append("mean_pain_days_at_or_above_14")
@@ -770,16 +840,27 @@ def _release_assessment(evaluation: CandidateEvaluation, expert_mean: float, con
     }
 
 
-def _reference_expert_mean(seeds: list[int], config: SimConfig) -> float:
+def _reference_expert_mean(seeds: list[int], config: SimConfig) -> float | None:
     from .policies import make_policy
 
+    if not seeds:
+        return None
     scores: list[float] = []
     for seed in seeds:
         env = BenchEnvironment(seed, config)
         policy = make_policy("scripted-expert", seed)
         while not env.done:
             env.submit_week(policy.action(env.observation), reactive_responder=policy.reactive)
-        scores.append(env.final_result().final_1rm_kg)
+        result = env.final_result()
+        counted = counted_score(
+            result.final_1rm_kg,
+            invalid_reason=result.invalid_reason,
+            violations=constraint_violations(pain_days=result.pain_days),
+        )
+        if counted is not None:
+            scores.append(counted)
+    if len(scores) / len(seeds) < MIN_COUNTED_SEED_FRACTION:
+        return None
     return round(fmean(scores), 4)
 
 
@@ -809,6 +890,10 @@ def run_adversarial_search(
         genomes.append(_random_genome(rng))
     seen: set[AdversarialGenome] = set()
     best_by_genome: dict[AdversarialGenome, CandidateEvaluation] = {}
+    regression_labels = {
+        genome.normalized(): label
+        for label, genome in regression
+    }
     for generation in range(generations):
         unique = []
         for genome in genomes:
@@ -818,7 +903,8 @@ def run_adversarial_search(
                 seen.add(normalized)
         scored: list[CandidateEvaluation] = []
         for index, genome in enumerate(unique):
-            evaluation = _evaluate_genome(f"search-g{generation}-{index:03d}", genome, search_seeds, config)
+            name = regression_labels.get(genome, f"search-g{generation}-{index:03d}")
+            evaluation = _evaluate_genome(name, genome, search_seeds, config)
             evaluation = replace(evaluation, search_mean_final_1rm_kg=evaluation.mean_final_1rm_kg)
             best_by_genome[genome] = evaluation
             scored.append(evaluation)
@@ -856,6 +942,10 @@ def run_adversarial_search(
         evaluation.name: _release_assessment(evaluation, expert_mean, config)
         for evaluation in evaluations
     }
+    diagnostic_ranking = [
+        _diagnostic_record(evaluation)
+        for evaluation in sorted(best_by_genome.values(), key=_diagnostic_rank, reverse=True)
+    ]
     candidates = {
         evaluation.name: {
             "genome": evaluation.genome.as_dict(),
@@ -886,6 +976,11 @@ def run_adversarial_search(
             "generations": generations,
             "unique_genomes_evaluated": len(best_by_genome),
             "regression_families": [label for label, _ in regression],
+            "diagnostic_ranking": diagnostic_ranking,
+            "diagnostic_genomes": len(diagnostic_ranking),
+            "diagnostic_eligible_genomes": sum(
+                item["eligible_for_comparison"] for item in diagnostic_ranking
+            ),
             "genome_features": [
                 "mixed_focus_sessions",
                 "per_week_templates",
@@ -901,7 +996,11 @@ def run_adversarial_search(
             "candidates_beating_expert": [
                 evaluation.name
                 for evaluation in evaluations
-                if evaluation.mean_final_1rm_kg is not None and evaluation.mean_final_1rm_kg > expert_mean
+                if (
+                    expert_mean is not None
+                    and evaluation.mean_final_1rm_kg is not None
+                    and evaluation.mean_final_1rm_kg > expert_mean
+                )
             ],
             "release_blocked_candidates": [
                 name for name, assessment in assessments.items() if assessment["release_blocked"]
