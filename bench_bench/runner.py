@@ -7,7 +7,7 @@ from functools import wraps
 import json
 from pathlib import Path
 import time
-from typing import Any, Callable, Protocol
+from typing import Any, Callable, Iterable, Protocol
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit, urlunsplit
 from urllib.request import Request, urlopen
@@ -46,6 +46,10 @@ class Usage:
     total_tokens: int = 0
     cost_usd: float = 0.0
     cached_prompt_tokens: int = 0
+    input_tokens: int = 0
+    visible_output_tokens: int = 0
+    thinking_tokens: int = 0
+    pricing_tier: str = "standard"
 
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -67,6 +71,86 @@ class ModelResponse:
             "model": self.model,
             "request_id": self.request_id,
         }
+
+
+def _is_transport_error(error: str) -> bool:
+    return str(error).startswith("model request failed:")
+
+
+def _attempt_transport_failures(attempts: list[dict[str, Any]]) -> int:
+    return sum(1 for attempt in attempts if _is_transport_error(str(attempt.get("error", ""))))
+
+
+def _attempt_rejected_outputs(attempts: list[dict[str, Any]]) -> int:
+    # The runner allows one repair per decision.  Use the first failed model
+    # request as the decision's cause: if the first failure was transport,
+    # the event is reported as transport even if a later recovery response is
+    # malformed.
+    first_error = next((str(attempt.get("error", "")) for attempt in attempts if attempt.get("error")), "")
+    return int(bool(first_error) and not _is_transport_error(first_error))
+
+
+def retry_metrics_from_attempt_groups(attempt_groups: Iterable[list[dict[str, Any]]]) -> dict[str, int]:
+    """Return the canonical retry vocabulary for decision attempt groups.
+
+    A decision is one weekly or reactive request.  Rejected model outputs are
+    counted per failed model-output attempt; ``rejected_output_decisions`` is
+    the numerator used for the release repair rate.  Transport failures are
+    never repairs.  ``repair_attempts`` counts validation-error retries that
+    were actually sent, and ``successful_repairs`` counts those that produced
+    a later valid model response.  Runner-side fallback records are counted
+    separately.
+    """
+    totals = {
+        "decisions": 0,
+        "rejected_model_outputs": 0,
+        "rejected_output_decisions": 0,
+        "repair_attempts": 0,
+        "successful_repairs": 0,
+        "transport_failures": 0,
+        "automatic_fallbacks": 0,
+    }
+    for raw_attempts in attempt_groups:
+        attempts = [attempt for attempt in raw_attempts if isinstance(attempt, dict)]
+        totals["decisions"] += 1
+        rejected_indexes: list[int] = []
+        for index, attempt in enumerate(attempts):
+            error = str(attempt.get("error", ""))
+            if error:
+                if _is_transport_error(error):
+                    totals["transport_failures"] += 1
+                else:
+                    totals["rejected_model_outputs"] += 1
+                    rejected_indexes.append(index)
+            if attempt.get("fallback"):
+                totals["automatic_fallbacks"] += 1
+        if rejected_indexes:
+            totals["rejected_output_decisions"] += 1
+        for index in rejected_indexes:
+            later_model_attempts = [
+                attempt
+                for attempt in attempts[index + 1 :]
+                if attempt.get("is_model_call", True) and not attempt.get("fallback")
+            ]
+            if later_model_attempts:
+                totals["repair_attempts"] += 1
+                if any(not attempt.get("error") for attempt in later_model_attempts):
+                    totals["successful_repairs"] += 1
+    return totals
+
+
+def retry_metrics_from_records(records: Iterable[dict[str, Any]]) -> dict[str, int]:
+    """Return canonical retry metrics from runner transcript records."""
+    groups: list[list[dict[str, Any]]] = []
+    for record in records:
+        if record.get("type") != "turn":
+            continue
+        groups.append(record.get("attempts", [record.get("model_response", {})]))
+        groups.extend(
+            reactive.get("attempts", [reactive.get("model_response", {})])
+            for reactive in record.get("reactive_turns", []) or []
+        )
+    return retry_metrics_from_attempt_groups(groups)
 
 
 class ModelClient(Protocol):
@@ -102,9 +186,28 @@ def _endpoint_metadata(client: ModelClient) -> dict[str, Any]:
 _MODEL_PRICING_USD_PER_MILLION: dict[str, dict[str, float]] = {
     # Standard API text-token prices. Explicit CLI values still take priority.
     "gpt-5.4": {"input": 2.50, "cached_input": 0.25, "output": 15.00},
+    "gpt-5.6-sol": {"input": 5.00, "cached_input": 0.50, "output": 30.00},
     "gpt-5.4-mini": {"input": 0.75, "cached_input": 0.075, "output": 4.50},
     "gpt-5.3-chat-latest": {"input": 1.75, "cached_input": 0.175, "output": 14.00},
     "gpt-4.1": {"input": 2.00, "cached_input": 0.50, "output": 8.00},
+    "kimi-k3": {"input": 3.00, "cached_input": 0.30, "output": 15.00},
+    "muse-spark-1.2": {"input": 1.25, "cached_input": 0.15, "output": 4.25},
+    # xAI lists Grok 4.6 at short-context rates below 200k prompt tokens and
+    # long-context rates at or above that threshold. Prices are USD per
+    # million tokens; the adapter applies the selected tier to the whole
+    # request, including cached input and output tokens.
+    "grok-4.6": {
+        "input": 2.00,
+        "cached_input": 0.50,
+        "output": 6.00,
+        "long_context_threshold_tokens": 200_000,
+        "long_input": 4.00,
+        "long_cached_input": 1.00,
+        "long_output": 12.00,
+    },
+    # Anthropic standard global API pricing; thinking is included in output
+    # tokens and is billed at the output rate.
+    "claude-opus-5": {"input": 5.00, "cached_input": 0.50, "output": 25.00},
 }
 
 
@@ -154,9 +257,14 @@ class OpenAICompatibleClient:
         api_key: str | None = None,
         timeout_seconds: float = 120.0,
         temperature: float = 0.2,
+        effort: str | None = None,
         input_price_per_million: float | None = None,
         cached_input_price_per_million: float | None = None,
         output_price_per_million: float | None = None,
+        long_context_threshold_tokens: int | None = None,
+        long_context_input_price_per_million: float | None = None,
+        long_context_cached_input_price_per_million: float | None = None,
+        long_context_output_price_per_million: float | None = None,
         request_retries: int = 2,
         retry_backoff_seconds: float = 1.0,
     ) -> None:
@@ -167,10 +275,19 @@ class OpenAICompatibleClient:
         self.api_key = api_key
         self.timeout_seconds = timeout_seconds
         self.temperature = temperature
+        self.effort = effort
         default_pricing = model_pricing(model) or {}
         explicit_pricing = any(
             value is not None
-            for value in (input_price_per_million, cached_input_price_per_million, output_price_per_million)
+            for value in (
+                input_price_per_million,
+                cached_input_price_per_million,
+                output_price_per_million,
+                long_context_threshold_tokens,
+                long_context_input_price_per_million,
+                long_context_cached_input_price_per_million,
+                long_context_output_price_per_million,
+            )
         )
         self.input_price_per_million = float(
             input_price_per_million if input_price_per_million is not None else default_pricing.get("input", 0.0)
@@ -183,13 +300,64 @@ class OpenAICompatibleClient:
         self.output_price_per_million = float(
             output_price_per_million if output_price_per_million is not None else default_pricing.get("output", 0.0)
         )
+        supplied_long_context = (
+            long_context_threshold_tokens,
+            long_context_input_price_per_million,
+            long_context_cached_input_price_per_million,
+            long_context_output_price_per_million,
+        )
+        if any(value is not None for value in supplied_long_context) and not all(
+            value is not None for value in supplied_long_context
+        ):
+            raise ValueError(
+                "long-context pricing requires threshold, input, cached-input, and output values together"
+            )
+        default_long_context = (
+            default_pricing.get("long_context_threshold_tokens"),
+            default_pricing.get("long_input"),
+            default_pricing.get("long_cached_input"),
+            default_pricing.get("long_output"),
+        )
+        if all(value is not None for value in supplied_long_context):
+            selected_long_context = supplied_long_context
+        elif all(value is not None for value in default_long_context):
+            selected_long_context = default_long_context
+        elif any(value is not None for value in default_long_context):
+            raise ValueError(f"incomplete long-context pricing metadata for model {model}")
+        else:
+            selected_long_context = (None, None, None, None)
+        self.long_context_threshold_tokens = (
+            int(selected_long_context[0]) if selected_long_context[0] is not None else None
+        )
+        self.long_context_input_price_per_million = (
+            float(selected_long_context[1]) if selected_long_context[1] is not None else None
+        )
+        self.long_context_cached_input_price_per_million = (
+            float(selected_long_context[2]) if selected_long_context[2] is not None else None
+        )
+        self.long_context_output_price_per_million = (
+            float(selected_long_context[3]) if selected_long_context[3] is not None else None
+        )
+        if self.long_context_threshold_tokens is not None and self.long_context_threshold_tokens <= 0:
+            raise ValueError("long-context threshold must be positive")
         self.sampling_parameters = {"temperature": self.temperature}
+        if self.effort is not None:
+            self.sampling_parameters["effort"] = self.effort
         self.pricing_metadata = {
             "input_price_per_million": self.input_price_per_million,
             "cached_input_price_per_million": self.cached_input_price_per_million,
             "output_price_per_million": self.output_price_per_million,
             "source": "explicit" if explicit_pricing else ("model-default" if default_pricing else "unpriced"),
         }
+        if self.long_context_threshold_tokens is not None:
+            self.pricing_metadata.update(
+                {
+                    "long_context_threshold_tokens": self.long_context_threshold_tokens,
+                    "long_context_input_price_per_million": self.long_context_input_price_per_million,
+                    "long_context_cached_input_price_per_million": self.long_context_cached_input_price_per_million,
+                    "long_context_output_price_per_million": self.long_context_output_price_per_million,
+                }
+            )
         self.request_retries = max(0, int(request_retries))
         self.retry_backoff_seconds = max(0.0, float(retry_backoff_seconds))
         self.endpoint_metadata = {
@@ -209,6 +377,8 @@ class OpenAICompatibleClient:
                 "messages": messages,
                 "response_format": {"type": "json_object"},
             }
+            if self.effort is not None:
+                payload["reasoning_effort"] = self.effort
             if include_temperature:
                 payload["temperature"] = self.temperature
             request = Request(
@@ -256,11 +426,39 @@ class OpenAICompatibleClient:
         total_tokens = int(usage_raw.get("total_tokens", prompt_tokens + completion_tokens) or 0)
         prompt_details = usage_raw.get("prompt_tokens_details", {}) or {}
         cached_prompt_tokens = int(prompt_details.get("cached_tokens", 0) or 0)
+        completion_details = usage_raw.get("completion_tokens_details", {}) or {}
+        thinking_tokens = int(
+            completion_details.get(
+                "reasoning_tokens",
+                completion_details.get("thinking_tokens", 0),
+            )
+            or 0
+        )
+        visible_output_tokens = max(0, completion_tokens - thinking_tokens)
         billable_prompt_tokens = max(0, prompt_tokens - cached_prompt_tokens)
+        use_long_context_pricing = (
+            self.long_context_threshold_tokens is not None
+            and prompt_tokens >= self.long_context_threshold_tokens
+        )
+        if use_long_context_pricing:
+            input_price_per_million = self.long_context_input_price_per_million or 0.0
+            cached_input_price_per_million = self.long_context_cached_input_price_per_million or 0.0
+            output_price_per_million = self.long_context_output_price_per_million or 0.0
+            pricing_tier = "long_context"
+        elif self.long_context_threshold_tokens is not None:
+            input_price_per_million = self.input_price_per_million
+            cached_input_price_per_million = self.cached_input_price_per_million
+            output_price_per_million = self.output_price_per_million
+            pricing_tier = "short_context"
+        else:
+            input_price_per_million = self.input_price_per_million
+            cached_input_price_per_million = self.cached_input_price_per_million
+            output_price_per_million = self.output_price_per_million
+            pricing_tier = "standard"
         cost = (
-            billable_prompt_tokens / 1_000_000 * self.input_price_per_million
-            + cached_prompt_tokens / 1_000_000 * self.cached_input_price_per_million
-            + completion_tokens / 1_000_000 * self.output_price_per_million
+            billable_prompt_tokens / 1_000_000 * input_price_per_million
+            + cached_prompt_tokens / 1_000_000 * cached_input_price_per_million
+            + completion_tokens / 1_000_000 * output_price_per_million
         )
         return ModelResponse(
             content=content,
@@ -270,9 +468,240 @@ class OpenAICompatibleClient:
                 total_tokens=total_tokens,
                 cost_usd=round(cost, 8),
                 cached_prompt_tokens=cached_prompt_tokens,
+                input_tokens=prompt_tokens,
+                visible_output_tokens=visible_output_tokens,
+                thinking_tokens=thinking_tokens,
+                pricing_tier=pricing_tier,
             ),
             provider=self.provider,
             model=self.model,
+            request_id=body.get("id"),
+        )
+
+
+def _anthropic_json_schema(model: type[BaseModel]) -> dict[str, Any]:
+    """Build a compact native structured-output schema from a Pydantic model.
+
+    Anthropic's native JSON output grammar enforces the returned shape, while
+    Bench-bench still performs the authoritative Pydantic validation afterward
+    for ranges and cross-field rules.  Making every property required avoids
+    spending the native schema's optional-parameter budget on fields that have
+    simulator defaults.
+    """
+    raw = json.loads(json.dumps(model.model_json_schema()))
+    definitions = raw.get("$defs", {})
+
+    def clean(node: Any) -> Any:
+        if isinstance(node, list):
+            return [clean(item) for item in node]
+        if not isinstance(node, dict):
+            return node
+        reference = node.get("$ref")
+        if reference:
+            definition_name = str(reference).rsplit("/", 1)[-1]
+            return clean(definitions[definition_name])
+        if "anyOf" in node:
+            return {"anyOf": [clean(item) for item in node["anyOf"]]}
+        if node.get("type") == "object" or "properties" in node:
+            properties = {
+                str(name): clean(value)
+                for name, value in (node.get("properties", {}) or {}).items()
+            }
+            return {
+                "type": "object",
+                "properties": properties,
+                "required": list(properties),
+                "additionalProperties": False,
+            }
+        if node.get("type") == "array" or "items" in node:
+            return {
+                "type": "array",
+                "items": clean(node.get("items", {})),
+            }
+        result: dict[str, Any] = {}
+        for key in ("type", "enum"):
+            if key in node:
+                result[key] = clean(node[key])
+        return result
+
+    return clean(raw)
+
+
+class AnthropicMessagesClient:
+    """Native Anthropic Messages API adapter with structured JSON outputs."""
+
+    provider = "anthropic"
+
+    def __init__(
+        self,
+        base_url: str,
+        model: str,
+        *,
+        api_key: str | None = None,
+        timeout_seconds: float = 120.0,
+        temperature: float = 0.2,
+        effort: str = "medium",
+        max_output_tokens: int = 4_096,
+        input_price_per_million: float | None = None,
+        cached_input_price_per_million: float | None = None,
+        output_price_per_million: float | None = None,
+        request_retries: int = 2,
+        retry_backoff_seconds: float = 1.0,
+    ) -> None:
+        self.base_url = base_url.rstrip("/")
+        if not self.base_url.endswith("/messages"):
+            self.base_url += "/messages"
+        self.model = model
+        self.api_key = api_key
+        self.timeout_seconds = timeout_seconds
+        self.temperature = float(temperature)
+        if not 0.0 <= self.temperature <= 1.0:
+            raise ValueError("Anthropic temperature must be between 0 and 1")
+        if model.startswith("claude-opus-5") and self.temperature != 1.0:
+            raise ValueError("Claude Opus 5 accepts only its provider-default temperature 1.0")
+        if effort not in {"low", "medium", "high", "xhigh", "max"}:
+            raise ValueError("Anthropic effort must be low, medium, high, xhigh, or max")
+        self.effort = effort
+        self.max_output_tokens = max(1, int(max_output_tokens))
+        default_pricing = model_pricing(model) or {}
+        explicit_pricing = any(
+            value is not None
+            for value in (input_price_per_million, cached_input_price_per_million, output_price_per_million)
+        )
+        self.input_price_per_million = float(
+            input_price_per_million if input_price_per_million is not None else default_pricing.get("input", 0.0)
+        )
+        self.cached_input_price_per_million = float(
+            cached_input_price_per_million
+            if cached_input_price_per_million is not None
+            else default_pricing.get("cached_input", 0.0)
+        )
+        self.output_price_per_million = float(
+            output_price_per_million if output_price_per_million is not None else default_pricing.get("output", 0.0)
+        )
+        self.sampling_parameters = {
+            "temperature": self.temperature,
+            "effort": self.effort,
+            "thinking": "adaptive",
+            "max_output_tokens": self.max_output_tokens,
+        }
+        self.pricing_metadata = {
+            "input_price_per_million": self.input_price_per_million,
+            "cached_input_price_per_million": self.cached_input_price_per_million,
+            "output_price_per_million": self.output_price_per_million,
+            "source": "explicit" if explicit_pricing else ("model-default" if default_pricing else "unpriced"),
+        }
+        self.request_retries = max(0, int(request_retries))
+        self.retry_backoff_seconds = max(0.0, float(retry_backoff_seconds))
+        self.endpoint_metadata = {
+            "kind": "anthropic-messages",
+            "url": _safe_endpoint_url(self.base_url),
+        }
+
+    @staticmethod
+    def _messages_payload(messages: list[dict[str, str]]) -> tuple[str | None, list[dict[str, str]]]:
+        system_parts = [message["content"] for message in messages if message.get("role") == "system"]
+        converted: list[dict[str, str]] = []
+        for message in messages:
+            role = message.get("role", "user")
+            if role == "system":
+                continue
+            role = role if role in {"user", "assistant"} else "user"
+            content = message.get("content", "")
+            if converted and converted[-1]["role"] == role:
+                converted[-1]["content"] += f"\n\n{content}"
+            else:
+                converted.append({"role": role, "content": content})
+        return ("\n\n".join(system_parts) if system_parts else None), converted
+
+    def complete(self, messages: list[dict[str, str]]) -> ModelResponse:
+        system, api_messages = self._messages_payload(messages)
+        interrupt = any("<interrupt_json>" in message.get("content", "") for message in messages)
+        schema_model = ReactiveTurn if interrupt else ModelTurn
+        payload: dict[str, Any] = {
+            "model": self.model,
+            "max_tokens": self.max_output_tokens,
+            "messages": api_messages,
+            "thinking": {"type": "adaptive"},
+            "output_config": {
+                "effort": self.effort,
+                "format": {
+                    "type": "json_schema",
+                    "schema": _anthropic_json_schema(schema_model),
+                },
+            },
+            "temperature": self.temperature,
+        }
+        if system is not None:
+            payload["system"] = system
+        headers = {
+            "Content-Type": "application/json",
+            "anthropic-version": "2023-06-01",
+        }
+        if self.api_key:
+            headers["x-api-key"] = self.api_key
+        transient_http_codes = {408, 425, 429, 500, 502, 503, 504}
+        for request_attempt in range(self.request_retries + 1):
+            request = Request(
+                self.base_url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers=headers,
+                method="POST",
+            )
+            try:
+                with urlopen(request, timeout=self.timeout_seconds) as response:
+                    body = json.loads(response.read().decode("utf-8"))
+                break
+            except HTTPError as exc:
+                if exc.code not in transient_http_codes or request_attempt >= self.request_retries:
+                    raise RuntimeError(f"model request failed: {exc}") from exc
+                retry_after = exc.headers.get("Retry-After") if exc.headers else None
+                try:
+                    delay = float(retry_after) if retry_after is not None else self.retry_backoff_seconds * (2**request_attempt)
+                except ValueError:
+                    delay = self.retry_backoff_seconds * (2**request_attempt)
+                time.sleep(min(60.0, max(0.0, delay)))
+            except (URLError, TimeoutError) as exc:
+                if request_attempt >= self.request_retries:
+                    raise RuntimeError(f"model request failed: {exc}") from exc
+                time.sleep(min(60.0, self.retry_backoff_seconds * (2**request_attempt)))
+        blocks = body.get("content", []) or []
+        visible_text = "".join(
+            str(block.get("text", ""))
+            for block in blocks
+            if isinstance(block, dict) and block.get("type") == "text"
+        )
+        usage_raw = body.get("usage", {}) or {}
+        base_input_tokens = int(usage_raw.get("input_tokens", 0) or 0)
+        cache_creation_tokens = int(usage_raw.get("cache_creation_input_tokens", 0) or 0)
+        cache_read_tokens = int(usage_raw.get("cache_read_input_tokens", 0) or 0)
+        input_tokens = base_input_tokens + cache_creation_tokens + cache_read_tokens
+        output_tokens = int(usage_raw.get("output_tokens", 0) or 0)
+        output_details = usage_raw.get("output_tokens_details", {}) or {}
+        thinking_tokens = int(
+            output_details.get("thinking_tokens", usage_raw.get("thinking_tokens", 0)) or 0
+        )
+        visible_output_tokens = max(0, output_tokens - thinking_tokens)
+        cost = (
+            base_input_tokens / 1_000_000 * self.input_price_per_million
+            + cache_creation_tokens / 1_000_000 * self.input_price_per_million
+            + cache_read_tokens / 1_000_000 * self.cached_input_price_per_million
+            + output_tokens / 1_000_000 * self.output_price_per_million
+        )
+        return ModelResponse(
+            content=visible_text,
+            usage=Usage(
+                prompt_tokens=input_tokens,
+                completion_tokens=output_tokens,
+                total_tokens=input_tokens + output_tokens,
+                cost_usd=round(cost, 8),
+                cached_prompt_tokens=cache_read_tokens,
+                input_tokens=input_tokens,
+                visible_output_tokens=visible_output_tokens,
+                thinking_tokens=thinking_tokens,
+            ),
+            provider=self.provider,
+            model=body.get("model", self.model),
             request_id=body.get("id"),
         )
 
@@ -340,7 +769,16 @@ class RunnerResult:
     resumed_weeks: int
     model_calls: int
     repair_calls: int
+    rejected_model_outputs: int
+    rejected_output_decisions: int
+    repair_attempts: int
+    successful_repairs: int
+    automatic_fallbacks: int
+    transport_failures: int
     total_tokens: int
+    input_tokens: int
+    visible_output_tokens: int
+    thinking_tokens: int
     total_cost_usd: float
     final_result: dict[str, Any] | None
     transcript_path: str | None
@@ -383,7 +821,8 @@ class ModelRunner:
     WEEK_SCHEMA_INSTRUCTIONS = """Use this response shape: {\"action\": { ... WeekAction ... }, \"notebook_update\": \"durable observation about Dave\"}.
 WeekAction fields: sessions (0–5 unique days; each has day 0–6, slot morning/lunch/evening,
 location gym/home/hotel, focus volume/heavy/technique/fallback/test, sets, reps, load_kg,
-duration_min (10–120 minutes), target_rpe); life (meal_prep_hours, meal_support_spend_cents,
+duration_min (10–120 minutes), target_rpe). When focus is fallback, the session is capped at
+25 minutes, 3 sets, and 6 reps; life (meal_prep_hours, meal_support_spend_cents,
 childcare_hours, childcare_spend_cents, chore_delegation_hours,
 chore_delegation_spend_cents, partner_coverage_hours, partner_giveback_hours,
 sleep_protection none/standard/strong, career_choice protect_time/accept_stretch_project/defer,
@@ -392,14 +831,15 @@ and purchases (a JSON list of zero or more of home_gym/recurring_childcare/meal_
 on_illness protect_recovery/fallback/skip). All training time (including commute), meal prep,
 childcare, delegated chores, partner coverage, and partner giveback draw from the finite weekly
 time/resource ledger shown in the observation. Delegated chores incur a money charge; reactive
-childcare must include its spend. Coverage and giveback are separate costs, so do not maximize both.
-Use zero or defaults for allocations you do not need.
+childcare must include its spend.
 """ + NOTEBOOK_INSTRUCTIONS
 
     REACTIVE_SCHEMA_INSTRUCTIONS = """Use this response shape: {\"action\": { ... ReactiveAction ... }, \"notebook_update\": \"durable observation about Dave\"}.
 ReactiveAction fields: response protect_recovery/reallocate/preserve_training/accept_disruption;
 cancel_session_days (at most 5 day numbers from 0–6); fallback_session_days (at most 5 day numbers from 0–6);
-extra_childcare_hours (0–8); extra_spend_cents (0–15000; reactive childcare must be paid for); note (at most 300 characters).
+extra_childcare_hours (0–8; it draws from the remaining weekly time/resource ledger, so it must not exceed the
+minutes remaining in the interrupt observation); extra_spend_cents (0–15000; reactive childcare must be paid for);
+note (at most 300 characters).
 The cancel and fallback day lists must not overlap. Do not include weekly-plan fields such as sessions, life, or rules.
 Valid example:
 {\"action\":{\"response\":\"protect_recovery\",\"cancel_session_days\":[2],\"fallback_session_days\":[],\"extra_childcare_hours\":0.0,\"extra_spend_cents\":0,\"note\":\"Protect recovery after the disruption.\"},\"notebook_update\":\"Cancelled the affected session and protected recovery.\"}
@@ -477,8 +917,20 @@ Valid example:
         notebook = ""
         model_calls = 0
         repair_calls = 0
+        transport_failures = 0
         total_tokens = 0
+        input_tokens = 0
+        visible_output_tokens = 0
+        thinking_tokens = 0
         total_cost = 0.0
+
+        def add_usage(usage: dict[str, Any]) -> None:
+            nonlocal total_tokens, input_tokens, visible_output_tokens, thinking_tokens, total_cost
+            total_tokens += int(usage.get("total_tokens", 0) or 0)
+            input_tokens += int(usage.get("input_tokens", usage.get("prompt_tokens", 0)) or 0)
+            visible_output_tokens += int(usage.get("visible_output_tokens", 0) or 0)
+            thinking_tokens += int(usage.get("thinking_tokens", 0) or 0)
+            total_cost += float(usage.get("cost_usd", 0.0) or 0.0)
         saved_turns = [record for record in existing if record.get("type") == "turn"]
         resumed_weeks = 0
         if saved_turns:
@@ -501,19 +953,19 @@ Valid example:
                 resumed_weeks += 1
                 attempts = saved.get("attempts", [saved.get("model_response", {})])
                 model_calls += _model_attempt_count(attempts)
-                repair_calls += int(saved.get("repair_calls", 0))
+                repair_calls += _attempt_rejected_outputs(attempts)
+                transport_failures += _attempt_transport_failures(attempts)
                 for attempt in attempts:
                     usage = attempt.get("usage", {})
-                    total_tokens += int(usage.get("total_tokens", 0))
-                    total_cost += float(usage.get("cost_usd", 0.0))
+                    add_usage(usage)
                 for reactive_record in reactive_records:
                     reactive_attempts = reactive_record.get("attempts", [reactive_record.get("model_response", {})])
                     model_calls += _model_attempt_count(reactive_attempts)
-                    repair_calls += int(reactive_record.get("repair_calls", 0))
+                    repair_calls += _attempt_rejected_outputs(reactive_attempts)
+                    transport_failures += _attempt_transport_failures(reactive_attempts)
                     for attempt in reactive_attempts:
                         reactive_usage = attempt.get("usage", {})
-                        total_tokens += int(reactive_usage.get("total_tokens", 0))
-                        total_cost += float(reactive_usage.get("cost_usd", 0.0))
+                        add_usage(reactive_usage)
 
         if path and not existing:
             sampling = self.config.sampling
@@ -548,13 +1000,13 @@ Valid example:
             turn_response, action, notebook_update, errors, retries, attempts = self._request_week(messages, env)
             model_calls += _model_attempt_count(attempts)
             repair_calls += retries
+            transport_failures += _attempt_transport_failures(attempts)
             for attempt in attempts:
-                total_tokens += int(attempt.get("usage", {}).get("total_tokens", 0))
-                total_cost += float(attempt.get("usage", {}).get("cost_usd", 0.0))
+                add_usage(attempt.get("usage", {}))
             reactive_turns: list[dict[str, Any]] = []
 
             def respond_to_interrupt(interrupt: InterruptObservation) -> ReactiveAction:
-                nonlocal model_calls, repair_calls, total_tokens, total_cost, notebook
+                nonlocal model_calls, repair_calls, transport_failures, total_tokens, total_cost, notebook
                 interrupt_messages = self._interrupt_messages(interrupt, notebook, env, saved_turns)
                 response, reactive, update, parse_errors, interrupt_retries, reactive_attempts = self._request_reactive(
                     interrupt_messages, env, interrupt
@@ -565,9 +1017,9 @@ Valid example:
                     )
                 model_calls += _model_attempt_count(reactive_attempts)
                 repair_calls += interrupt_retries
+                transport_failures += _attempt_transport_failures(reactive_attempts)
                 for attempt in reactive_attempts:
-                    total_tokens += int(attempt.get("usage", {}).get("total_tokens", 0))
-                    total_cost += float(attempt.get("usage", {}).get("cost_usd", 0.0))
+                    add_usage(attempt.get("usage", {}))
                 if update:
                     notebook = self._update_notebook(notebook, update)
                 reactive_turns.append(
@@ -582,6 +1034,7 @@ Valid example:
                         "action": reactive.model_dump(mode="json"),
                         "parse_errors": parse_errors,
                         "repair_calls": interrupt_retries,
+                        "transport_failures": _attempt_transport_failures(reactive_attempts),
                     }
                 )
                 return reactive
@@ -600,6 +1053,7 @@ Valid example:
                 "notebook_after": notebook,
                 "parse_errors": errors,
                 "repair_calls": retries,
+                "transport_failures": _attempt_transport_failures(attempts),
                 "reactive_turns": reactive_turns,
                 "outcome": outcome.as_dict(),
             }
@@ -608,6 +1062,18 @@ Valid example:
                 _append_record(path, turn_record)
 
         result = env.final_result().as_dict()
+        if path:
+            canonical_retry_metrics = retry_metrics_from_records(_read_records(path))
+        else:
+            canonical_retry_metrics = {
+                "decisions": 0,
+                "rejected_model_outputs": repair_calls,
+                "rejected_output_decisions": repair_calls,
+                "repair_attempts": repair_calls,
+                "successful_repairs": 0,
+                "transport_failures": transport_failures,
+                "automatic_fallbacks": 0,
+            }
         if path:
             existing_end = any(record.get("type") == "run_end" for record in _read_records(path))
             if not existing_end:
@@ -618,8 +1084,17 @@ Valid example:
                         "engine_config_hash": engine_config_hash(),
                         "result": result,
                         "model_calls": model_calls,
-                        "repair_calls": repair_calls,
+                        "repair_calls": canonical_retry_metrics["repair_attempts"],
+                        "rejected_model_outputs": canonical_retry_metrics["rejected_model_outputs"],
+                        "rejected_output_decisions": canonical_retry_metrics["rejected_output_decisions"],
+                        "repair_attempts": canonical_retry_metrics["repair_attempts"],
+                        "successful_repairs": canonical_retry_metrics["successful_repairs"],
+                        "automatic_fallbacks": canonical_retry_metrics["automatic_fallbacks"],
+                        "transport_failures": transport_failures,
                         "total_tokens": total_tokens,
+                        "input_tokens": input_tokens,
+                        "visible_output_tokens": visible_output_tokens,
+                        "thinking_tokens": thinking_tokens,
                         "total_cost_usd": round(total_cost, 8),
                     },
                 )
@@ -630,8 +1105,17 @@ Valid example:
             completed=True,
             resumed_weeks=resumed_weeks,
             model_calls=model_calls,
-            repair_calls=repair_calls,
+            repair_calls=canonical_retry_metrics["repair_attempts"],
+            rejected_model_outputs=canonical_retry_metrics["rejected_model_outputs"],
+            rejected_output_decisions=canonical_retry_metrics["rejected_output_decisions"],
+            repair_attempts=canonical_retry_metrics["repair_attempts"],
+            successful_repairs=canonical_retry_metrics["successful_repairs"],
+            automatic_fallbacks=canonical_retry_metrics["automatic_fallbacks"],
+            transport_failures=canonical_retry_metrics["transport_failures"],
             total_tokens=total_tokens,
+            input_tokens=input_tokens,
+            visible_output_tokens=visible_output_tokens,
+            thinking_tokens=thinking_tokens,
             total_cost_usd=round(total_cost, 8),
             final_result=result,
             transcript_path=str(path) if path else None,
@@ -641,6 +1125,8 @@ Valid example:
         errors: list[str] = []
         attempts: list[dict[str, Any]] = []
         latest_messages = messages
+        repair_requested = False
+        first_error_seen = False
         for attempt in range(self.config.max_retries + 1):
             response: ModelResponse | None = None
             attempt_record: dict[str, Any] | None = None
@@ -655,7 +1141,7 @@ Valid example:
                 if budget_validation.errors:
                     raise ValueError("; ".join(budget_validation.errors))
                 attempts.append(attempt_record)
-                return response, turn.action, turn.notebook_update, errors, attempt, attempts
+                return response, turn.action, turn.notebook_update, errors, int(repair_requested), attempts
             except (RuntimeError, ValueError, TypeError, json.JSONDecodeError, ValidationError) as exc:
                 errors.append(str(exc))
                 if attempt_record is None:
@@ -664,22 +1150,28 @@ Valid example:
                         attempt_record.update(response.as_dict())
                 attempt_record["error"] = str(exc)
                 attempts.append(attempt_record)
+                if not first_error_seen and not _is_transport_error(str(exc)):
+                    repair_requested = True
+                first_error_seen = True
                 if attempt >= self.config.max_retries:
                     break
-                latest_messages = messages + [
-                    {
-                        "role": "user",
-                        "content": (
-                            f"Your previous response was invalid: {exc}\n\n"
-                            f"{self.WEEK_SCHEMA_INSTRUCTIONS}"
-                            "Return only a repaired JSON object matching this schema."
-                        ),
-                    }
-                ]
+                if _is_transport_error(str(exc)):
+                    latest_messages = messages
+                else:
+                    latest_messages = messages + [
+                        {
+                            "role": "user",
+                            "content": (
+                                f"Your previous response was invalid: {exc}\n\n"
+                                f"{self.WEEK_SCHEMA_INSTRUCTIONS}"
+                                "Return only a repaired JSON object matching this schema."
+                            ),
+                        }
+                    ]
         safe = env.safe_action()
         fallback_response = ModelResponse(content={"action": safe.model_dump(mode="json")})
         attempts.append({"attempt": len(attempts), "is_model_call": False, "fallback": True, **fallback_response.as_dict()})
-        return fallback_response, safe, "", errors, self.config.max_retries, attempts
+        return fallback_response, safe, "", errors, int(repair_requested), attempts
 
     def _request_reactive(
         self,
@@ -690,6 +1182,8 @@ Valid example:
         errors: list[str] = []
         attempts: list[dict[str, Any]] = []
         latest_messages = messages
+        repair_requested = False
+        first_error_seen = False
         for attempt in range(self.config.max_retries + 1):
             response: ModelResponse | None = None
             attempt_record: dict[str, Any] | None = None
@@ -705,7 +1199,7 @@ Valid example:
                     if budget_error:
                         raise ValueError(budget_error)
                 attempts.append(attempt_record)
-                return response, turn.action, turn.notebook_update, errors, attempt, attempts
+                return response, turn.action, turn.notebook_update, errors, int(repair_requested), attempts
             except (RuntimeError, ValueError, TypeError, json.JSONDecodeError, ValidationError) as exc:
                 errors.append(str(exc))
                 if attempt_record is None:
@@ -714,21 +1208,27 @@ Valid example:
                         attempt_record.update(response.as_dict())
                 attempt_record["error"] = str(exc)
                 attempts.append(attempt_record)
+                if not first_error_seen and not _is_transport_error(str(exc)):
+                    repair_requested = True
+                first_error_seen = True
                 if attempt >= self.config.max_retries:
                     break
-                latest_messages = messages + [
-                    {
-                        "role": "user",
-                        "content": (
-                            f"Your previous reactive response was invalid: {exc}\n\n"
-                            f"{self.REACTIVE_SCHEMA_INSTRUCTIONS}"
-                            "Return only a repaired JSON object matching this schema."
-                        ),
-                    }
-                ]
+                if _is_transport_error(str(exc)):
+                    latest_messages = messages
+                else:
+                    latest_messages = messages + [
+                        {
+                            "role": "user",
+                            "content": (
+                                f"Your previous reactive response was invalid: {exc}\n\n"
+                                f"{self.REACTIVE_SCHEMA_INSTRUCTIONS}"
+                                "Return only a repaired JSON object matching this schema."
+                            ),
+                        }
+                    ]
         fallback_response = ModelResponse(content={"action": {"response": "protect_recovery"}})
         attempts.append({"attempt": len(attempts), "is_model_call": False, "fallback": True, **fallback_response.as_dict()})
-        return fallback_response, ReactiveAction(response="protect_recovery"), "", errors, self.config.max_retries, attempts
+        return fallback_response, ReactiveAction(response="protect_recovery"), "", errors, int(repair_requested), attempts
 
     def _week_messages(self, observation: WeekObservation, notebook: str, env: BenchEnvironment, saved_turns: list[dict[str, Any]]) -> list[dict[str, str]]:
         recent = [record for record in saved_turns if int(record.get("week", 0)) < observation.episode_week][-self.config.context_weeks :]

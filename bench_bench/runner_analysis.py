@@ -5,15 +5,15 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import fields as dataclass_fields
 import json
-import math
 from pathlib import Path
 import re
-from statistics import fmean
+from statistics import fmean, stdev
 from typing import Any, Iterable
 
 from .engine import FinalResult, WeekOutcome, _State
 from .provenance import engine_config_hash
-from .scoring import PAIN_DAYS_LIMIT, score_fields
+from .runner import retry_metrics_from_records
+from .scoring import MAX_EPISODE_DAYS, MIN_COUNTED_SEED_FRACTION, PAIN_DAYS_LIMIT, score_fields
 from .schemas import (
     InterruptObservation,
     LifeAllocation,
@@ -111,6 +111,7 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
     end = next((record for record in records if record.get("type") == "run_end"), {})
     private_fields = sorted(_private_field_hits(records))
     transport_errors = _transport_error_counts(records)
+    retry_metrics = retry_metrics_from_records(records)
     configured_weeks = int(start.get("config", {}).get("weeks", 0) or 0)
     recorded_hash = start.get("engine_config_hash")
     current_hash = engine_config_hash()
@@ -121,6 +122,8 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         transcript_violations.append(f"expected_{configured_weeks}_turns_got_{len(turns)}")
     if configured_weeks and sorted(observed_weeks) != list(range(1, configured_weeks + 1)):
         transcript_violations.append("week_sequence_not_unique_and_complete")
+    if recorded_hash != current_hash:
+        transcript_violations.append("engine_config_hash_mismatch")
     sessions = [session for turn in turns for session in turn["action"].get("sessions", [])]
     none_sleep_weeks = sum(turn["action"].get("life", {}).get("sleep_protection") == "none" for turn in turns)
     imbalanced_weeks = sum(
@@ -152,8 +155,32 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
     exclusion_reasons.extend(f"constraint: {violation}" for violation in score["constraint_violations"])
     if transcript_violations:
         exclusion_reasons.extend(f"transcript: {violation}" for violation in transcript_violations)
-    if transport_errors:
-        exclusion_reasons.extend(f"transport: {error}" for error in transport_errors)
+    final_pain_days = final_result.get("pain_days")
+    valid_pain_days = (
+        final_pain_days
+        if isinstance(final_pain_days, int)
+        and not isinstance(final_pain_days, bool)
+        and 0 <= final_pain_days <= MAX_EPISODE_DAYS
+        else None
+    )
+    usage_totals = {
+        "input_tokens": 0,
+        "visible_output_tokens": 0,
+        "thinking_tokens": 0,
+        "total_tokens": 0,
+        "cost_usd": 0.0,
+    }
+    for turn in turns:
+        attempt_groups = [turn.get("attempts", [])]
+        attempt_groups.extend(reactive.get("attempts", []) for reactive in turn.get("reactive_turns", []))
+        for attempts in attempt_groups:
+            for attempt in attempts:
+                usage = attempt.get("usage", {}) or {}
+                usage_totals["input_tokens"] += int(usage.get("input_tokens", usage.get("prompt_tokens", 0)) or 0)
+                usage_totals["visible_output_tokens"] += int(usage.get("visible_output_tokens", 0) or 0)
+                usage_totals["thinking_tokens"] += int(usage.get("thinking_tokens", 0) or 0)
+                usage_totals["total_tokens"] += int(usage.get("total_tokens", 0) or 0)
+                usage_totals["cost_usd"] += float(usage.get("cost_usd", 0.0) or 0.0)
     observations: list[str] = []
     if sessions and heavy_sessions / len(sessions) >= 0.7:
         observations.append("weekly-maxing / high-intensity fixation")
@@ -185,13 +212,7 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         "counted_final_1rm_kg": score["counted_final_1rm_kg"] if not exclusion_reasons else None,
         "constraint_violations": score["constraint_violations"],
         "violations": score["constraint_violations"],
-        "pain_days": (
-            int(final_result["pain_days"])
-            if isinstance(final_result.get("pain_days"), (int, float))
-            and not isinstance(final_result.get("pain_days"), bool)
-            and math.isfinite(float(final_result["pain_days"]))
-            else None
-        ),
+        "pain_days": valid_pain_days,
         "planned_sessions": int(final_result.get("planned_sessions", 0)),
         "transformed_sessions": int(final_result.get("transformed_sessions", 0)),
         "attempted_sessions": int(final_result.get("attempted_sessions", 0)),
@@ -199,8 +220,24 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         "missed_sessions": int(final_result.get("missed_sessions", 0)),
         "fallback_sessions": int(final_result.get("fallback_sessions", 0)),
         "model_calls": int(end.get("model_calls", 0)),
-        "repair_calls": int(end.get("repair_calls", 0)),
-        "total_cost_usd": float(end.get("total_cost_usd", 0.0)),
+        # ``repair_calls`` is retained as the number of repair prompts sent.
+        # The release repair rate uses rejected_output_decisions instead.
+        "repair_calls": retry_metrics["repair_attempts"],
+        "rejected_model_outputs": retry_metrics["rejected_model_outputs"],
+        "rejected_output_decisions": retry_metrics["rejected_output_decisions"],
+        "repair_attempts": retry_metrics["repair_attempts"],
+        "successful_repairs": retry_metrics["successful_repairs"],
+        "automatic_fallbacks": retry_metrics["automatic_fallbacks"],
+        "transport_failures": retry_metrics["transport_failures"],
+        "decision_count": retry_metrics["decisions"],
+        "repair_rate": round(
+            retry_metrics["rejected_output_decisions"] / retry_metrics["decisions"], 6
+        ) if retry_metrics["decisions"] else 0.0,
+        "total_tokens": int(end.get("total_tokens", usage_totals["total_tokens"])),
+        "input_tokens": int(end.get("input_tokens", usage_totals["input_tokens"])),
+        "visible_output_tokens": int(end.get("visible_output_tokens", usage_totals["visible_output_tokens"])),
+        "thinking_tokens": int(end.get("thinking_tokens", usage_totals["thinking_tokens"])),
+        "total_cost_usd": float(end.get("total_cost_usd", usage_totals["cost_usd"])),
         "heavy_session_fraction": round(heavy_sessions / len(sessions), 4) if sessions else 0.0,
         "none_sleep_weeks": none_sleep_weeks,
         "imbalanced_household_weeks": imbalanced_weeks,
@@ -222,7 +259,58 @@ def analyze_paths(paths: Iterable[str | Path]) -> list[dict[str, Any]]:
 
 
 def analyze_directory(directory: str | Path) -> list[dict[str, Any]]:
-    return analyze_paths(Path(directory).glob("*.jsonl"))
+    """Analyze every transcript below a directory, in stable relative order."""
+    root = Path(directory).resolve()
+    paths = sorted(root.rglob("*.jsonl"), key=lambda path: path.relative_to(root).as_posix())
+    records = analyze_paths(paths)
+    for record, path in zip(records, paths):
+        record["path"] = path.relative_to(root).as_posix()
+    return records
+
+
+def leaderboard_aggregates(records: Iterable[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Build score aggregates without dropping excluded seeds from the denominator."""
+    records = list(records)
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for record in records:
+        grouped[str(record["model"])].append(record)
+    seed_values = {
+        record.get("seed")
+        for record in records
+        if record.get("seed") is not None
+    }
+    expected_seed_count = max(
+        len(seed_values),
+        max((len(model_records) for model_records in grouped.values()), default=0),
+    )
+    aggregates: dict[str, dict[str, Any]] = {}
+    for model, model_records in sorted(grouped.items()):
+        counted_scores = [
+            float(record["counted_final_1rm_kg"])
+            for record in model_records
+            if record.get("valid", record.get("invalid_reason") is None)
+            and record.get("counted_final_1rm_kg") is not None
+        ]
+        raw_scores = [
+            float(record["raw_final_1rm_kg"])
+            for record in model_records
+            if record.get("raw_final_1rm_kg") is not None
+        ]
+        counted_fraction = len(counted_scores) / expected_seed_count if expected_seed_count else 0.0
+        reportable = counted_fraction >= MIN_COUNTED_SEED_FRACTION
+        counted_mean = fmean(counted_scores) if counted_scores and reportable else None
+        counted_std = stdev(counted_scores) if len(counted_scores) > 1 and reportable else (0.0 if counted_scores and reportable else None)
+        aggregates[model] = {
+            "total_seeds": expected_seed_count,
+            "counted_seeds": len(counted_scores),
+            "excluded_seeds": expected_seed_count - len(counted_scores),
+            "counted_seed_fraction": round(counted_fraction, 4),
+            "counted_mean_final_1rm_kg": round(counted_mean, 4) if counted_mean is not None else None,
+            "counted_seed_std_kg": round(counted_std, 4) if counted_std is not None else None,
+            "raw_mean_final_1rm_kg": round(fmean(raw_scores), 4) if raw_scores else None,
+            "counted_aggregate_reportable": reportable,
+        }
+    return aggregates
 
 
 def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
@@ -241,14 +329,14 @@ def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
     configured_weeks = max((int(record.get("configured_weeks", 0)) for record in all_values), default=0)
     live_endpoint = bool(all_values) and all(
         isinstance(record.get("endpoint_metadata"), dict)
-        and record["endpoint_metadata"].get("kind") == "openai-compatible"
+        and record["endpoint_metadata"].get("kind") in {"openai-compatible", "anthropic-messages"}
         for record in all_values
     )
     replayed = bool(all_values) and all(record.get("replayed_under_current_engine") for record in all_values)
     if replayed and configured_weeks >= 52:
-        title = "# Bench-bench Authoritative Public Leaderboard"
+        title = "# Bench-bench Generated Public Leaderboard"
     else:
-        title = "# Bench-bench Phase 4 Live Leaderboard" if live_endpoint and configured_weeks >= 52 else "# Bench-bench Phase 3 Mini-Leaderboard"
+        title = "# Bench-bench Generated Public Leaderboard" if live_endpoint and configured_weeks >= 52 else "# Bench-bench Phase 3 Mini-Leaderboard"
     description = (
         "This is an offline re-evaluation of the checked-in public model actions under the current engine/config hash; no model calls were made during regeneration."
         if replayed
@@ -257,18 +345,19 @@ def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
         if live_endpoint
         else "This artifact is generated from runner transcripts. It is a local deterministic runner smoke test unless the input directory was produced with a live endpoint; it must not be presented as a frontier-model result without endpoint metadata."
     )
+    aggregates = leaderboard_aggregates(all_values)
     lines = [
         title,
         "",
         description,
         "",
         f"- Engine/config hash: `{engine_config_hash()}`",
-        "| Model | Valid seeds | Excluded | Counted mean final 1RM (kg) | Counted seed std (kg) | Mean calls | Mean cost | Repairs | Violations | Raw mean final 1RM (kg) |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---|---:|",
+        "| Model | Valid seeds | Excluded | Counted mean final 1RM (kg) | Counted seed SD (kg) | Decisions | Mean calls | Mean cost | Rejected decisions | Repair attempts | Successful repairs | Transport failures | Auto fallbacks | Violations | Raw mean final 1RM (kg) |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|",
     ]
     for model in sorted(all_grouped):
         model_records = grouped.get(model, [])
-        excluded_count = len(all_grouped[model]) - len(model_records)
+        excluded_count = aggregates[model]["excluded_seeds"]
         scores = [record["counted_final_1rm_kg"] for record in model_records if record.get("counted_final_1rm_kg") is not None]
         raw_scores = [
             record["raw_final_1rm_kg"]
@@ -280,18 +369,25 @@ def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
             for violation in record.get("constraint_violations", record.get("violations", [])):
                 violation_counts[str(violation)] += 1
         violations = ", ".join(f"{name} ({count})" for name, count in sorted(violation_counts.items())) or "—"
-        mean = fmean(scores) if scores else 0.0
-        variance = fmean((score - mean) ** 2 for score in scores) if scores else 0.0
+        aggregate = aggregates[model]
+        mean = aggregate["counted_mean_final_1rm_kg"]
+        variance = aggregate["counted_seed_std_kg"]
         raw_mean = fmean(raw_scores) if raw_scores else None
+        rejected_decisions = sum(record.get("rejected_output_decisions", 0) for record in all_grouped[model])
+        repair_attempts = sum(record.get("repair_attempts", record.get("repair_calls", 0)) for record in all_grouped[model])
+        successful_repairs = sum(record.get("successful_repairs", 0) for record in all_grouped[model])
+        transport_failures = sum(record.get("transport_failures", 0) for record in all_grouped[model])
+        automatic_fallbacks = sum(record.get("automatic_fallbacks", 0) for record in all_grouped[model])
+        decisions = sum(record.get("decision_count", 0) for record in all_grouped[model])
         if model_records:
             lines.append(
-                f"| {model} | {len(scores)} | {excluded_count} | {mean:.2f} | {variance ** 0.5:.2f} | {fmean(record['model_calls'] for record in model_records):.1f} | ${fmean(record['total_cost_usd'] for record in model_records):.4f} | {sum(record['repair_calls'] for record in model_records)} | {violations} | {raw_mean:.2f} |"
-                if scores
+                f"| {model} | {len(scores)} | {excluded_count} | {mean:.2f} | {variance:.2f} | {decisions} | {fmean(record['model_calls'] for record in model_records):.1f} | ${fmean(record['total_cost_usd'] for record in model_records):.4f} | {rejected_decisions} | {repair_attempts} | {successful_repairs} | {transport_failures} | {automatic_fallbacks} | {violations} | {raw_mean:.2f} |"
+                if mean is not None
                 else
-                f"| {model} | 0 | {excluded_count} | — | — | {fmean(record['model_calls'] for record in model_records):.1f} | ${fmean(record['total_cost_usd'] for record in model_records):.4f} | {sum(record['repair_calls'] for record in model_records)} | {violations} | {raw_mean:.2f} |"
+                f"| {model} | {len(scores)} | {excluded_count} | — | — | {decisions} | {fmean(record['model_calls'] for record in model_records):.1f} | ${fmean(record['total_cost_usd'] for record in model_records):.4f} | {rejected_decisions} | {repair_attempts} | {successful_repairs} | {transport_failures} | {automatic_fallbacks} | {violations} | {raw_mean:.2f} |"
             )
         else:
-            lines.append(f"| {model} | 0 | {excluded_count} | — | — | — | — | — | {violations} | {raw_mean:.2f} |" if raw_mean is not None else f"| {model} | 0 | {excluded_count} | — | — | — | — | — | {violations} | — |")
+            lines.append(f"| {model} | 0 | {excluded_count} | — | — | {decisions} | — | — | {rejected_decisions} | {repair_attempts} | {successful_repairs} | {transport_failures} | {automatic_fallbacks} | {violations} | {raw_mean:.2f} |" if raw_mean is not None else f"| {model} | 0 | {excluded_count} | — | — | {decisions} | — | — | {rejected_decisions} | {repair_attempts} | {successful_repairs} | {transport_failures} | {automatic_fallbacks} | {violations} | — |")
     endpoint_values = {_endpoint_label(record) for record in all_values}
     privacy_counts: dict[str, int] = defaultdict(int)
     transcript_counts: dict[str, int] = defaultdict(int)
@@ -306,7 +402,17 @@ def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
             transport_record_counts[error] += 1
             transport_attempt_counts[error] += int(count)
     endpoint_status = "present" if all_values and all(record.get("endpoint_metadata") for record in all_values) else "INCOMPLETE"
-    lines.extend(["", "## Provenance and transcript audit", ""])
+    lines.extend(
+        [
+            "",
+            "## Aggregation rule",
+            "",
+            f"A counted mean and seed standard deviation are reportable only when all expected seeds count (minimum counted-seed fraction {MIN_COUNTED_SEED_FRACTION:.0%}). Excluded seeds remain in the denominator and their raw scores remain diagnostic; no survivor mean is ranked.",
+            "",
+            "## Provenance and transcript audit",
+            "",
+        ]
+    )
     hash_matches = sum(record.get("engine_config_hash_matches") is True for record in all_values)
     lines.append(f"- Engine/config hash audit: {'PASS' if hash_matches == len(all_values) else 'FAILED'} on {hash_matches}/{len(all_values)} transcripts.")
     lines.append(f"- Endpoint metadata: {endpoint_status} on {sum(bool(record.get('endpoint_metadata')) for record in all_values)}/{len(all_values)} transcripts.")
@@ -383,6 +489,7 @@ def write_analysis(records: list[dict[str, Any]], json_path: str | Path, markdow
             {
                 "engine_config_hash": engine_config_hash(),
                 "records": records,
+                "leaderboard": leaderboard_aggregates(records),
                 "valid_record_count": len(records) - len(excluded_records),
                 "excluded_invalid_count": len(invalid_records),
                 "constraint_violating_count": len(constraint_records),

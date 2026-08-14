@@ -79,6 +79,17 @@ Each new transcript records a sanitized endpoint identity (never the API key,
 userinfo, or query string), and the analyzer audits endpoint provenance,
 evaluator-only field leaks, and stale transcripts before producing the report.
 
+The canonical leaderboard is always generated from a named command over an
+explicit run root. The command is recursive and deterministic; it does not
+discover neighboring runs or hand-built summary files:
+
+```bash
+python3 -m bench_bench build-leaderboard \
+  --input-dir runs/archive/v0.1-pilot \
+  --json reports/PILOT_V0.1_LEADERBOARD.json \
+  --markdown reports/PILOT_V0.1_LEADERBOARD.md
+```
+
 To create a new live full-year model suite (separate from the current
 authoritative offline replay), use:
 
@@ -101,6 +112,11 @@ For a local runner smoke test and transcript analyzer:
 
 ```bash
 python3 -m bench_bench demo-runner --weeks 12 --seed-count 5
-python3 -m bench_bench analyze-runs --input-dir runs/public-leaderboard
+python3 -m bench_bench build-leaderboard \
+  --input-dir runs/public-leaderboard \
+  --json reports/PUBLIC_LEADERBOARD.json \
+  --markdown reports/PUBLIC_LEADERBOARD.md
+python3 -m bench_bench verify-transcript runs/public-leaderboard/gpt-4.1-seed-100.jsonl \
+  --output /tmp/gpt-4.1-seed-100.current-engine.jsonl
 python3 -m bench_bench render-replay runs/public-leaderboard/gpt-4.1-seed-100.jsonl --output /tmp/bench-bench-replay.html
 ```

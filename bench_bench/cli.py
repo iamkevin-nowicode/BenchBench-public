@@ -10,9 +10,10 @@ import sys
 from typing import Any
 
 from .config import SimConfig
+from .artifact_replay import replay_transcript_current_engine
 from .engine import BenchEnvironment
 from .evaluation import run_episode, run_exploit_suite, run_suite, write_exploit_report, write_report
-from .runner import DeterministicPolicyClient, ModelRunner, OpenAICompatibleClient, RunnerConfig
+from .runner import AnthropicMessagesClient, DeterministicPolicyClient, ModelRunner, OpenAICompatibleClient, RunnerConfig
 from .runner_analysis import analyze_directory, analyze_paths, write_analysis
 from .viewer import render_replay
 
@@ -248,17 +249,11 @@ def run_model(args: argparse.Namespace) -> int:
         print(f"Invalid seed selection: {exc}")
         return 2
     api_key = os.environ.get(args.api_key_env)
-    client = OpenAICompatibleClient(
-        args.base_url,
-        args.model,
-        api_key=api_key,
-        temperature=args.temperature,
-        input_price_per_million=args.input_price_per_million,
-        cached_input_price_per_million=args.cached_input_price_per_million,
-        output_price_per_million=args.output_price_per_million,
-        request_retries=args.request_retries,
-        retry_backoff_seconds=args.retry_backoff_seconds,
-    )
+    client = _make_live_client(args, args.model, api_key)
+    _require_configured_pricing(client)
+    sampling = dict(getattr(client, "sampling_parameters", {}))
+    if args.effort == "not-exposed":
+        sampling["effort"] = "not exposed"
     results = []
     for seed in seeds:
         path = args.output_dir / f"{args.model.replace('/', '_')}-seed-{seed}.jsonl"
@@ -268,7 +263,7 @@ def run_model(args: argparse.Namespace) -> int:
                 weeks=args.weeks,
                 max_retries=args.max_retries,
                 expose_session_failure_reasons=args.expose_session_failure_reasons,
-                sampling={"temperature": args.temperature},
+                sampling=sampling,
             ),
         ).run_episode(seed, path)
         results.append(result.as_dict())
@@ -299,17 +294,11 @@ def run_model_suite(args: argparse.Namespace) -> int:
         return 2
     transcript_paths: list[Path] = []
     for model in models:
-        client = OpenAICompatibleClient(
-            args.base_url,
-            model,
-            api_key=os.environ.get(args.api_key_env),
-            temperature=args.temperature,
-            input_price_per_million=args.input_price_per_million,
-            cached_input_price_per_million=args.cached_input_price_per_million,
-            output_price_per_million=args.output_price_per_million,
-            request_retries=args.request_retries,
-            retry_backoff_seconds=args.retry_backoff_seconds,
-        )
+        client = _make_live_client(args, model, os.environ.get(args.api_key_env))
+        _require_configured_pricing(client)
+        sampling = dict(getattr(client, "sampling_parameters", {}))
+        if args.effort == "not-exposed":
+            sampling["effort"] = "not exposed"
         for seed in seeds:
             path = args.output_dir / f"{model.replace('/', '_')}-seed-{seed}.jsonl"
             transcript_paths.append(path)
@@ -319,7 +308,7 @@ def run_model_suite(args: argparse.Namespace) -> int:
                     weeks=args.weeks,
                     max_retries=args.max_retries,
                     expose_session_failure_reasons=args.expose_session_failure_reasons,
-                    sampling={"temperature": args.temperature},
+                    sampling=sampling,
                 ),
             ).run_episode(seed, path)
             print(f"{model} seed {seed}: {result.final_result['final_1rm_kg']:.2f} kg")
@@ -332,6 +321,66 @@ def run_model_suite(args: argparse.Namespace) -> int:
         print("Transport errors detected; live suite report is invalid until the affected transcripts are rerun.")
         return 2
     return 0
+
+
+def _make_live_client(args: argparse.Namespace, model: str, api_key: str | None):
+    if not api_key:
+        raise ValueError(f"API key environment variable {args.api_key_env} is not set")
+    common = {
+        "api_key": api_key,
+        "temperature": args.temperature,
+        "input_price_per_million": args.input_price_per_million,
+        "cached_input_price_per_million": args.cached_input_price_per_million,
+        "output_price_per_million": args.output_price_per_million,
+        "long_context_threshold_tokens": args.long_context_threshold_tokens,
+        "long_context_input_price_per_million": args.long_context_input_price_per_million,
+        "long_context_cached_input_price_per_million": args.long_context_cached_input_price_per_million,
+        "long_context_output_price_per_million": args.long_context_output_price_per_million,
+        "request_retries": args.request_retries,
+        "retry_backoff_seconds": args.retry_backoff_seconds,
+    }
+    if args.provider == "anthropic":
+        return AnthropicMessagesClient(
+            args.base_url,
+            model,
+            effort=args.effort,
+            max_output_tokens=args.max_output_tokens,
+            **common,
+        )
+    return OpenAICompatibleClient(
+        args.base_url,
+        model,
+        effort=None if args.effort == "not-exposed" else args.effort,
+        **common,
+    )
+
+
+def _require_configured_pricing(client: Any) -> None:
+    pricing = getattr(client, "pricing_metadata", {})
+    if (
+        not isinstance(pricing, dict)
+        or pricing.get("source") == "unpriced"
+        or float(pricing.get("input_price_per_million", 0.0)) <= 0.0
+        or float(pricing.get("output_price_per_million", 0.0)) <= 0.0
+    ):
+        raise ValueError(
+            f"pricing is not configured for model {getattr(client, 'model', 'unknown')}; "
+            "supply explicit input/output prices before running"
+        )
+    print(
+        "Pricing configured: "
+        f"input ${float(pricing['input_price_per_million']):.4g}/MTok, "
+        f"output ${float(pricing['output_price_per_million']):.4g}/MTok, "
+        f"source {pricing.get('source', 'unknown')}"
+    )
+    threshold = pricing.get("long_context_threshold_tokens")
+    if threshold is not None:
+        print(
+            "Long-context pricing configured: "
+            f">= {int(threshold)} prompt tokens; "
+            f"input ${float(pricing['long_context_input_price_per_million']):.4g}/MTok, "
+            f"output ${float(pricing['long_context_output_price_per_million']):.4g}/MTok"
+        )
 
 
 def demo_runner(args: argparse.Namespace) -> int:
@@ -362,24 +411,39 @@ def analyze_runs(args: argparse.Namespace) -> int:
     return 0
 
 
+def build_leaderboard(args: argparse.Namespace) -> int:
+    """Generate the canonical transcript-derived leaderboard from one run root."""
+    records = analyze_directory(args.input_dir)
+    if not records:
+        print(f"No JSONL transcripts found below {args.input_dir}")
+        return 2
+    write_analysis(records, args.json, args.markdown)
+    print(
+        f"Built leaderboard from {len(records)} transcripts below {args.input_dir}; "
+        f"wrote {args.json} and {args.markdown}"
+    )
+    return 0
+
+
+def verify_transcript(args: argparse.Namespace) -> int:
+    destination = args.output or args.source.with_name(f"{args.source.stem}.current-engine.jsonl")
+    replay_transcript_current_engine(args.source, destination)
+    print(f"Replayed under current engine: {args.source} -> {destination}")
+    return 0
+
+
 def redteam(args: argparse.Namespace) -> int:
     report = run_exploit_suite(
         range(args.seed_count),
         weeks=args.weeks,
         weekly_stimulus_cap=args.weekly_stimulus_cap,
     )
-    expert_config = SimConfig(
-        weeks=args.weeks,
-        **(
-            {"weekly_stimulus_cap": args.weekly_stimulus_cap}
-            if args.weekly_stimulus_cap is not None
-            else {}
-        ),
-    )
-    expert_scores = [run_episode("scripted-expert", seed, expert_config).final_1rm_kg for seed in range(args.seed_count)]
-    expert_mean = sum(expert_scores) / len(expert_scores)
+    # The search report owns the reference calculation so it applies the same
+    # all-seed constrained-score rule to expert and candidates.
+    expert_mean = report["comparison"].get("expert_mean_final_1rm_kg")
     write_exploit_report(report, args.json, args.markdown, expert_mean)
-    print(f"Red-team reference expert mean: {expert_mean:.2f} kg")
+    expert_label = f"{expert_mean:.2f} kg" if expert_mean is not None else "unavailable (not all seeds counted)"
+    print(f"Red-team reference expert mean: {expert_label}")
     print(f"Adversarial candidates beating expert: {report['comparison'].get('candidates_beating_expert') or 'none'}")
     print(f"Candidates requiring human review: {report['comparison'].get('human_review_candidates') or 'none'}")
     print(f"Release-blocking candidates: {report['comparison'].get('release_blocked_candidates') or 'none'}")
@@ -404,6 +468,13 @@ def build_parser() -> argparse.ArgumentParser:
     replay_parser = subparsers.add_parser("replay", help="verify a JSONL episode log byte-for-byte")
     replay_parser.add_argument("log", type=Path)
     replay_parser.set_defaults(func=replay)
+    verify_parser = subparsers.add_parser(
+        "verify-transcript",
+        help="replay a transcript under the current engine without model calls",
+    )
+    verify_parser.add_argument("source", type=Path)
+    verify_parser.add_argument("--output", type=Path)
+    verify_parser.set_defaults(func=verify_transcript)
     baseline_parser = subparsers.add_parser("baselines", help="run the six-policy Phase 2 separation gate")
     baseline_parser.add_argument("--weeks", type=int, default=12)
     baseline_parser.add_argument("--seed-count", type=int, default=20)
@@ -411,7 +482,8 @@ def build_parser() -> argparse.ArgumentParser:
     baseline_parser.add_argument("--markdown", type=Path, default=Path("reports/CURRENT_BASELINE_GATE.md"))
     baseline_parser.add_argument("--no-ablations", action="store_true")
     baseline_parser.set_defaults(func=baselines)
-    model_parser = subparsers.add_parser("run-model", help="evaluate an OpenAI-compatible model-only endpoint")
+    model_parser = subparsers.add_parser("run-model", help="evaluate a direct provider model-only endpoint")
+    model_parser.add_argument("--provider", choices=("openai-compatible", "anthropic"), default="openai-compatible")
     model_parser.add_argument("--base-url", required=True, help="chat completions URL or API root")
     model_parser.add_argument("--model", required=True)
     model_parser.add_argument("--api-key-env", default="OPENAI_API_KEY")
@@ -421,14 +493,21 @@ def build_parser() -> argparse.ArgumentParser:
     model_parser.add_argument("--max-retries", type=int, default=1)
     model_parser.add_argument("--expose-session-failure-reasons", action="store_true")
     model_parser.add_argument("--temperature", type=float, default=0.2)
+    model_parser.add_argument("--effort", choices=("low", "medium", "high", "xhigh", "max", "not-exposed"), default="medium")
+    model_parser.add_argument("--max-output-tokens", type=int, default=4096)
     model_parser.add_argument("--input-price-per-million", type=float, default=None)
     model_parser.add_argument("--cached-input-price-per-million", type=float, default=None)
     model_parser.add_argument("--output-price-per-million", type=float, default=None)
+    model_parser.add_argument("--long-context-threshold-tokens", type=int, default=None)
+    model_parser.add_argument("--long-context-input-price-per-million", type=float, default=None)
+    model_parser.add_argument("--long-context-cached-input-price-per-million", type=float, default=None)
+    model_parser.add_argument("--long-context-output-price-per-million", type=float, default=None)
     model_parser.add_argument("--request-retries", type=int, default=2)
     model_parser.add_argument("--retry-backoff-seconds", type=float, default=1.0)
     model_parser.add_argument("--output-dir", type=Path, default=Path("runs"))
     model_parser.set_defaults(func=run_model)
-    suite_parser = subparsers.add_parser("run-model-suite", help="evaluate several models on the same public seeds")
+    suite_parser = subparsers.add_parser("run-model-suite", help="evaluate several direct-provider models on the same public seeds")
+    suite_parser.add_argument("--provider", choices=("openai-compatible", "anthropic"), default="openai-compatible")
     suite_parser.add_argument("--base-url", required=True)
     suite_parser.add_argument("--models", required=True, help="comma-separated model names")
     suite_parser.add_argument("--api-key-env", default="OPENAI_API_KEY")
@@ -438,9 +517,15 @@ def build_parser() -> argparse.ArgumentParser:
     suite_parser.add_argument("--max-retries", type=int, default=1)
     suite_parser.add_argument("--expose-session-failure-reasons", action="store_true")
     suite_parser.add_argument("--temperature", type=float, default=0.2)
+    suite_parser.add_argument("--effort", choices=("low", "medium", "high", "xhigh", "max", "not-exposed"), default="medium")
+    suite_parser.add_argument("--max-output-tokens", type=int, default=4096)
     suite_parser.add_argument("--input-price-per-million", type=float, default=None)
     suite_parser.add_argument("--cached-input-price-per-million", type=float, default=None)
     suite_parser.add_argument("--output-price-per-million", type=float, default=None)
+    suite_parser.add_argument("--long-context-threshold-tokens", type=int, default=None)
+    suite_parser.add_argument("--long-context-input-price-per-million", type=float, default=None)
+    suite_parser.add_argument("--long-context-cached-input-price-per-million", type=float, default=None)
+    suite_parser.add_argument("--long-context-output-price-per-million", type=float, default=None)
     suite_parser.add_argument("--request-retries", type=int, default=2)
     suite_parser.add_argument("--retry-backoff-seconds", type=float, default=1.0)
     suite_parser.add_argument("--output-dir", type=Path, default=Path("runs/model-suite"))
@@ -458,6 +543,14 @@ def build_parser() -> argparse.ArgumentParser:
     analysis_parser.add_argument("--json", type=Path, default=Path("reports/current_transcript_analysis.json"))
     analysis_parser.add_argument("--markdown", type=Path, default=Path("reports/CURRENT_TRANSCRIPT_ANALYSIS.md"))
     analysis_parser.set_defaults(func=analyze_runs)
+    leaderboard_parser = subparsers.add_parser(
+        "build-leaderboard",
+        help="generate the canonical leaderboard from every transcript below a run root",
+    )
+    leaderboard_parser.add_argument("--input-dir", type=Path, required=True)
+    leaderboard_parser.add_argument("--json", type=Path, required=True)
+    leaderboard_parser.add_argument("--markdown", type=Path, required=True)
+    leaderboard_parser.set_defaults(func=build_leaderboard)
     redteam_parser = subparsers.add_parser("redteam", help="run full-year automated legal-action adversarial search")
     redteam_parser.add_argument("--weeks", type=int, default=52)
     redteam_parser.add_argument("--seed-count", type=int, default=20)
