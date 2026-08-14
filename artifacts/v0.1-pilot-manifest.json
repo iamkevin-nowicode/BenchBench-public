@@ -1,0 +1,514 @@
+{
+  "benchmark": "Bench-bench",
+  "label": "v0.1 pilot",
+  "archive_path": "artifacts/v0.1-pilot-transcripts.tar.gz",
+  "archive_member_prefix": "v0.1-pilot-transcripts",
+  "archive_sha256": "sha256:823d6ff4649046cae4519637fa1346eb395257caf9045250a806b7afb3bbf990",
+  "file_count": 50,
+  "byte_count": 130784450,
+  "runner_version": "0.1.0",
+  "pricing_table_version": "bench_bench.runner._MODEL_PRICING_USD_PER_MILLION@sha256:5fd68548de5bb67bd8977dfa1d0bee091dab3aaf0c4a0a386a62182b6de1cb81",
+  "transcript_tree_sha256": "sha256:00dda00a64147e70527eae4efdb54468714d71514870d56dcfecd2847c829148",
+  "transcripts": [
+    {
+      "relative_path": "live-full-20260808/claude-opus-5/seed-100/claude-opus-5-seed-100.jsonl",
+      "sha256": "sha256:d4974b33a890920241a5e24ed790b912d4910c5e679cd828ca835b432772c4e0",
+      "byte_count": 3320279,
+      "model": "claude-opus-5",
+      "seed": 100,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/claude-opus-5/seed-101/claude-opus-5-seed-101.jsonl",
+      "sha256": "sha256:5f3c4f02f6139adfe89ae4eb8a46d194cb29069251ded83b264e1754984621e2",
+      "byte_count": 3223925,
+      "model": "claude-opus-5",
+      "seed": 101,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/claude-opus-5/seed-102/claude-opus-5-seed-102.jsonl",
+      "sha256": "sha256:42f344fe2eb801837a14e59237c0c483f82d99ffb25c5f5f7f45a42ae2e4b307",
+      "byte_count": 3263203,
+      "model": "claude-opus-5",
+      "seed": 102,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/claude-opus-5/seed-103/claude-opus-5-seed-103.jsonl",
+      "sha256": "sha256:ec4f68dacdc436ebe52b9ffa24b37ca723e68e61ff37a4728aac5cf964a837eb",
+      "byte_count": 3107737,
+      "model": "claude-opus-5",
+      "seed": 103,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/claude-opus-5/seed-104/claude-opus-5-seed-104.jsonl",
+      "sha256": "sha256:bd9f223fe64b50e99dbefe6047da4ae690e3344ee9b5d040463c7e6a2d16b5f0",
+      "byte_count": 3170591,
+      "model": "claude-opus-5",
+      "seed": 104,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/claude-opus-5/seed-105/claude-opus-5-seed-105.jsonl",
+      "sha256": "sha256:83bbdda4f51e9b8dfe6ccd3174f5f3d57a40141014bf61be334ded6d518b13a9",
+      "byte_count": 3167117,
+      "model": "claude-opus-5",
+      "seed": 105,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/claude-opus-5/seed-106/claude-opus-5-seed-106.jsonl",
+      "sha256": "sha256:8988d4af90e968d6d2b18e23c9588eb5e3c458f34357623fe8ae0c97659ac20b",
+      "byte_count": 3093213,
+      "model": "claude-opus-5",
+      "seed": 106,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/claude-opus-5/seed-107/claude-opus-5-seed-107.jsonl",
+      "sha256": "sha256:1a00162881ec7f9d992bf35e405148c3423ab22928bced8e313eb617967c8c36",
+      "byte_count": 3130546,
+      "model": "claude-opus-5",
+      "seed": 107,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/claude-opus-5/seed-108/claude-opus-5-seed-108.jsonl",
+      "sha256": "sha256:ab9934fdb45041a5090e6b31efee9171cbec870f09b3026c2abcfe11d5d959e5",
+      "byte_count": 3285202,
+      "model": "claude-opus-5",
+      "seed": 108,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/claude-opus-5/seed-109/claude-opus-5-seed-109.jsonl",
+      "sha256": "sha256:a004c96611022e33ec01d9b055ee805f4cd1913f2656e21773804863338ef4f9",
+      "byte_count": 3145765,
+      "model": "claude-opus-5",
+      "seed": 109,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/gpt-5.6-sol/seed-100/gpt-5.6-sol-seed-100.jsonl",
+      "sha256": "sha256:eb203f87ec3efb78f354b5f0deeee9469121da1a472c48e968cf10ce045e0495",
+      "byte_count": 2286169,
+      "model": "gpt-5.6-sol",
+      "seed": 100,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/gpt-5.6-sol/seed-101/gpt-5.6-sol-seed-101.jsonl",
+      "sha256": "sha256:4046fb46afb5e345f0d4a3c30f76835731ae8e28f9ace31e22edfa0c3b5b3258",
+      "byte_count": 2274473,
+      "model": "gpt-5.6-sol",
+      "seed": 101,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/gpt-5.6-sol/seed-102/gpt-5.6-sol-seed-102.jsonl",
+      "sha256": "sha256:d1cedcc619d0f6e737bef1ad7c17fd48cfb87e7850ff76b9df3238b4e0edb741",
+      "byte_count": 2336612,
+      "model": "gpt-5.6-sol",
+      "seed": 102,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/gpt-5.6-sol/seed-103/gpt-5.6-sol-seed-103.jsonl",
+      "sha256": "sha256:c3a5d5d313e5c3db39872f212b0a834ae7b8dc6964220341decd8628130e0582",
+      "byte_count": 2258578,
+      "model": "gpt-5.6-sol",
+      "seed": 103,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/gpt-5.6-sol/seed-104/gpt-5.6-sol-seed-104.jsonl",
+      "sha256": "sha256:10369dfd723ad194fa9de5a72b3d446eafc3cbcedb5755b369cb18958bd2df33",
+      "byte_count": 2272971,
+      "model": "gpt-5.6-sol",
+      "seed": 104,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/gpt-5.6-sol/seed-105/gpt-5.6-sol-seed-105.jsonl",
+      "sha256": "sha256:453709391d98567775e02000388d6eb41927d3dfe52a486c9cd34578e52fb464",
+      "byte_count": 2281500,
+      "model": "gpt-5.6-sol",
+      "seed": 105,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/gpt-5.6-sol/seed-106/gpt-5.6-sol-seed-106.jsonl",
+      "sha256": "sha256:41b8a8e7f893eade1fef8b36b191fb56871400411529a1deb5a80052598eccd0",
+      "byte_count": 2278654,
+      "model": "gpt-5.6-sol",
+      "seed": 106,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/gpt-5.6-sol/seed-107/gpt-5.6-sol-seed-107.jsonl",
+      "sha256": "sha256:5cb4d432126d4d874be9c9e052641a96d593cbb2b8f28558765c234db60c91c7",
+      "byte_count": 2306753,
+      "model": "gpt-5.6-sol",
+      "seed": 107,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/gpt-5.6-sol/seed-108/gpt-5.6-sol-seed-108.jsonl",
+      "sha256": "sha256:e45db18ffc5b8e10e0fa15a487ff8009fe56b5d79fa24815440df59ed34daee4",
+      "byte_count": 2309159,
+      "model": "gpt-5.6-sol",
+      "seed": 108,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/gpt-5.6-sol/seed-109/gpt-5.6-sol-seed-109.jsonl",
+      "sha256": "sha256:1e0c078856182145d482b0b7eb769cdf1bd4af10c491c720f89f126282321005",
+      "byte_count": 2283425,
+      "model": "gpt-5.6-sol",
+      "seed": 109,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/kimi-k3/seed-100/kimi-k3-seed-100.jsonl",
+      "sha256": "sha256:168043bb17036714f18989c097b98e6d86257cad957bb019eb44b45428472634",
+      "byte_count": 3298245,
+      "model": "kimi-k3",
+      "seed": 100,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/kimi-k3/seed-101/kimi-k3-seed-101.jsonl",
+      "sha256": "sha256:314f1ba023f6f69f7382f4c6a0b9d0dad071f475702272ad0328ba44b50bb57d",
+      "byte_count": 3166524,
+      "model": "kimi-k3",
+      "seed": 101,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/kimi-k3/seed-102/kimi-k3-seed-102.jsonl",
+      "sha256": "sha256:0d8bafcc60ce287f93fa5573bcad6d00bf4943a6530a94546e72e1e1ddddc8c0",
+      "byte_count": 3238169,
+      "model": "kimi-k3",
+      "seed": 102,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/kimi-k3/seed-103/kimi-k3-seed-103.jsonl",
+      "sha256": "sha256:22a6ab320bb18a1cfac9ff16dd933cf9114183759818bf5959e5860c6f9005f5",
+      "byte_count": 3203127,
+      "model": "kimi-k3",
+      "seed": 103,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/kimi-k3/seed-104/kimi-k3-seed-104.jsonl",
+      "sha256": "sha256:5f6b353481f017f4018f1e83e02f7110f2dad77689030a07691da7fb9768652b",
+      "byte_count": 2711606,
+      "model": "kimi-k3",
+      "seed": 104,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/kimi-k3/seed-105/kimi-k3-seed-105.jsonl",
+      "sha256": "sha256:2ee647bfe3300b32b7c402b962fbdd2c4539dfbea307a7ca847c2cee430aec49",
+      "byte_count": 2200308,
+      "model": "kimi-k3",
+      "seed": 105,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/kimi-k3/seed-106/kimi-k3-seed-106.jsonl",
+      "sha256": "sha256:6baeb58faee19df15f86c0ed52186c0ee6ef266d9d9a8383721f73058bf1a5d1",
+      "byte_count": 1471559,
+      "model": "kimi-k3",
+      "seed": 106,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/kimi-k3/seed-107/kimi-k3-seed-107.jsonl",
+      "sha256": "sha256:88c81434dec7b908d4edb22d2e7d00b8298d004408713f5c6c8f369df97fbbb5",
+      "byte_count": 1494530,
+      "model": "kimi-k3",
+      "seed": 107,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/kimi-k3/seed-108/kimi-k3-seed-108.jsonl",
+      "sha256": "sha256:b1c854034ccf9ae8592adf0ae1f3e8f736a3589a8dc0e664be91895f2ecf965b",
+      "byte_count": 1492411,
+      "model": "kimi-k3",
+      "seed": 108,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/kimi-k3/seed-109/kimi-k3-seed-109.jsonl",
+      "sha256": "sha256:035a64453516363bcd92f139359c43a189d53e58418cef4fbecb83ff8b75d948",
+      "byte_count": 1476791,
+      "model": "kimi-k3",
+      "seed": 109,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/muse-spark-1.2/seed-100/muse-spark-1.2-seed-100.jsonl",
+      "sha256": "sha256:82382abfe305744bac10b0c9ca0dfed2391a92b1ea221ddac66a38ff2e1a674e",
+      "byte_count": 2445829,
+      "model": "muse-spark-1.2",
+      "seed": 100,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/muse-spark-1.2/seed-101/muse-spark-1.2-seed-101.jsonl",
+      "sha256": "sha256:a6a33049bc21247347a28815f129bdf84c7a612c703759a837698692d5ee492e",
+      "byte_count": 2543874,
+      "model": "muse-spark-1.2",
+      "seed": 101,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/muse-spark-1.2/seed-102/muse-spark-1.2-seed-102.jsonl",
+      "sha256": "sha256:b231aff3dbb3f7b415f28eada479a33b5384ee36db6d949591a33bf29d3e7934",
+      "byte_count": 2495353,
+      "model": "muse-spark-1.2",
+      "seed": 102,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/muse-spark-1.2/seed-103/muse-spark-1.2-seed-103.jsonl",
+      "sha256": "sha256:447da86871ed35b715570556a51108cb4f4d1057f62d3ae38fe8ac76b0f11ef5",
+      "byte_count": 2430542,
+      "model": "muse-spark-1.2",
+      "seed": 103,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/muse-spark-1.2/seed-104/muse-spark-1.2-seed-104.jsonl",
+      "sha256": "sha256:267dab1c8c9b122576e597429247780883d44f9eeda1c1381b8e88b727bb30a6",
+      "byte_count": 2445428,
+      "model": "muse-spark-1.2",
+      "seed": 104,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/muse-spark-1.2/seed-105/muse-spark-1.2-seed-105.jsonl",
+      "sha256": "sha256:b4ed988c41e3b9e69ea7f695eecdc81bde402a535c4f92138d1dae7bb5716873",
+      "byte_count": 2442436,
+      "model": "muse-spark-1.2",
+      "seed": 105,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/muse-spark-1.2/seed-106/muse-spark-1.2-seed-106.jsonl",
+      "sha256": "sha256:3b8a9373b9fab8f2b7ea08527e632f1b1ff84fd730557300875138bfbb2d3ade",
+      "byte_count": 2459266,
+      "model": "muse-spark-1.2",
+      "seed": 106,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/muse-spark-1.2/seed-107/muse-spark-1.2-seed-107.jsonl",
+      "sha256": "sha256:d76cf4ddcf2d85eb681d057c926ea3a4841b1f05ab230703dce112ad167bf96c",
+      "byte_count": 2457819,
+      "model": "muse-spark-1.2",
+      "seed": 107,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/muse-spark-1.2/seed-108/muse-spark-1.2-seed-108.jsonl",
+      "sha256": "sha256:4a4dd569685d2b179ab80561d71ff03cf51e999a5edbd5a5696b3bb61281b9b0",
+      "byte_count": 2500522,
+      "model": "muse-spark-1.2",
+      "seed": 108,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-full-20260808/muse-spark-1.2/seed-109/muse-spark-1.2-seed-109.jsonl",
+      "sha256": "sha256:f8c9e4bef705d5965bfc6fbd3eb80e80a1a77366d37b0fdb9281b482afd21d41",
+      "byte_count": 2457500,
+      "model": "muse-spark-1.2",
+      "seed": 109,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-grok-4.5-full-20260811/grok-4.5/seed-100/grok-4.5-seed-100.jsonl",
+      "sha256": "sha256:69df8bdeaabc0c85f97833708a53c5d782790b7609727b9b745ba76970dd209a",
+      "byte_count": 2740329,
+      "model": "grok-4.5",
+      "seed": 100,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-grok-4.5-full-20260811/grok-4.5/seed-101/grok-4.5-seed-101.jsonl",
+      "sha256": "sha256:8594356b2cbbcec288a39911a580ed55e30b4e97d8301af4a1a8b73640a52012",
+      "byte_count": 2881599,
+      "model": "grok-4.5",
+      "seed": 101,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-grok-4.5-full-20260811/grok-4.5/seed-102/grok-4.5-seed-102.jsonl",
+      "sha256": "sha256:5edc6610abb4e2201fe72d6de3686a6722c7e73cbef82642c5e823bedbbd50e8",
+      "byte_count": 2689992,
+      "model": "grok-4.5",
+      "seed": 102,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-grok-4.5-full-20260811/grok-4.5/seed-103/grok-4.5-seed-103.jsonl",
+      "sha256": "sha256:95045ffd2865994df325e85ae9c52267c20050164b86260a86a0aa81282d5959",
+      "byte_count": 2732503,
+      "model": "grok-4.5",
+      "seed": 103,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-grok-4.5-full-20260811/grok-4.5/seed-104/grok-4.5-seed-104.jsonl",
+      "sha256": "sha256:df0a8925c1e60f1423b6a67e4e824b40f7732324ccf63cf56a37235300925fbb",
+      "byte_count": 2762714,
+      "model": "grok-4.5",
+      "seed": 104,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-grok-4.5-full-20260811/grok-4.5/seed-105/grok-4.5-seed-105.jsonl",
+      "sha256": "sha256:c8ede656441dfb61b56629eae286b3c5b6886b6143d22b3fa2aa5ffa4916b96c",
+      "byte_count": 2680113,
+      "model": "grok-4.5",
+      "seed": 105,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-grok-4.5-full-20260811/grok-4.5/seed-106/grok-4.5-seed-106.jsonl",
+      "sha256": "sha256:2c4cce61bda3b3f5e8488d016d1eed942c23cb9661343c0b759fefa29da1eaa4",
+      "byte_count": 2817815,
+      "model": "grok-4.5",
+      "seed": 106,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-grok-4.5-full-20260811/grok-4.5/seed-107/grok-4.5-seed-107.jsonl",
+      "sha256": "sha256:8cc71da29725092c4506dab40d98668880061861074b4611235dcc63037cc08c",
+      "byte_count": 2790575,
+      "model": "grok-4.5",
+      "seed": 107,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-grok-4.5-full-20260811/grok-4.5/seed-108/grok-4.5-seed-108.jsonl",
+      "sha256": "sha256:1a083ad0f2160c96bbeb72d96f75bf9b479246e010e640b6ec7b813dee931a24",
+      "byte_count": 2762669,
+      "model": "grok-4.5",
+      "seed": 108,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    },
+    {
+      "relative_path": "live-grok-4.5-full-20260811/grok-4.5/seed-109/grok-4.5-seed-109.jsonl",
+      "sha256": "sha256:5bf54ba0937a1adc88189b41784ff4d076691a9119fdb059197a1d53b794f5cc",
+      "byte_count": 2698430,
+      "model": "grok-4.5",
+      "seed": 109,
+      "weeks": 52,
+      "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+      "prompt_hash": "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+    }
+  ]
+}

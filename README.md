@@ -79,16 +79,24 @@ Each new transcript records a sanitized endpoint identity (never the API key,
 userinfo, or query string), and the analyzer audits endpoint provenance,
 evaluator-only field leaks, and stale transcripts before producing the report.
 
-The canonical leaderboard is always generated from a named command over an
-explicit run root. The command is recursive and deterministic; it does not
-discover neighboring runs or hand-built summary files:
+The v0.1 pilot transcripts are published as the tracked, immutable archive
+`artifacts/v0.1-pilot-transcripts.tar.gz`; `runs/` remains disposable. After
+extracting that archive into `artifacts/`, the canonical leaderboard is always
+generated from this named command over the extracted artifact root. The command
+is recursive and deterministic; it does not discover neighboring runs or
+hand-built summary files:
 
 ```bash
+tar -xzf artifacts/v0.1-pilot-transcripts.tar.gz -C artifacts
 python3 -m bench_bench build-leaderboard \
-  --input-dir runs/archive/v0.1-pilot \
+  --input-dir artifacts/v0.1-pilot-transcripts \
   --json reports/PILOT_V0.1_LEADERBOARD.json \
   --markdown reports/PILOT_V0.1_LEADERBOARD.md
 ```
+
+The archive manifest is `artifacts/v0.1-pilot-manifest.json`. It records the
+per-transcript hashes and provenance, plus the deterministic tarball hash,
+runner version, and content-addressed pricing-table version.
 
 To create a new live full-year model suite (separate from the current
 authoritative offline replay), use:
