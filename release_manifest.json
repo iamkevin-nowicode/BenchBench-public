@@ -5,7 +5,7 @@
   "package": "bench_bench",
   "required_runtime": "Python 3.11+",
   "required_dependency": "pydantic >=2,<3",
-  "engine_config_hash": "sha256:d5585a5bb69088a0cb7b3f4f78b70dc79a3caa59a3fcbbc00a9fcebde6d3add1",
+  "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
   "benchmark_card": "BENCHMARK_CARD.md",
   "authoritative_leaderboard_status": "pending_independent_review_and_live_run",
   "authoritative_leaderboard_json": "reports/PUBLIC_LEADERBOARD.json",

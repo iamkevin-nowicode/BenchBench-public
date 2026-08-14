@@ -1,6 +1,6 @@
 # Bench-bench v0.1 Benchmark Card
 
-Engine/config hash for this artifact set: `sha256:d5585a5bb69088a0cb7b3f4f78b70dc79a3caa59a3fcbbc00a9fcebde6d3add1`
+Engine/config hash for this artifact set: `sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1`
 
 ## Summary
 
@@ -24,11 +24,12 @@ open-web track in this release.
   sleep, pain, and illness.
 - The simulator executes days internally. Seeded illness, closure, travel,
   work, or household events can create short reactive decisions.
-- The headline score is the arithmetic mean of three hidden standardized-test
+- The headline score is the arithmetic mean of three standardized-test
   projections taken after weeks 44, 48, and 52. Each projection uses the fixed
   three-day test protocol and is read-only: it does not alter the episode.
-- Test timing is hidden from the acting model. A 12-week configuration is a
-  development diagnostic and does not constitute the release horizon.
+- Test timing is disclosed by protocol: the standardized tests are at weeks 44,
+  48, and 52. A 12-week configuration is a development diagnostic and does not
+  constitute the release horizon.
 - After four consecutive productive weeks, each subsequent productive week
   adds 0.10 kg to durable base capacity. This is the current consistency drift
   mechanic.
@@ -75,9 +76,13 @@ decisions. These are benchmark-designed mechanics, not a physiological model.
 
 ## Scoring and validity
 
-Headline score is the averaged hidden-test 1RM, counted only when the episode
-has `pain_days ≤ 14`. The raw final 1RM is retained beside the counted score
-for every structurally valid episode. Secondary reporting includes
+Headline score is the averaged standardized-test 1RM, counted only when the
+episode has `pain_days ≤ 14`. The raw final 1RM is retained beside the counted
+score for every structurally valid episode. For any aggregate across seeds, a
+counted mean and seed standard deviation are reportable only when all expected
+seeds count (minimum counted-seed fraction: 100%). If any seed is excluded, the
+aggregate counted score is shown as unavailable rather than averaging survivors;
+raw per-seed scores and violations remain visible. Secondary reporting includes
 improvement, productive weeks, completed and missed sessions, fallback use,
 pain burden, sleep debt, household strain, spending, and repair counts.
 Household strain and sleep debt are diagnostics only; neither can invalidate a
@@ -116,17 +121,19 @@ score; the model leaderboard uses the counted column and excludes violations.
 
 The 12-week diagnostic has 5.766σ expert–random separation and fails the
 stable-ordering diagnostic, so it is not a release gate. In the current
-52-week widened adversarial search, the best valid candidate scored 100.48 kg
-against the 102.89 kg expert. `adversarial-001` had a raw mean of 102.22 kg
-and a counted mean of 102.08 kg across its 16 pain-compliant episodes, but
-four of 20 episodes exceeded `pain_days ≤ 14`; it is therefore not a fully
-valid candidate and was excluded from the search ranking. No candidate beat
-the expert, no candidate required human review, and no candidate was
+52-week widened adversarial search, the best valid candidate scored 100.72 kg
+against the 102.89 kg expert. This is a result about the current search
+coverage, not an environment ceiling: the report also retains a diagnostic
+ranking of raw scores and counted-seed fractions, while only all-seed-compliant
+genomes are eligible for comparisons or release claims. No candidate beat the
+expert, no candidate required human review, and no candidate was
 release-blocking. The widened genome covers mixed-focus weekly templates,
-per-week structure, boundary loads including zero, and ordered purchases; the
-volume-stacking, 8×4, mixed-focus, zero-load, and purchase-order regression
-families remain below expert, while the over-ceiling authored fallback family
-is invalid in search. Beating the expert alone is not a release block.
+per-week structure, boundary loads including zero, ordered purchases, and the
+two independent-reviewer regression policies (`4×1×11` with a 0.449 + 0.0112×
+weekly load ramp, and `4×4×8` at 0.72× for 30 minutes). The volume-stacking,
+8×4, mixed-focus, zero-load, purchase-order, and reviewer regression families
+remain below expert; the over-ceiling authored fallback family is invalid in
+search. Beating the expert alone is not a release block.
 
 ## Public leaderboard status
 

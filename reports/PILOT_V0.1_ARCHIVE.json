@@ -1,0 +1,22 @@
+{
+  "benchmark": "Bench-bench",
+  "label": "v0.1 pilot",
+  "archive_root": "runs/archive/v0.1-pilot",
+  "source_roots": [
+    "runs/live-full-20260808",
+    "runs/live-grok-4.5-full-20260811"
+  ],
+  "transcript_count": 50,
+  "models": [
+    "claude-opus-5",
+    "gpt-5.6-sol",
+    "kimi-k3",
+    "muse-spark-1.2",
+    "grok-4.5"
+  ],
+  "public_seed_values": [100, 101, 102, 103, 104, 105, 106, 107, 108, 109],
+  "horizon_weeks": 52,
+  "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+  "transcript_tree_sha256": "4352edf48bdfece189d35e7fe4ffa5c0428b64b37779c940a411f836c23fad3d",
+  "note": "The transcript files remain local under the ignored runs/ archive. This manifest labels and fingerprints the retained evidence without placing raw provider transcripts in Git."
+}

@@ -1,0 +1,2363 @@
+{
+  "aggregation": {
+    "counted_seed_fraction_required": 1.0,
+    "pain_days_limit": 14,
+    "paired_ci": "two-sided 95% t interval over 10 matched public seeds; df=9"
+  },
+  "baselines": {
+    "random": {
+      "counted_mean_kg": 86.939,
+      "counted_seed_sd_kg": 0.9999889473073381,
+      "counted_seeds": 20,
+      "mean_kg": 86.939,
+      "name": "random",
+      "raw_scores": {
+        "0": 85.92,
+        "1": 86.81,
+        "10": 87.1,
+        "11": 88.19,
+        "12": 86.81,
+        "13": 86.81,
+        "14": 86.3,
+        "15": 87.21,
+        "16": 86.7,
+        "17": 86.23,
+        "18": 86.11,
+        "19": 87.8,
+        "2": 85.29,
+        "3": 86.88,
+        "4": 85.82,
+        "5": 85.83,
+        "6": 89.32,
+        "7": 87.69,
+        "8": 87.63,
+        "9": 88.33
+      },
+      "seed_sd_kg": 0.9999889473073381,
+      "total_seeds": 20,
+      "violations": 0
+    },
+    "reckless-maximalist": {
+      "counted_mean_kg": null,
+      "counted_seed_sd_kg": null,
+      "counted_seeds": 0,
+      "mean_kg": 87.506,
+      "name": "reckless-maximalist",
+      "raw_scores": {
+        "0": 87.61,
+        "1": 86.45,
+        "10": 85.95,
+        "11": 88.49,
+        "12": 86.5,
+        "13": 87.94,
+        "14": 90.18,
+        "15": 87.63,
+        "16": 87.43,
+        "17": 86.87,
+        "18": 88.85,
+        "19": 88.28,
+        "2": 86.08,
+        "3": 87.71,
+        "4": 87.64,
+        "5": 86.79,
+        "6": 88.54,
+        "7": 88.11,
+        "8": 86.52,
+        "9": 86.55
+      },
+      "seed_sd_kg": 1.06679253643315,
+      "total_seeds": 20,
+      "violations": 20
+    },
+    "recovery-aware": {
+      "counted_mean_kg": 99.00750000000001,
+      "counted_seed_sd_kg": 0.6987196938159921,
+      "counted_seeds": 20,
+      "mean_kg": 99.00750000000001,
+      "name": "recovery-aware",
+      "raw_scores": {
+        "0": 98.65,
+        "1": 99.16,
+        "10": 99.42,
+        "11": 99.16,
+        "12": 100.28,
+        "13": 99.25,
+        "14": 99.4,
+        "15": 98.9,
+        "16": 98.98,
+        "17": 99.63,
+        "18": 99.0,
+        "19": 98.71,
+        "2": 97.43,
+        "3": 98.95,
+        "4": 98.28,
+        "5": 99.58,
+        "6": 99.12,
+        "7": 99.64,
+        "8": 99.27,
+        "9": 97.34
+      },
+      "seed_sd_kg": 0.6987196938159921,
+      "total_seeds": 20,
+      "violations": 0
+    },
+    "rigid-linear": {
+      "counted_mean_kg": 92.346,
+      "counted_seed_sd_kg": 1.7744306722231555,
+      "counted_seeds": 20,
+      "mean_kg": 92.346,
+      "name": "rigid-linear",
+      "raw_scores": {
+        "0": 93.48,
+        "1": 90.18,
+        "10": 91.74,
+        "11": 93.56,
+        "12": 90.13,
+        "13": 93.64,
+        "14": 94.49,
+        "15": 91.93,
+        "16": 90.61,
+        "17": 93.54,
+        "18": 94.39,
+        "19": 92.35,
+        "2": 91.75,
+        "3": 90.41,
+        "4": 93.02,
+        "5": 89.08,
+        "6": 94.12,
+        "7": 95.04,
+        "8": 90.05,
+        "9": 93.41
+      },
+      "seed_sd_kg": 1.7744306722231555,
+      "total_seeds": 20,
+      "violations": 0
+    },
+    "scripted-expert": {
+      "counted_mean_kg": 102.89200000000001,
+      "counted_seed_sd_kg": 0.6495066953992247,
+      "counted_seeds": 20,
+      "mean_kg": 102.89200000000001,
+      "name": "scripted-expert",
+      "raw_scores": {
+        "0": 102.75,
+        "1": 103.37,
+        "10": 102.69,
+        "11": 103.1,
+        "12": 103.59,
+        "13": 103.45,
+        "14": 102.78,
+        "15": 102.97,
+        "16": 102.55,
+        "17": 103.87,
+        "18": 102.34,
+        "19": 103.13,
+        "2": 101.09,
+        "3": 103.17,
+        "4": 102.4,
+        "5": 103.37,
+        "6": 102.4,
+        "7": 103.7,
+        "8": 103.07,
+        "9": 102.05
+      },
+      "seed_sd_kg": 0.6495066953992247,
+      "total_seeds": 20,
+      "violations": 0
+    },
+    "skip-when-busy": {
+      "counted_mean_kg": 96.5615,
+      "counted_seed_sd_kg": 0.9577620570343851,
+      "counted_seeds": 20,
+      "mean_kg": 96.5615,
+      "name": "skip-when-busy",
+      "raw_scores": {
+        "0": 96.72,
+        "1": 96.62,
+        "10": 96.4,
+        "11": 95.94,
+        "12": 97.97,
+        "13": 97.78,
+        "14": 96.25,
+        "15": 95.87,
+        "16": 97.36,
+        "17": 97.45,
+        "18": 96.51,
+        "19": 96.23,
+        "2": 94.85,
+        "3": 96.37,
+        "4": 96.76,
+        "5": 95.94,
+        "6": 96.24,
+        "7": 98.72,
+        "8": 96.49,
+        "9": 94.76
+      },
+      "seed_sd_kg": 0.9577620570343851,
+      "total_seeds": 20,
+      "violations": 0
+    }
+  },
+  "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+  "episodes": 50,
+  "generated_date": "2026-08-12",
+  "horizon_weeks": 52,
+  "models": {
+    "claude-opus-5": {
+      "cost_per_episode_usd": 5.9503315,
+      "cost_total_usd": 59.503315,
+      "counted_seeds": 10,
+      "decisions": 677,
+      "display_name": "Claude Opus 5",
+      "endpoint_metadata": {
+        "kind": "anthropic-messages",
+        "url": "https://api.anthropic.com/v1/messages"
+      },
+      "engine_config_hashes": [
+        "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1"
+      ],
+      "input_tokens": 7856328,
+      "interrupts": 157,
+      "invalid_episodes": 0,
+      "max_kg": 102.15,
+      "mean_kg": 100.064,
+      "min_kg": 94.88,
+      "model": "claude-opus-5",
+      "model_calls": 807,
+      "pain_violations": 0,
+      "pricing": {
+        "cached_input_price_per_million": 0.5,
+        "input_price_per_million": 5.0,
+        "output_price_per_million": 25.0,
+        "source": "model-default"
+      },
+      "records": [
+        {
+          "cost_usd": 6.09157,
+          "decisions": 68,
+          "endpoint_metadata": {
+            "kind": "anthropic-messages",
+            "url": "https://api.anthropic.com/v1/messages"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 798964,
+          "interrupts": 16,
+          "invalid_reason": null,
+          "model": "claude-opus-5",
+          "model_calls": 80,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 25.0,
+            "source": "model-default"
+          },
+          "provider": "anthropic",
+          "repairs": 12,
+          "sampling": {
+            "effort": "medium",
+            "max_output_tokens": 8192,
+            "temperature": 1.0,
+            "thinking": "adaptive"
+          },
+          "score": 97.61,
+          "seed": 100,
+          "summary_repair_calls": 12,
+          "thinking_tokens": 10690,
+          "total_tokens": 882834,
+          "transport_failures": 0,
+          "visible_output_tokens": 73180,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 5.874375,
+          "decisions": 67,
+          "endpoint_metadata": {
+            "kind": "anthropic-messages",
+            "url": "https://api.anthropic.com/v1/messages"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 781185,
+          "interrupts": 15,
+          "invalid_reason": null,
+          "model": "claude-opus-5",
+          "model_calls": 79,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 25.0,
+            "source": "model-default"
+          },
+          "provider": "anthropic",
+          "repairs": 12,
+          "sampling": {
+            "effort": "medium",
+            "max_output_tokens": 8192,
+            "temperature": 1.0,
+            "thinking": "adaptive"
+          },
+          "score": 101.13,
+          "seed": 101,
+          "summary_repair_calls": 12,
+          "thinking_tokens": 8253,
+          "total_tokens": 859923,
+          "transport_failures": 0,
+          "visible_output_tokens": 70485,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 5.39581,
+          "decisions": 73,
+          "endpoint_metadata": {
+            "kind": "anthropic-messages",
+            "url": "https://api.anthropic.com/v1/messages"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 710692,
+          "interrupts": 21,
+          "invalid_reason": null,
+          "model": "claude-opus-5",
+          "model_calls": 79,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 25.0,
+            "source": "model-default"
+          },
+          "provider": "anthropic",
+          "repairs": 6,
+          "sampling": {
+            "effort": "medium",
+            "max_output_tokens": 8192,
+            "temperature": 1.0,
+            "thinking": "adaptive"
+          },
+          "score": 101.88,
+          "seed": 102,
+          "summary_repair_calls": 6,
+          "thinking_tokens": 9624,
+          "total_tokens": 784386,
+          "transport_failures": 0,
+          "visible_output_tokens": 64070,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 5.412545,
+          "decisions": 65,
+          "endpoint_metadata": {
+            "kind": "anthropic-messages",
+            "url": "https://api.anthropic.com/v1/messages"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 720614,
+          "interrupts": 13,
+          "invalid_reason": null,
+          "model": "claude-opus-5",
+          "model_calls": 74,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 25.0,
+            "source": "model-default"
+          },
+          "provider": "anthropic",
+          "repairs": 9,
+          "sampling": {
+            "effort": "medium",
+            "max_output_tokens": 8192,
+            "temperature": 1.0,
+            "thinking": "adaptive"
+          },
+          "score": 102.15,
+          "seed": 103,
+          "summary_repair_calls": 9,
+          "thinking_tokens": 9055,
+          "total_tokens": 792993,
+          "transport_failures": 0,
+          "visible_output_tokens": 63324,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 6.592995,
+          "decisions": 64,
+          "endpoint_metadata": {
+            "kind": "anthropic-messages",
+            "url": "https://api.anthropic.com/v1/messages"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 874659,
+          "interrupts": 12,
+          "invalid_reason": null,
+          "model": "claude-opus-5",
+          "model_calls": 85,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 25.0,
+            "source": "model-default"
+          },
+          "provider": "anthropic",
+          "repairs": 21,
+          "sampling": {
+            "effort": "medium",
+            "max_output_tokens": 8192,
+            "temperature": 1.0,
+            "thinking": "adaptive"
+          },
+          "score": 94.88,
+          "seed": 104,
+          "summary_repair_calls": 21,
+          "thinking_tokens": 10608,
+          "total_tokens": 963447,
+          "transport_failures": 0,
+          "visible_output_tokens": 78180,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 6.19721,
+          "decisions": 66,
+          "endpoint_metadata": {
+            "kind": "anthropic-messages",
+            "url": "https://api.anthropic.com/v1/messages"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 824357,
+          "interrupts": 14,
+          "invalid_reason": null,
+          "model": "claude-opus-5",
+          "model_calls": 82,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 25.0,
+            "source": "model-default"
+          },
+          "provider": "anthropic",
+          "repairs": 16,
+          "sampling": {
+            "effort": "medium",
+            "max_output_tokens": 8192,
+            "temperature": 1.0,
+            "thinking": "adaptive"
+          },
+          "score": 101.52,
+          "seed": 105,
+          "summary_repair_calls": 16,
+          "thinking_tokens": 11648,
+          "total_tokens": 907374,
+          "transport_failures": 0,
+          "visible_output_tokens": 71369,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 5.676585,
+          "decisions": 67,
+          "endpoint_metadata": {
+            "kind": "anthropic-messages",
+            "url": "https://api.anthropic.com/v1/messages"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 733172,
+          "interrupts": 15,
+          "invalid_reason": null,
+          "model": "claude-opus-5",
+          "model_calls": 77,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 25.0,
+            "source": "model-default"
+          },
+          "provider": "anthropic",
+          "repairs": 10,
+          "sampling": {
+            "effort": "medium",
+            "max_output_tokens": 8192,
+            "temperature": 1.0,
+            "thinking": "adaptive"
+          },
+          "score": 101.09,
+          "seed": 106,
+          "summary_repair_calls": 10,
+          "thinking_tokens": 9412,
+          "total_tokens": 813601,
+          "transport_failures": 0,
+          "visible_output_tokens": 71017,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 5.553845,
+          "decisions": 69,
+          "endpoint_metadata": {
+            "kind": "anthropic-messages",
+            "url": "https://api.anthropic.com/v1/messages"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 739789,
+          "interrupts": 17,
+          "invalid_reason": null,
+          "model": "claude-opus-5",
+          "model_calls": 79,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 25.0,
+            "source": "model-default"
+          },
+          "provider": "anthropic",
+          "repairs": 10,
+          "sampling": {
+            "effort": "medium",
+            "max_output_tokens": 8192,
+            "temperature": 1.0,
+            "thinking": "adaptive"
+          },
+          "score": 100.31,
+          "seed": 107,
+          "summary_repair_calls": 10,
+          "thinking_tokens": 9416,
+          "total_tokens": 813985,
+          "transport_failures": 0,
+          "visible_output_tokens": 64780,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 6.259835,
+          "decisions": 70,
+          "endpoint_metadata": {
+            "kind": "anthropic-messages",
+            "url": "https://api.anthropic.com/v1/messages"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 825632,
+          "interrupts": 18,
+          "invalid_reason": null,
+          "model": "claude-opus-5",
+          "model_calls": 85,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 25.0,
+            "source": "model-default"
+          },
+          "provider": "anthropic",
+          "repairs": 15,
+          "sampling": {
+            "effort": "medium",
+            "max_output_tokens": 8192,
+            "temperature": 1.0,
+            "thinking": "adaptive"
+          },
+          "score": 100.65,
+          "seed": 108,
+          "summary_repair_calls": 15,
+          "thinking_tokens": 11013,
+          "total_tokens": 910899,
+          "transport_failures": 0,
+          "visible_output_tokens": 74254,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 6.448545,
+          "decisions": 68,
+          "endpoint_metadata": {
+            "kind": "anthropic-messages",
+            "url": "https://api.anthropic.com/v1/messages"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 847264,
+          "interrupts": 16,
+          "invalid_reason": null,
+          "model": "claude-opus-5",
+          "model_calls": 87,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 25.0,
+            "source": "model-default"
+          },
+          "provider": "anthropic",
+          "repairs": 19,
+          "sampling": {
+            "effort": "medium",
+            "max_output_tokens": 8192,
+            "temperature": 1.0,
+            "thinking": "adaptive"
+          },
+          "score": 99.42,
+          "seed": 109,
+          "summary_repair_calls": 19,
+          "thinking_tokens": 13891,
+          "total_tokens": 935753,
+          "transport_failures": 0,
+          "visible_output_tokens": 74598,
+          "weeks": 52
+        }
+      ],
+      "repair_rate": 0.19202363367799113,
+      "repairs": 130,
+      "sampling": {
+        "effort": "medium",
+        "max_output_tokens": 8192,
+        "temperature": 1.0,
+        "thinking": "adaptive"
+      },
+      "scores": {
+        "100": 97.61,
+        "101": 101.13,
+        "102": 101.88,
+        "103": 102.15,
+        "104": 94.88,
+        "105": 101.52,
+        "106": 101.09,
+        "107": 100.31,
+        "108": 100.65,
+        "109": 99.42
+      },
+      "seed_sd_kg": 2.252722796972589,
+      "thinking_tokens": 103610,
+      "total_tokens": 8665195,
+      "transport_failures": 0,
+      "visible_output_tokens": 705257
+    },
+    "gpt-5.6-sol": {
+      "cost_per_episode_usd": 2.8055671,
+      "cost_total_usd": 28.055671,
+      "counted_seeds": 10,
+      "decisions": 677,
+      "display_name": "GPT-5.6 Sol",
+      "endpoint_metadata": {
+        "kind": "openai-compatible",
+        "url": "https://api.openai.com/v1/chat/completions"
+      },
+      "engine_config_hashes": [
+        "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1"
+      ],
+      "input_tokens": 2852147,
+      "interrupts": 157,
+      "invalid_episodes": 0,
+      "max_kg": 95.44,
+      "mean_kg": 93.864,
+      "min_kg": 91.8,
+      "model": "gpt-5.6-sol",
+      "model_calls": 692,
+      "pain_violations": 0,
+      "pricing": {
+        "cached_input_price_per_million": 0.5,
+        "input_price_per_million": 5.0,
+        "output_price_per_million": 30.0,
+        "source": "model-default"
+      },
+      "records": [
+        {
+          "cost_usd": 2.8033075,
+          "decisions": 68,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.openai.com/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 284267,
+          "interrupts": 16,
+          "invalid_reason": null,
+          "model": "gpt-5.6-sol",
+          "model_calls": 69,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 30.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 1,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 94.75,
+          "seed": 100,
+          "summary_repair_calls": 1,
+          "thinking_tokens": 26924,
+          "total_tokens": 331418,
+          "transport_failures": 0,
+          "visible_output_tokens": 20227,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 2.8279195,
+          "decisions": 67,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.openai.com/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 290336,
+          "interrupts": 15,
+          "invalid_reason": null,
+          "model": "gpt-5.6-sol",
+          "model_calls": 71,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 30.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 4,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 91.8,
+          "seed": 101,
+          "summary_repair_calls": 4,
+          "thinking_tokens": 27223,
+          "total_tokens": 338054,
+          "transport_failures": 0,
+          "visible_output_tokens": 20495,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 2.818955,
+          "decisions": 73,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.openai.com/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 287824,
+          "interrupts": 21,
+          "invalid_reason": null,
+          "model": "gpt-5.6-sol",
+          "model_calls": 74,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 30.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 1,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 95.44,
+          "seed": 102,
+          "summary_repair_calls": 1,
+          "thinking_tokens": 26497,
+          "total_tokens": 334798,
+          "transport_failures": 0,
+          "visible_output_tokens": 20477,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 2.76443,
+          "decisions": 65,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.openai.com/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 277468,
+          "interrupts": 13,
+          "invalid_reason": null,
+          "model": "gpt-5.6-sol",
+          "model_calls": 66,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 30.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 1,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 94.68,
+          "seed": 103,
+          "summary_repair_calls": 1,
+          "thinking_tokens": 26270,
+          "total_tokens": 323371,
+          "transport_failures": 0,
+          "visible_output_tokens": 19633,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 2.796903,
+          "decisions": 64,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.openai.com/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 282048,
+          "interrupts": 12,
+          "invalid_reason": null,
+          "model": "gpt-5.6-sol",
+          "model_calls": 65,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 30.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 1,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 92.58,
+          "seed": 104,
+          "summary_repair_calls": 1,
+          "thinking_tokens": 27960,
+          "total_tokens": 329867,
+          "transport_failures": 0,
+          "visible_output_tokens": 19859,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 2.7255055,
+          "decisions": 66,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.openai.com/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 283925,
+          "interrupts": 14,
+          "invalid_reason": null,
+          "model": "gpt-5.6-sol",
+          "model_calls": 67,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 30.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 1,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 94.91,
+          "seed": 105,
+          "summary_repair_calls": 1,
+          "thinking_tokens": 25035,
+          "total_tokens": 329088,
+          "transport_failures": 0,
+          "visible_output_tokens": 20128,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 2.8771245,
+          "decisions": 67,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.openai.com/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 290505,
+          "interrupts": 15,
+          "invalid_reason": null,
+          "model": "gpt-5.6-sol",
+          "model_calls": 70,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 30.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 3,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 94.37,
+          "seed": 106,
+          "summary_repair_calls": 3,
+          "thinking_tokens": 28889,
+          "total_tokens": 339778,
+          "transport_failures": 0,
+          "visible_output_tokens": 20384,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 2.807784,
+          "decisions": 69,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.openai.com/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 286113,
+          "interrupts": 17,
+          "invalid_reason": null,
+          "model": "gpt-5.6-sol",
+          "model_calls": 70,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 30.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 1,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 92.85,
+          "seed": 107,
+          "summary_repair_calls": 1,
+          "thinking_tokens": 26434,
+          "total_tokens": 332830,
+          "transport_failures": 0,
+          "visible_output_tokens": 20283,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 2.848329,
+          "decisions": 70,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.openai.com/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 285486,
+          "interrupts": 18,
+          "invalid_reason": null,
+          "model": "gpt-5.6-sol",
+          "model_calls": 71,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 30.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 1,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 92.82,
+          "seed": 108,
+          "summary_repair_calls": 1,
+          "thinking_tokens": 27938,
+          "total_tokens": 333647,
+          "transport_failures": 0,
+          "visible_output_tokens": 20223,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 2.785413,
+          "decisions": 68,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.openai.com/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 284175,
+          "interrupts": 16,
+          "invalid_reason": null,
+          "model": "gpt-5.6-sol",
+          "model_calls": 69,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.5,
+            "input_price_per_million": 5.0,
+            "output_price_per_million": 30.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 1,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 94.44,
+          "seed": 109,
+          "summary_repair_calls": 1,
+          "thinking_tokens": 26186,
+          "total_tokens": 330475,
+          "transport_failures": 0,
+          "visible_output_tokens": 20114,
+          "weeks": 52
+        }
+      ],
+      "repair_rate": 0.022156573116691284,
+      "repairs": 15,
+      "sampling": {
+        "effort": "medium",
+        "temperature": 1.0
+      },
+      "scores": {
+        "100": 94.75,
+        "101": 91.8,
+        "102": 95.44,
+        "103": 94.68,
+        "104": 92.58,
+        "105": 94.91,
+        "106": 94.37,
+        "107": 92.85,
+        "108": 92.82,
+        "109": 94.44
+      },
+      "seed_sd_kg": 1.2312342497582587,
+      "thinking_tokens": 269356,
+      "total_tokens": 3323326,
+      "transport_failures": 0,
+      "visible_output_tokens": 201823
+    },
+    "grok-4.5": {
+      "cost_per_episode_usd": 0.92246668,
+      "cost_total_usd": 9.2246668,
+      "counted_seeds": 10,
+      "decisions": 677,
+      "display_name": "Grok 4.5",
+      "endpoint_metadata": {
+        "kind": "openai-compatible",
+        "url": "https://api.x.ai/v1/chat/completions"
+      },
+      "engine_config_hashes": [
+        "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1"
+      ],
+      "input_tokens": 4120602,
+      "interrupts": 157,
+      "invalid_episodes": 0,
+      "max_kg": 101.8,
+      "mean_kg": 99.191,
+      "min_kg": 94.91,
+      "model": "grok-4.5",
+      "model_calls": 734,
+      "pain_violations": 0,
+      "pricing": {
+        "cached_input_price_per_million": 0.3,
+        "input_price_per_million": 2.0,
+        "output_price_per_million": 6.0,
+        "source": "explicit"
+      },
+      "records": [
+        {
+          "cost_usd": 0.9588212,
+          "decisions": 68,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.x.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 428207,
+          "interrupts": 16,
+          "invalid_reason": null,
+          "model": "grok-4.5",
+          "model_calls": 76,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 2.0,
+            "output_price_per_million": 6.0,
+            "source": "explicit"
+          },
+          "provider": "openai-compatible",
+          "repairs": 8,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 101.35,
+          "seed": 100,
+          "summary_repair_calls": 8,
+          "thinking_tokens": 93648,
+          "total_tokens": 560973,
+          "transport_failures": 0,
+          "visible_output_tokens": 651,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.9959368,
+          "decisions": 67,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.x.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 432704,
+          "interrupts": 15,
+          "invalid_reason": null,
+          "model": "grok-4.5",
+          "model_calls": 74,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 2.0,
+            "output_price_per_million": 6.0,
+            "source": "explicit"
+          },
+          "provider": "openai-compatible",
+          "repairs": 7,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 101.8,
+          "seed": 101,
+          "summary_repair_calls": 7,
+          "thinking_tokens": 81757,
+          "total_tokens": 554603,
+          "transport_failures": 0,
+          "visible_output_tokens": 109,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.8809084,
+          "decisions": 73,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.x.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 397412,
+          "interrupts": 21,
+          "invalid_reason": null,
+          "model": "grok-4.5",
+          "model_calls": 77,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 2.0,
+            "output_price_per_million": 6.0,
+            "source": "explicit"
+          },
+          "provider": "openai-compatible",
+          "repairs": 4,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 100.27,
+          "seed": 102,
+          "summary_repair_calls": 4,
+          "thinking_tokens": 77493,
+          "total_tokens": 509054,
+          "transport_failures": 0,
+          "visible_output_tokens": 237,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.9275688,
+          "decisions": 65,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.x.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 424257,
+          "interrupts": 13,
+          "invalid_reason": null,
+          "model": "grok-4.5",
+          "model_calls": 72,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 2.0,
+            "output_price_per_million": 6.0,
+            "source": "explicit"
+          },
+          "provider": "openai-compatible",
+          "repairs": 7,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 99.07,
+          "seed": 103,
+          "summary_repair_calls": 7,
+          "thinking_tokens": 83234,
+          "total_tokens": 546126,
+          "transport_failures": 0,
+          "visible_output_tokens": 765,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.8987736,
+          "decisions": 64,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.x.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 397252,
+          "interrupts": 12,
+          "invalid_reason": null,
+          "model": "grok-4.5",
+          "model_calls": 68,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 2.0,
+            "output_price_per_million": 6.0,
+            "source": "explicit"
+          },
+          "provider": "openai-compatible",
+          "repairs": 4,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 97.21,
+          "seed": 104,
+          "summary_repair_calls": 4,
+          "thinking_tokens": 81391,
+          "total_tokens": 515025,
+          "transport_failures": 0,
+          "visible_output_tokens": 199,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.8453284,
+          "decisions": 66,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.x.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 371233,
+          "interrupts": 14,
+          "invalid_reason": null,
+          "model": "grok-4.5",
+          "model_calls": 68,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 2.0,
+            "output_price_per_million": 6.0,
+            "source": "explicit"
+          },
+          "provider": "openai-compatible",
+          "repairs": 2,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 98.26,
+          "seed": 105,
+          "summary_repair_calls": 2,
+          "thinking_tokens": 72198,
+          "total_tokens": 475843,
+          "transport_failures": 0,
+          "visible_output_tokens": 25,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.949768,
+          "decisions": 67,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.x.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 433711,
+          "interrupts": 15,
+          "invalid_reason": null,
+          "model": "grok-4.5",
+          "model_calls": 75,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 2.0,
+            "output_price_per_million": 6.0,
+            "source": "explicit"
+          },
+          "provider": "openai-compatible",
+          "repairs": 8,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 100.23,
+          "seed": 106,
+          "summary_repair_calls": 8,
+          "thinking_tokens": 89905,
+          "total_tokens": 562727,
+          "transport_failures": 0,
+          "visible_output_tokens": 386,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.9378936,
+          "decisions": 69,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.x.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 414056,
+          "interrupts": 17,
+          "invalid_reason": null,
+          "model": "grok-4.5",
+          "model_calls": 74,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 2.0,
+            "output_price_per_million": 6.0,
+            "source": "explicit"
+          },
+          "provider": "openai-compatible",
+          "repairs": 5,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 100.5,
+          "seed": 107,
+          "summary_repair_calls": 5,
+          "thinking_tokens": 82710,
+          "total_tokens": 534248,
+          "transport_failures": 0,
+          "visible_output_tokens": 730,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.9301316,
+          "decisions": 70,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.x.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 420924,
+          "interrupts": 18,
+          "invalid_reason": null,
+          "model": "grok-4.5",
+          "model_calls": 77,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 2.0,
+            "output_price_per_million": 6.0,
+            "source": "explicit"
+          },
+          "provider": "openai-compatible",
+          "repairs": 7,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 94.91,
+          "seed": 108,
+          "summary_repair_calls": 7,
+          "thinking_tokens": 87181,
+          "total_tokens": 545268,
+          "transport_failures": 0,
+          "visible_output_tokens": 68,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.8995364,
+          "decisions": 68,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.x.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 400846,
+          "interrupts": 16,
+          "invalid_reason": null,
+          "model": "grok-4.5",
+          "model_calls": 73,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 2.0,
+            "output_price_per_million": 6.0,
+            "source": "explicit"
+          },
+          "provider": "openai-compatible",
+          "repairs": 5,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 98.31,
+          "seed": 109,
+          "summary_repair_calls": 5,
+          "thinking_tokens": 97862,
+          "total_tokens": 533729,
+          "transport_failures": 0,
+          "visible_output_tokens": 0,
+          "weeks": 52
+        }
+      ],
+      "repair_rate": 0.08419497784342689,
+      "repairs": 57,
+      "sampling": {
+        "effort": "medium",
+        "temperature": 1.0
+      },
+      "scores": {
+        "100": 101.35,
+        "101": 101.8,
+        "102": 100.27,
+        "103": 99.07,
+        "104": 97.21,
+        "105": 98.26,
+        "106": 100.23,
+        "107": 100.5,
+        "108": 94.91,
+        "109": 98.31
+      },
+      "seed_sd_kg": 2.090568503222668,
+      "thinking_tokens": 847379,
+      "total_tokens": 5337596,
+      "transport_failures": 0,
+      "visible_output_tokens": 3170
+    },
+    "kimi-k3": {
+      "cost_per_episode_usd": 2.00951436,
+      "cost_total_usd": 20.0951436,
+      "counted_seeds": 10,
+      "decisions": 677,
+      "display_name": "Kimi K3",
+      "endpoint_metadata": {
+        "kind": "openai-compatible",
+        "url": "https://api.moonshot.ai/v1/chat/completions"
+      },
+      "engine_config_hashes": [
+        "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1"
+      ],
+      "input_tokens": 2141746,
+      "interrupts": 157,
+      "invalid_episodes": 0,
+      "max_kg": 99.79,
+      "mean_kg": 90.483,
+      "min_kg": 84.62,
+      "model": "kimi-k3",
+      "model_calls": 1071,
+      "pain_violations": 0,
+      "pricing": {
+        "cached_input_price_per_million": 0.3,
+        "input_price_per_million": 3.0,
+        "output_price_per_million": 15.0,
+        "source": "model-default"
+      },
+      "records": [
+        {
+          "cost_usd": 4.3824705,
+          "decisions": 68,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.moonshot.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 466108,
+          "interrupts": 16,
+          "invalid_reason": null,
+          "model": "kimi-k3",
+          "model_calls": 78,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 3.0,
+            "output_price_per_million": 15.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 9,
+          "sampling": {
+            "effort": "not exposed",
+            "temperature": 1.0
+          },
+          "score": 97.25,
+          "seed": 100,
+          "summary_repair_calls": 10,
+          "thinking_tokens": 173906,
+          "total_tokens": 691593,
+          "transport_failures": 1,
+          "visible_output_tokens": 51579,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 4.0511994,
+          "decisions": 67,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.moonshot.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 428242,
+          "interrupts": 15,
+          "invalid_reason": null,
+          "model": "kimi-k3",
+          "model_calls": 75,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 3.0,
+            "output_price_per_million": 15.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 7,
+          "sampling": {
+            "effort": "not exposed",
+            "temperature": 1.0
+          },
+          "score": 93.36,
+          "seed": 101,
+          "summary_repair_calls": 8,
+          "thinking_tokens": 172428,
+          "total_tokens": 646542,
+          "transport_failures": 1,
+          "visible_output_tokens": 45872,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 4.2499131,
+          "decisions": 73,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.moonshot.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 447987,
+          "interrupts": 21,
+          "invalid_reason": null,
+          "model": "kimi-k3",
+          "model_calls": 83,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 3.0,
+            "output_price_per_million": 15.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 8,
+          "sampling": {
+            "effort": "not exposed",
+            "temperature": 1.0
+          },
+          "score": 99.79,
+          "seed": 102,
+          "summary_repair_calls": 10,
+          "thinking_tokens": 177575,
+          "total_tokens": 675724,
+          "transport_failures": 2,
+          "visible_output_tokens": 50162,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 3.957783,
+          "decisions": 65,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.moonshot.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 437348,
+          "interrupts": 13,
+          "invalid_reason": null,
+          "model": "kimi-k3",
+          "model_calls": 76,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 3.0,
+            "output_price_per_million": 15.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 7,
+          "sampling": {
+            "effort": "not exposed",
+            "temperature": 1.0
+          },
+          "score": 98.78,
+          "seed": 103,
+          "summary_repair_calls": 11,
+          "thinking_tokens": 171788,
+          "total_tokens": 656585,
+          "transport_failures": 4,
+          "visible_output_tokens": 47449,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 2.45733,
+          "decisions": 64,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.moonshot.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 271711,
+          "interrupts": 12,
+          "invalid_reason": null,
+          "model": "kimi-k3",
+          "model_calls": 96,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 3.0,
+            "output_price_per_million": 15.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 6,
+          "sampling": {
+            "effort": "not exposed",
+            "temperature": 1.0
+          },
+          "score": 89.05,
+          "seed": 104,
+          "summary_repair_calls": 6,
+          "thinking_tokens": 98916,
+          "total_tokens": 402618,
+          "transport_failures": 52,
+          "visible_output_tokens": 31991,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.9964476,
+          "decisions": 66,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.moonshot.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 90350,
+          "interrupts": 14,
+          "invalid_reason": null,
+          "model": "kimi-k3",
+          "model_calls": 115,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 3.0,
+            "output_price_per_million": 15.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 2,
+          "sampling": {
+            "effort": "not exposed",
+            "temperature": 1.0
+          },
+          "score": 86.88,
+          "seed": 105,
+          "summary_repair_calls": 2,
+          "thinking_tokens": 39555,
+          "total_tokens": 142258,
+          "transport_failures": 94,
+          "visible_output_tokens": 12353,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.0,
+          "decisions": 67,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.moonshot.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 0,
+          "interrupts": 15,
+          "invalid_reason": null,
+          "model": "kimi-k3",
+          "model_calls": 134,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 3.0,
+            "output_price_per_million": 15.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 0,
+          "sampling": {
+            "effort": "not exposed",
+            "temperature": 1.0
+          },
+          "score": 85.14,
+          "seed": 106,
+          "summary_repair_calls": 0,
+          "thinking_tokens": 0,
+          "total_tokens": 0,
+          "transport_failures": 134,
+          "visible_output_tokens": 0,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.0,
+          "decisions": 69,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.moonshot.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 0,
+          "interrupts": 17,
+          "invalid_reason": null,
+          "model": "kimi-k3",
+          "model_calls": 138,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 3.0,
+            "output_price_per_million": 15.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 0,
+          "sampling": {
+            "effort": "not exposed",
+            "temperature": 1.0
+          },
+          "score": 84.62,
+          "seed": 107,
+          "summary_repair_calls": 0,
+          "thinking_tokens": 0,
+          "total_tokens": 0,
+          "transport_failures": 138,
+          "visible_output_tokens": 0,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.0,
+          "decisions": 70,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.moonshot.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 0,
+          "interrupts": 18,
+          "invalid_reason": null,
+          "model": "kimi-k3",
+          "model_calls": 140,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 3.0,
+            "output_price_per_million": 15.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 0,
+          "sampling": {
+            "effort": "not exposed",
+            "temperature": 1.0
+          },
+          "score": 84.79,
+          "seed": 108,
+          "summary_repair_calls": 0,
+          "thinking_tokens": 0,
+          "total_tokens": 0,
+          "transport_failures": 140,
+          "visible_output_tokens": 0,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 0.0,
+          "decisions": 68,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.moonshot.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 0,
+          "interrupts": 16,
+          "invalid_reason": null,
+          "model": "kimi-k3",
+          "model_calls": 136,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.3,
+            "input_price_per_million": 3.0,
+            "output_price_per_million": 15.0,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 0,
+          "sampling": {
+            "effort": "not exposed",
+            "temperature": 1.0
+          },
+          "score": 85.17,
+          "seed": 109,
+          "summary_repair_calls": 0,
+          "thinking_tokens": 0,
+          "total_tokens": 0,
+          "transport_failures": 136,
+          "visible_output_tokens": 0,
+          "weeks": 52
+        }
+      ],
+      "repair_rate": 0.05760709010339734,
+      "repairs": 39,
+      "sampling": {
+        "effort": "not exposed",
+        "temperature": 1.0
+      },
+      "scores": {
+        "100": 97.25,
+        "101": 93.36,
+        "102": 99.79,
+        "103": 98.78,
+        "104": 89.05,
+        "105": 86.88,
+        "106": 85.14,
+        "107": 84.62,
+        "108": 84.79,
+        "109": 85.17
+      },
+      "seed_sd_kg": 6.219374834606235,
+      "thinking_tokens": 834168,
+      "total_tokens": 3215320,
+      "transport_failures": 702,
+      "visible_output_tokens": 239406
+    },
+    "muse-spark-1.2": {
+      "cost_per_episode_usd": 1.075272895,
+      "cost_total_usd": 10.75272895,
+      "counted_seeds": 10,
+      "decisions": 677,
+      "display_name": "Muse Spark 1.2",
+      "endpoint_metadata": {
+        "kind": "openai-compatible",
+        "url": "https://api.meta.ai/v1/chat/completions"
+      },
+      "engine_config_hashes": [
+        "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1"
+      ],
+      "input_tokens": 3294405,
+      "interrupts": 157,
+      "invalid_episodes": 0,
+      "max_kg": 101.51,
+      "mean_kg": 98.61600000000001,
+      "min_kg": 97.34,
+      "model": "muse-spark-1.2",
+      "model_calls": 707,
+      "pain_violations": 0,
+      "pricing": {
+        "cached_input_price_per_million": 0.15,
+        "input_price_per_million": 1.25,
+        "output_price_per_million": 4.25,
+        "source": "model-default"
+      },
+      "records": [
+        {
+          "cost_usd": 1.0287659,
+          "decisions": 68,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.meta.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 313221,
+          "interrupts": 16,
+          "invalid_reason": null,
+          "model": "muse-spark-1.2",
+          "model_calls": 69,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.15,
+            "input_price_per_million": 1.25,
+            "output_price_per_million": 4.25,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 1,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 98.9,
+          "seed": 100,
+          "summary_repair_calls": 1,
+          "thinking_tokens": 132782,
+          "total_tokens": 474490,
+          "transport_failures": 0,
+          "visible_output_tokens": 28487,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 1.090907,
+          "decisions": 67,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.meta.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 341340,
+          "interrupts": 15,
+          "invalid_reason": null,
+          "model": "muse-spark-1.2",
+          "model_calls": 70,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.15,
+            "input_price_per_million": 1.25,
+            "output_price_per_million": 4.25,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 3,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 97.63,
+          "seed": 101,
+          "summary_repair_calls": 3,
+          "thinking_tokens": 136659,
+          "total_tokens": 510716,
+          "transport_failures": 0,
+          "visible_output_tokens": 32717,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 1.0999242,
+          "decisions": 73,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.meta.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 321063,
+          "interrupts": 21,
+          "invalid_reason": null,
+          "model": "muse-spark-1.2",
+          "model_calls": 74,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.15,
+            "input_price_per_million": 1.25,
+            "output_price_per_million": 4.25,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 1,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 98.17,
+          "seed": 102,
+          "summary_repair_calls": 1,
+          "thinking_tokens": 146810,
+          "total_tokens": 497138,
+          "transport_failures": 0,
+          "visible_output_tokens": 29265,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 1.0976448,
+          "decisions": 65,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.meta.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 346757,
+          "interrupts": 13,
+          "invalid_reason": null,
+          "model": "muse-spark-1.2",
+          "model_calls": 71,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.15,
+            "input_price_per_million": 1.25,
+            "output_price_per_million": 4.25,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 6,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 99.4,
+          "seed": 103,
+          "summary_repair_calls": 6,
+          "thinking_tokens": 137708,
+          "total_tokens": 515828,
+          "transport_failures": 0,
+          "visible_output_tokens": 31363,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 1.03274835,
+          "decisions": 64,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.meta.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 333365,
+          "interrupts": 12,
+          "invalid_reason": null,
+          "model": "muse-spark-1.2",
+          "model_calls": 68,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.15,
+            "input_price_per_million": 1.25,
+            "output_price_per_million": 4.25,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 4,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 97.45,
+          "seed": 104,
+          "summary_repair_calls": 4,
+          "thinking_tokens": 126066,
+          "total_tokens": 490421,
+          "transport_failures": 0,
+          "visible_output_tokens": 30990,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 1.0162211,
+          "decisions": 66,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.meta.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 314227,
+          "interrupts": 14,
+          "invalid_reason": null,
+          "model": "muse-spark-1.2",
+          "model_calls": 67,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.15,
+            "input_price_per_million": 1.25,
+            "output_price_per_million": 4.25,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 1,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 99.92,
+          "seed": 105,
+          "summary_repair_calls": 1,
+          "thinking_tokens": 128817,
+          "total_tokens": 471804,
+          "transport_failures": 0,
+          "visible_output_tokens": 28760,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 1.04595165,
+          "decisions": 67,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.meta.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 320885,
+          "interrupts": 15,
+          "invalid_reason": null,
+          "model": "muse-spark-1.2",
+          "model_calls": 69,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.15,
+            "input_price_per_million": 1.25,
+            "output_price_per_million": 4.25,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 2,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 101.51,
+          "seed": 106,
+          "summary_repair_calls": 2,
+          "thinking_tokens": 133988,
+          "total_tokens": 484271,
+          "transport_failures": 0,
+          "visible_output_tokens": 29398,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 1.07747765,
+          "decisions": 69,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.meta.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 326964,
+          "interrupts": 17,
+          "invalid_reason": null,
+          "model": "muse-spark-1.2",
+          "model_calls": 72,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.15,
+            "input_price_per_million": 1.25,
+            "output_price_per_million": 4.25,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 3,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 97.7,
+          "seed": 107,
+          "summary_repair_calls": 3,
+          "thinking_tokens": 140695,
+          "total_tokens": 497309,
+          "transport_failures": 0,
+          "visible_output_tokens": 29650,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 1.14390125,
+          "decisions": 70,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.meta.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 345812,
+          "interrupts": 18,
+          "invalid_reason": null,
+          "model": "muse-spark-1.2",
+          "model_calls": 75,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.15,
+            "input_price_per_million": 1.25,
+            "output_price_per_million": 4.25,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 5,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 97.34,
+          "seed": 108,
+          "summary_repair_calls": 5,
+          "thinking_tokens": 147888,
+          "total_tokens": 525581,
+          "transport_failures": 0,
+          "visible_output_tokens": 31881,
+          "weeks": 52
+        },
+        {
+          "cost_usd": 1.11918705,
+          "decisions": 68,
+          "endpoint_metadata": {
+            "kind": "openai-compatible",
+            "url": "https://api.meta.ai/v1/chat/completions"
+          },
+          "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+          "input_tokens": 330771,
+          "interrupts": 16,
+          "invalid_reason": null,
+          "model": "muse-spark-1.2",
+          "model_calls": 72,
+          "pain_days": 0,
+          "pricing": {
+            "cached_input_price_per_million": 0.15,
+            "input_price_per_million": 1.25,
+            "output_price_per_million": 4.25,
+            "source": "model-default"
+          },
+          "provider": "openai-compatible",
+          "repairs": 4,
+          "sampling": {
+            "effort": "medium",
+            "temperature": 1.0
+          },
+          "score": 98.14,
+          "seed": 109,
+          "summary_repair_calls": 4,
+          "thinking_tokens": 147958,
+          "total_tokens": 508717,
+          "transport_failures": 0,
+          "visible_output_tokens": 29988,
+          "weeks": 52
+        }
+      ],
+      "repair_rate": 0.04431314623338257,
+      "repairs": 30,
+      "sampling": {
+        "effort": "medium",
+        "temperature": 1.0
+      },
+      "scores": {
+        "100": 98.9,
+        "101": 97.63,
+        "102": 98.17,
+        "103": 99.4,
+        "104": 97.45,
+        "105": 99.92,
+        "106": 101.51,
+        "107": 97.7,
+        "108": 97.34,
+        "109": 98.14
+      },
+      "seed_sd_kg": 1.3331433197939053,
+      "thinking_tokens": 1379371,
+      "total_tokens": 4976275,
+      "transport_failures": 0,
+      "visible_output_tokens": 302499
+    }
+  },
+  "pairwise_model_differences": [
+    {
+      "a": "claude-opus-5",
+      "a_display": "Claude Opus 5",
+      "b": "grok-4.5",
+      "b_display": "Grok 4.5",
+      "ci95_high_kg": 2.866689558199795,
+      "ci95_low_kg": -1.1206895581997913,
+      "difference_sd_kg": 2.7869858270181433,
+      "mean_difference_kg": 0.8730000000000018
+    },
+    {
+      "a": "claude-opus-5",
+      "a_display": "Claude Opus 5",
+      "b": "muse-spark-1.2",
+      "b_display": "Muse Spark 1.2",
+      "ci95_high_kg": 3.0120282621416186,
+      "ci95_low_kg": -0.11602826214162354,
+      "difference_sd_kg": 2.186360750958849,
+      "mean_difference_kg": 1.4479999999999975
+    },
+    {
+      "a": "claude-opus-5",
+      "a_display": "Claude Opus 5",
+      "b": "gpt-5.6-sol",
+      "b_display": "GPT-5.6 Sol",
+      "ci95_high_kg": 7.781792715900731,
+      "ci95_low_kg": 4.618207284099271,
+      "difference_sd_kg": 2.2111937449662307,
+      "mean_difference_kg": 6.200000000000001
+    },
+    {
+      "a": "claude-opus-5",
+      "a_display": "Claude Opus 5",
+      "b": "kimi-k3",
+      "b_display": "Kimi K3",
+      "ci95_high_kg": 14.11642979321988,
+      "ci95_low_kg": 5.045570206780121,
+      "difference_sd_kg": 6.340093672634325,
+      "mean_difference_kg": 9.581
+    },
+    {
+      "a": "grok-4.5",
+      "a_display": "Grok 4.5",
+      "b": "muse-spark-1.2",
+      "b_display": "Muse Spark 1.2",
+      "ci95_high_kg": 2.1355323214116373,
+      "ci95_low_kg": -0.985532321411646,
+      "difference_sd_kg": 2.181473762798393,
+      "mean_difference_kg": 0.5749999999999957
+    },
+    {
+      "a": "grok-4.5",
+      "a_display": "Grok 4.5",
+      "b": "gpt-5.6-sol",
+      "b_display": "GPT-5.6 Sol",
+      "ci95_high_kg": 6.9662309803158475,
+      "ci95_low_kg": 3.6877690196841524,
+      "difference_sd_kg": 2.291486902040293,
+      "mean_difference_kg": 5.327
+    },
+    {
+      "a": "grok-4.5",
+      "a_display": "Grok 4.5",
+      "b": "kimi-k3",
+      "b_display": "Kimi K3",
+      "ci95_high_kg": 12.705985190170516,
+      "ci95_low_kg": 4.7100148098294765,
+      "difference_sd_kg": 5.5887979228294045,
+      "mean_difference_kg": 8.707999999999997
+    },
+    {
+      "a": "muse-spark-1.2",
+      "a_display": "Muse Spark 1.2",
+      "b": "gpt-5.6-sol",
+      "b_display": "GPT-5.6 Sol",
+      "ci95_high_kg": 5.597317950890221,
+      "ci95_low_kg": 3.9066820491097873,
+      "difference_sd_kg": 1.18167301361718,
+      "mean_difference_kg": 4.752000000000004
+    },
+    {
+      "a": "muse-spark-1.2",
+      "a_display": "Muse Spark 1.2",
+      "b": "kimi-k3",
+      "b_display": "Kimi K3",
+      "ci95_high_kg": 12.706659427215097,
+      "ci95_low_kg": 3.5593405727849055,
+      "difference_sd_kg": 6.3935350159360205,
+      "mean_difference_kg": 8.133000000000001
+    },
+    {
+      "a": "gpt-5.6-sol",
+      "a_display": "GPT-5.6 Sol",
+      "b": "kimi-k3",
+      "b_display": "Kimi K3",
+      "ci95_high_kg": 7.581998287687734,
+      "ci95_low_kg": -0.8199982876877385,
+      "difference_sd_kg": 5.872590664358541,
+      "mean_difference_kg": 3.3809999999999976
+    }
+  ],
+  "public_seeds": [
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109
+  ]
+}

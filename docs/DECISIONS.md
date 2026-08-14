@@ -173,3 +173,33 @@ This section supersedes earlier seed and leaderboard decisions.
 - Household strain and sleep debt remain diagnostics only. They are not
   pass/fail thresholds or hidden score penalties. Structural invalidation via
   `invalid_reason` remains separately excluded from aggregates.
+
+## Counted-seed aggregation decision — 2026-08-07
+
+- A counted aggregate is reportable only when every expected seed is counted
+  (minimum counted-seed fraction: 100%). Excluded seeds remain in the
+  denominator and their raw scores and violations remain visible; survivor
+  means are never used for leaderboard ranking.
+- This is an ineligibility rule, not a synthetic zero-kilogram score. It avoids
+  assigning an arbitrary unit to a voided episode while preventing a policy
+  from ranking on only its easiest surviving seeds.
+- The same all-seed counted rule applies to scripted-reference means and
+  adversarial candidate comparisons.
+
+## v0.2 live-run audit findings — 2026-08-08
+
+- `ModelTurn.notebook_update` is enforced with a 2,000-character maximum, but
+  the weekly prompt states neither the limit nor the consequence of exceeding
+  it. This is an undocumented validation constraint.
+- Authored fallback loads are enforced at no more than 0.78× the permitted
+  estimated 1RM ceiling, but the weekly prompt states only the fallback
+  duration, set, and repetition caps. This load ceiling is also an
+  undocumented validation constraint.
+- Live repair metrics count one repair per decision only when a model output is
+  rejected. Exhausted provider retries are reported separately as transport
+  failures and do not inflate the model-format repair rate.
+- The weekly prompt names the `life` object and its fields but does not include
+  a complete valid nested weekly-action JSON example. The reactive prompt does
+  include a valid example. Grok flattened `life` into `action` on both seed
+  100 and seed 101 in week 1; this is recorded as a v0.2 prompt-clarity finding
+  and a candidate for a complete weekly example.

@@ -1,12 +1,12 @@
 {
-  "all_checks_pass": true,
+  "all_checks_pass": false,
   "benchmark": "Bench-bench",
   "card_reference_values": {
     "adversarial": {
-      "best_candidate": "adversarial-002",
-      "best_candidate_mean_final_1rm_kg": 100.4795,
+      "best_candidate": "adversarial-001",
+      "best_candidate_mean_final_1rm_kg": 100.7185,
       "candidates_beating_expert": [],
-      "expert_mean_final_1rm_kg": 102.89200000000001,
+      "expert_mean_final_1rm_kg": 102.892,
       "human_review_candidates": [],
       "release_blocked_candidates": []
     },
@@ -136,7 +136,7 @@
     "adversarial_search_reproduces": true,
     "all_json_reports_have_hash": true,
     "all_markdown_reports_have_hash": true,
-    "authoritative_leaderboard_not_generated_before_live_run": true,
+    "authoritative_leaderboard_not_generated_before_live_run": false,
     "baseline_gate_reproduces": true,
     "card_adversarial_numbers_match": true,
     "card_and_manifest_have_hash": true,
@@ -149,10 +149,10 @@
     "private_seed_values_not_materialized": true,
     "public_leaderboard_pending": true,
     "public_transcript_count": true,
-    "stale_run_directories_removed": true,
+    "stale_run_directories_removed": false,
     "transcripts_have_current_hash": true,
     "twelve_week_diagnostic_reproduces": true
   },
-  "engine_config_hash": "sha256:d5585a5bb69088a0cb7b3f4f78b70dc79a3caa59a3fcbbc00a9fcebde6d3add1",
+  "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
   "public_transcript_count": 0
 }

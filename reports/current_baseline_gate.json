@@ -101,6 +101,7 @@
           "counted_max_final_1rm_kg": 93.14,
           "counted_mean_final_1rm_kg": 90.221,
           "counted_min_final_1rm_kg": 86.75,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 1.4643,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -118,7 +119,7 @@
           "mean_planned_sessions": 111.35,
           "mean_productive_weeks": 31.8,
           "mean_sleep_debt": 0.0,
-          "mean_transformed_sessions": 7.0,
+          "mean_transformed_sessions": 7.65,
           "min_final_1rm_kg": 86.75,
           "policy": "random",
           "seed_std_kg": 1.4643
@@ -132,6 +133,7 @@
           "counted_max_final_1rm_kg": null,
           "counted_mean_final_1rm_kg": null,
           "counted_min_final_1rm_kg": null,
+          "counted_seed_fraction": 0.0,
           "counted_seed_std_kg": null,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -149,7 +151,7 @@
           "mean_planned_sessions": 205.0,
           "mean_productive_weeks": 47.45,
           "mean_sleep_debt": 0.0,
-          "mean_transformed_sessions": 150.05,
+          "mean_transformed_sessions": 150.75,
           "min_final_1rm_kg": 91.47,
           "policy": "reckless-maximalist",
           "seed_std_kg": 0.8156
@@ -161,6 +163,7 @@
           "counted_max_final_1rm_kg": 100.78,
           "counted_mean_final_1rm_kg": 99.741,
           "counted_min_final_1rm_kg": 98.35,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 0.6338,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -178,7 +181,7 @@
           "mean_planned_sessions": 151.95,
           "mean_productive_weeks": 47.35,
           "mean_sleep_debt": 0.0,
-          "mean_transformed_sessions": 11.15,
+          "mean_transformed_sessions": 11.7,
           "min_final_1rm_kg": 98.35,
           "policy": "recovery-aware",
           "seed_std_kg": 0.6338
@@ -190,6 +193,7 @@
           "counted_max_final_1rm_kg": 99.96,
           "counted_mean_final_1rm_kg": 98.922,
           "counted_min_final_1rm_kg": 97.32,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 0.6454,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -207,7 +211,7 @@
           "mean_planned_sessions": 156.0,
           "mean_productive_weeks": 48.65,
           "mean_sleep_debt": 0.0,
-          "mean_transformed_sessions": 10.7,
+          "mean_transformed_sessions": 11.55,
           "min_final_1rm_kg": 97.32,
           "policy": "rigid-linear",
           "seed_std_kg": 0.6454
@@ -219,6 +223,7 @@
           "counted_max_final_1rm_kg": 103.96,
           "counted_mean_final_1rm_kg": 103.047,
           "counted_min_final_1rm_kg": 101.33,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 0.6332,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -248,6 +253,7 @@
           "counted_max_final_1rm_kg": 98.98,
           "counted_mean_final_1rm_kg": 96.814,
           "counted_min_final_1rm_kg": 94.89,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 0.9536,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -265,7 +271,7 @@
           "mean_planned_sessions": 121.55,
           "mean_productive_weeks": 44.7,
           "mean_sleep_debt": 0.0,
-          "mean_transformed_sessions": 0.05,
+          "mean_transformed_sessions": 0.35,
           "min_final_1rm_kg": 94.89,
           "policy": "skip-when-busy",
           "seed_std_kg": 0.9536
@@ -373,6 +379,7 @@
           "counted_max_final_1rm_kg": 115.13,
           "counted_mean_final_1rm_kg": 109.0705,
           "counted_min_final_1rm_kg": 100.99,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 3.7061,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -390,7 +397,7 @@
           "mean_planned_sessions": 111.35,
           "mean_productive_weeks": 23.9,
           "mean_sleep_debt": 13.9985,
-          "mean_transformed_sessions": 6.4,
+          "mean_transformed_sessions": 7.05,
           "min_final_1rm_kg": 100.99,
           "policy": "random",
           "seed_std_kg": 3.7061
@@ -404,6 +411,7 @@
           "counted_max_final_1rm_kg": null,
           "counted_mean_final_1rm_kg": null,
           "counted_min_final_1rm_kg": null,
+          "counted_seed_fraction": 0.0,
           "counted_seed_std_kg": null,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -421,7 +429,7 @@
           "mean_planned_sessions": 205.0,
           "mean_productive_weeks": 36.9,
           "mean_sleep_debt": 14.0,
-          "mean_transformed_sessions": 132.45,
+          "mean_transformed_sessions": 133.15,
           "min_final_1rm_kg": 109.6,
           "policy": "reckless-maximalist",
           "seed_std_kg": 4.3853
@@ -433,6 +441,7 @@
           "counted_max_final_1rm_kg": 165.83,
           "counted_mean_final_1rm_kg": 158.316,
           "counted_min_final_1rm_kg": 152.08,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 3.6251,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -450,7 +459,7 @@
           "mean_planned_sessions": 151.2,
           "mean_productive_weeks": 47.35,
           "mean_sleep_debt": 0.0532,
-          "mean_transformed_sessions": 11.05,
+          "mean_transformed_sessions": 11.55,
           "min_final_1rm_kg": 152.08,
           "policy": "recovery-aware",
           "seed_std_kg": 3.6251
@@ -462,6 +471,7 @@
           "counted_max_final_1rm_kg": 138.14,
           "counted_mean_final_1rm_kg": 129.475,
           "counted_min_final_1rm_kg": 121.41,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 3.9545,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -479,7 +489,7 @@
           "mean_planned_sessions": 156.0,
           "mean_productive_weeks": 41.5,
           "mean_sleep_debt": 14.0,
-          "mean_transformed_sessions": 10.7,
+          "mean_transformed_sessions": 11.55,
           "min_final_1rm_kg": 121.41,
           "policy": "rigid-linear",
           "seed_std_kg": 3.9545
@@ -491,6 +501,7 @@
           "counted_max_final_1rm_kg": 174.74,
           "counted_mean_final_1rm_kg": 168.6825,
           "counted_min_final_1rm_kg": 163.73,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 3.1392,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -520,6 +531,7 @@
           "counted_max_final_1rm_kg": 149.53,
           "counted_mean_final_1rm_kg": 145.685,
           "counted_min_final_1rm_kg": 136.38,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 3.7361,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -537,7 +549,7 @@
           "mean_planned_sessions": 121.55,
           "mean_productive_weeks": 44.7,
           "mean_sleep_debt": 0.0543,
-          "mean_transformed_sessions": 0.05,
+          "mean_transformed_sessions": 0.35,
           "min_final_1rm_kg": 136.38,
           "policy": "skip-when-busy",
           "seed_std_kg": 3.7361
@@ -645,6 +657,7 @@
           "counted_max_final_1rm_kg": 95.05,
           "counted_mean_final_1rm_kg": 92.0875,
           "counted_min_final_1rm_kg": 90.2,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 1.139,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -676,6 +689,7 @@
           "counted_max_final_1rm_kg": null,
           "counted_mean_final_1rm_kg": null,
           "counted_min_final_1rm_kg": null,
+          "counted_seed_fraction": 0.0,
           "counted_seed_std_kg": null,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -705,6 +719,7 @@
           "counted_max_final_1rm_kg": 104.47,
           "counted_mean_final_1rm_kg": 103.789,
           "counted_min_final_1rm_kg": 102.09,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 0.5304,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -734,6 +749,7 @@
           "counted_max_final_1rm_kg": 102.81,
           "counted_mean_final_1rm_kg": 102.066,
           "counted_min_final_1rm_kg": 100.46,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 0.6553,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -763,6 +779,7 @@
           "counted_max_final_1rm_kg": 105.09,
           "counted_mean_final_1rm_kg": 104.443,
           "counted_min_final_1rm_kg": 102.98,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 0.4503,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -792,6 +809,7 @@
           "counted_max_final_1rm_kg": 102.73,
           "counted_mean_final_1rm_kg": 100.8565,
           "counted_min_final_1rm_kg": 98.1,
+          "counted_seed_fraction": 1.0,
           "counted_seed_std_kg": 0.9746,
           "episodes": 20,
           "invalid_episodes": 0,
@@ -858,7 +876,7 @@
     "weekly_time_budget_minutes": 900,
     "weeks": 52
   },
-  "engine_config_hash": "sha256:d5585a5bb69088a0cb7b3f4f78b70dc79a3caa59a3fcbbc00a9fcebde6d3add1",
+  "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
   "episodes": {
     "random": [
       {
@@ -979,7 +997,7 @@
         "seed": 4,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 6
+        "transformed_sessions": 9
       },
       {
         "action_repairs": 0,
@@ -1003,7 +1021,7 @@
         "seed": 5,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 9
+        "transformed_sessions": 12
       },
       {
         "action_repairs": 0,
@@ -1027,7 +1045,7 @@
         "seed": 6,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 5
+        "transformed_sessions": 6
       },
       {
         "action_repairs": 0,
@@ -1099,7 +1117,7 @@
         "seed": 9,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 7
+        "transformed_sessions": 9
       },
       {
         "action_repairs": 0,
@@ -1219,7 +1237,7 @@
         "seed": 14,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 7
+        "transformed_sessions": 8
       },
       {
         "action_repairs": 0,
@@ -1267,7 +1285,7 @@
         "seed": 16,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 5
+        "transformed_sessions": 6
       },
       {
         "action_repairs": 0,
@@ -1315,7 +1333,7 @@
         "seed": 18,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 7
+        "transformed_sessions": 8
       },
       {
         "action_repairs": 0,
@@ -1339,7 +1357,7 @@
         "seed": 19,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 8
+        "transformed_sessions": 9
       }
     ],
     "reckless-maximalist": [
@@ -1367,7 +1385,7 @@
         "seed": 0,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 152
+        "transformed_sessions": 153
       },
       {
         "action_repairs": 0,
@@ -1393,7 +1411,7 @@
         "seed": 1,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 128
+        "transformed_sessions": 129
       },
       {
         "action_repairs": 0,
@@ -1419,7 +1437,7 @@
         "seed": 2,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 134
+        "transformed_sessions": 135
       },
       {
         "action_repairs": 0,
@@ -1471,7 +1489,7 @@
         "seed": 4,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 118
+        "transformed_sessions": 120
       },
       {
         "action_repairs": 0,
@@ -1497,7 +1515,7 @@
         "seed": 5,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 134
+        "transformed_sessions": 135
       },
       {
         "action_repairs": 0,
@@ -1523,7 +1541,7 @@
         "seed": 6,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 120
+        "transformed_sessions": 124
       },
       {
         "action_repairs": 0,
@@ -1575,7 +1593,7 @@
         "seed": 8,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 111
+        "transformed_sessions": 112
       },
       {
         "action_repairs": 0,
@@ -1601,7 +1619,7 @@
         "seed": 9,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 106
+        "transformed_sessions": 107
       },
       {
         "action_repairs": 0,
@@ -1731,7 +1749,7 @@
         "seed": 14,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 130
+        "transformed_sessions": 131
       },
       {
         "action_repairs": 0,
@@ -1835,7 +1853,7 @@
         "seed": 18,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 145
+        "transformed_sessions": 146
       },
       {
         "action_repairs": 0,
@@ -1887,7 +1905,7 @@
         "seed": 0,
         "sleep_debt": 0.0,
         "total_spend_cents": 140400,
-        "transformed_sessions": 11
+        "transformed_sessions": 12
       },
       {
         "action_repairs": 0,
@@ -1983,7 +2001,7 @@
         "seed": 4,
         "sleep_debt": 0.42,
         "total_spend_cents": 140400,
-        "transformed_sessions": 11
+        "transformed_sessions": 13
       },
       {
         "action_repairs": 0,
@@ -2007,7 +2025,7 @@
         "seed": 5,
         "sleep_debt": 0.0,
         "total_spend_cents": 140400,
-        "transformed_sessions": 13
+        "transformed_sessions": 15
       },
       {
         "action_repairs": 0,
@@ -2031,7 +2049,7 @@
         "seed": 6,
         "sleep_debt": 0.0,
         "total_spend_cents": 140400,
-        "transformed_sessions": 15
+        "transformed_sessions": 16
       },
       {
         "action_repairs": 0,
@@ -2103,7 +2121,7 @@
         "seed": 9,
         "sleep_debt": 0.0,
         "total_spend_cents": 140400,
-        "transformed_sessions": 5
+        "transformed_sessions": 7
       },
       {
         "action_repairs": 0,
@@ -2271,7 +2289,7 @@
         "seed": 16,
         "sleep_debt": 0.0,
         "total_spend_cents": 140400,
-        "transformed_sessions": 14
+        "transformed_sessions": 15
       },
       {
         "action_repairs": 0,
@@ -2319,7 +2337,7 @@
         "seed": 18,
         "sleep_debt": 0.0,
         "total_spend_cents": 140400,
-        "transformed_sessions": 10
+        "transformed_sessions": 11
       },
       {
         "action_repairs": 0,
@@ -2369,7 +2387,7 @@
         "seed": 0,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 9
+        "transformed_sessions": 12
       },
       {
         "action_repairs": 0,
@@ -2393,7 +2411,7 @@
         "seed": 1,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 17
+        "transformed_sessions": 19
       },
       {
         "action_repairs": 0,
@@ -2465,7 +2483,7 @@
         "seed": 4,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 11
+        "transformed_sessions": 12
       },
       {
         "action_repairs": 0,
@@ -2489,7 +2507,7 @@
         "seed": 5,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 14
+        "transformed_sessions": 15
       },
       {
         "action_repairs": 0,
@@ -2513,7 +2531,7 @@
         "seed": 6,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 13
+        "transformed_sessions": 15
       },
       {
         "action_repairs": 0,
@@ -2585,7 +2603,7 @@
         "seed": 9,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 6
+        "transformed_sessions": 8
       },
       {
         "action_repairs": 0,
@@ -2609,7 +2627,7 @@
         "seed": 10,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 4
+        "transformed_sessions": 5
       },
       {
         "action_repairs": 0,
@@ -2633,7 +2651,7 @@
         "seed": 11,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 7
+        "transformed_sessions": 8
       },
       {
         "action_repairs": 0,
@@ -2705,7 +2723,7 @@
         "seed": 14,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 13
+        "transformed_sessions": 14
       },
       {
         "action_repairs": 0,
@@ -2753,7 +2771,7 @@
         "seed": 16,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 16
+        "transformed_sessions": 17
       },
       {
         "action_repairs": 0,
@@ -2801,7 +2819,7 @@
         "seed": 18,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 15
+        "transformed_sessions": 16
       },
       {
         "action_repairs": 0,
@@ -2825,7 +2843,7 @@
         "seed": 19,
         "sleep_debt": 14.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 9
+        "transformed_sessions": 10
       }
     ],
     "scripted-expert": [
@@ -3429,7 +3447,7 @@
         "seed": 4,
         "sleep_debt": 0.42,
         "total_spend_cents": 18000,
-        "transformed_sessions": 0
+        "transformed_sessions": 1
       },
       {
         "action_repairs": 0,
@@ -3453,7 +3471,7 @@
         "seed": 5,
         "sleep_debt": 0.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 0
+        "transformed_sessions": 1
       },
       {
         "action_repairs": 0,
@@ -3477,7 +3495,7 @@
         "seed": 6,
         "sleep_debt": 0.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 0
+        "transformed_sessions": 1
       },
       {
         "action_repairs": 0,
@@ -3549,7 +3567,7 @@
         "seed": 9,
         "sleep_debt": 0.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 0
+        "transformed_sessions": 2
       },
       {
         "action_repairs": 0,
@@ -3789,7 +3807,7 @@
         "seed": 19,
         "sleep_debt": 0.0,
         "total_spend_cents": 18000,
-        "transformed_sessions": 0
+        "transformed_sessions": 1
       }
     ]
   },
@@ -3856,6 +3874,7 @@
       "counted_max_final_1rm_kg": 100.84,
       "counted_mean_final_1rm_kg": 99.9265,
       "counted_min_final_1rm_kg": 98.29,
+      "counted_seed_fraction": 1.0,
       "counted_seed_std_kg": 0.5923,
       "episodes": 20,
       "invalid_episodes": 0,
@@ -3873,7 +3892,7 @@
       "mean_planned_sessions": 153.0,
       "mean_productive_weeks": 47.65,
       "mean_sleep_debt": 0.0532,
-      "mean_transformed_sessions": 11.3,
+      "mean_transformed_sessions": 11.9,
       "min_final_1rm_kg": 98.29,
       "policy": "scripted-expert",
       "seed_std_kg": 0.5923
@@ -3885,6 +3904,7 @@
       "counted_max_final_1rm_kg": 103.87,
       "counted_mean_final_1rm_kg": 102.892,
       "counted_min_final_1rm_kg": 101.09,
+      "counted_seed_fraction": 1.0,
       "counted_seed_std_kg": 0.6495,
       "episodes": 20,
       "invalid_episodes": 0,
@@ -3984,6 +4004,7 @@
       "counted_max_final_1rm_kg": 89.32,
       "counted_mean_final_1rm_kg": 86.939,
       "counted_min_final_1rm_kg": 85.29,
+      "counted_seed_fraction": 1.0,
       "counted_seed_std_kg": 1.0,
       "episodes": 20,
       "invalid_episodes": 0,
@@ -4001,7 +4022,7 @@
       "mean_planned_sessions": 111.35,
       "mean_productive_weeks": 23.7,
       "mean_sleep_debt": 13.9987,
-      "mean_transformed_sessions": 6.45,
+      "mean_transformed_sessions": 7.1,
       "min_final_1rm_kg": 85.29,
       "policy": "random",
       "seed_std_kg": 1.0
@@ -4015,6 +4036,7 @@
       "counted_max_final_1rm_kg": null,
       "counted_mean_final_1rm_kg": null,
       "counted_min_final_1rm_kg": null,
+      "counted_seed_fraction": 0.0,
       "counted_seed_std_kg": null,
       "episodes": 20,
       "invalid_episodes": 0,
@@ -4032,7 +4054,7 @@
       "mean_planned_sessions": 205.0,
       "mean_productive_weeks": 35.7,
       "mean_sleep_debt": 14.0,
-      "mean_transformed_sessions": 126.8,
+      "mean_transformed_sessions": 127.5,
       "min_final_1rm_kg": 85.95,
       "policy": "reckless-maximalist",
       "seed_std_kg": 1.0668
@@ -4044,6 +4066,7 @@
       "counted_max_final_1rm_kg": 100.28,
       "counted_mean_final_1rm_kg": 99.0075,
       "counted_min_final_1rm_kg": 97.34,
+      "counted_seed_fraction": 1.0,
       "counted_seed_std_kg": 0.6987,
       "episodes": 20,
       "invalid_episodes": 0,
@@ -4061,7 +4084,7 @@
       "mean_planned_sessions": 148.35,
       "mean_productive_weeks": 47.15,
       "mean_sleep_debt": 0.0532,
-      "mean_transformed_sessions": 10.7,
+      "mean_transformed_sessions": 11.2,
       "min_final_1rm_kg": 97.34,
       "policy": "recovery-aware",
       "seed_std_kg": 0.6987
@@ -4073,6 +4096,7 @@
       "counted_max_final_1rm_kg": 95.04,
       "counted_mean_final_1rm_kg": 92.346,
       "counted_min_final_1rm_kg": 89.08,
+      "counted_seed_fraction": 1.0,
       "counted_seed_std_kg": 1.7744,
       "episodes": 20,
       "invalid_episodes": 0,
@@ -4090,7 +4114,7 @@
       "mean_planned_sessions": 156.0,
       "mean_productive_weeks": 42.55,
       "mean_sleep_debt": 14.0,
-      "mean_transformed_sessions": 10.7,
+      "mean_transformed_sessions": 11.55,
       "min_final_1rm_kg": 89.08,
       "policy": "rigid-linear",
       "seed_std_kg": 1.7744
@@ -4102,6 +4126,7 @@
       "counted_max_final_1rm_kg": 103.87,
       "counted_mean_final_1rm_kg": 102.892,
       "counted_min_final_1rm_kg": 101.09,
+      "counted_seed_fraction": 1.0,
       "counted_seed_std_kg": 0.6495,
       "episodes": 20,
       "invalid_episodes": 0,
@@ -4131,6 +4156,7 @@
       "counted_max_final_1rm_kg": 98.72,
       "counted_mean_final_1rm_kg": 96.5615,
       "counted_min_final_1rm_kg": 94.76,
+      "counted_seed_fraction": 1.0,
       "counted_seed_std_kg": 0.9578,
       "episodes": 20,
       "invalid_episodes": 0,
@@ -4148,7 +4174,7 @@
       "mean_planned_sessions": 121.55,
       "mean_productive_weeks": 44.55,
       "mean_sleep_debt": 0.0543,
-      "mean_transformed_sessions": 0.05,
+      "mean_transformed_sessions": 0.35,
       "min_final_1rm_kg": 94.76,
       "policy": "skip-when-busy",
       "seed_std_kg": 0.9578

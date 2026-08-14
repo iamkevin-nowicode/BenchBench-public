@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bench-bench: a year-long benchmark for coaching under uncertainty, constraints, and missed sessions.">
+  <title>Bench-bench — A year in the loop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,750&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #fbfaf7;
+      --ink: #122a45;
+      --muted: #738093;
+      --line: #d8dfe3;
+      --red: #e54732;
+      --blue: #2f7bb7;
+      --gold: #a66a00;
+      --green: #4e8b63;
+      --purple: #7557a8;
+      --max: 1120px;
+      --ease: cubic-bezier(.2,.75,.25,1);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font: 400 16px/1.65 "Space Grotesk", system-ui, sans-serif;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .13;
+      background: repeating-linear-gradient(90deg, rgba(18,42,69,.025) 0 1px, transparent 1px 5px);
+      mix-blend-mode: multiply;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid var(--red); outline-offset: 4px; }
+    .skip { position: absolute; top: -50px; left: 16px; background: var(--ink); color: white; padding: 8px 12px; z-index: 5; }
+    .skip:focus { top: 16px; }
+    .wrap { width: min(var(--max), calc(100% - 48px)); margin-inline: auto; }
+    .mono, .eyebrow, .section-no, .meta, .chart-note, .label { font-family: "DM Mono", ui-monospace, monospace; }
+    .eyebrow, .section-no, .label { text-transform: uppercase; letter-spacing: .12em; font-size: .68rem; }
+
+    header { border-bottom: 1px solid var(--line); }
+    .topbar { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: inline-flex; align-items: center; gap: 16px; text-decoration: none; }
+    .brand img { width: 128px; height: 44px; object-fit: contain; mix-blend-mode: multiply; }
+    .brand span { color: var(--muted); font: .67rem "DM Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+    nav { display: flex; gap: 22px; color: var(--muted); font: .68rem "DM Mono", monospace; text-transform: uppercase; letter-spacing: .08em; }
+    nav a { text-decoration: none; }
+    nav a:hover { color: var(--red); }
+
+    .hero { padding: 112px 0 118px; max-width: 900px; }
+    .hero .eyebrow { color: var(--red); display: flex; align-items: center; gap: 12px; }
+    .hero .eyebrow::before { content: ""; width: 34px; border-top: 2px solid var(--red); transform: rotate(-3deg); }
+    h1, h2, h3 { font-family: Fraunces, Georgia, serif; letter-spacing: -.045em; line-height: 1.02; }
+    h1 { max-width: 850px; font-size: clamp(3.7rem, 9vw, 7.8rem); font-weight: 650; margin: 22px 0 30px; }
+    h1 em { color: var(--red); font-style: normal; position: relative; white-space: nowrap; }
+    h1 em::after { content: ""; position: absolute; left: 0; right: -5%; bottom: -.08em; height: .085em; background: var(--red); border-radius: 80%; transform: rotate(-2deg); }
+    .dek { max-width: 650px; margin: 0; color: #354c63; font-size: clamp(1.1rem, 2.2vw, 1.42rem); line-height: 1.45; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 10px 20px; margin-top: 38px; color: var(--muted); font: .67rem "DM Mono", monospace; text-transform: uppercase; letter-spacing: .08em; }
+    .hero-meta span::before { content: "·"; color: var(--red); margin-right: 8px; }
+    .scribble { display: block; width: 155px; border-top: 2px solid var(--blue); margin-top: 52px; transform: rotate(-1deg); }
+
+    section { padding: 94px 0; border-top: 1px solid var(--line); }
+    .section-head { display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 26px; align-items: start; margin-bottom: 44px; }
+    .section-no { padding-top: 11px; color: var(--red); }
+    h2 { margin: 0 0 16px; font-size: clamp(2.8rem, 5vw, 5.2rem); font-weight: 650; }
+    h3 { margin: 0 0 7px; font-size: 1.55rem; }
+    .lede { max-width: 680px; margin: 0; color: #455b70; font-size: 1.04rem; }
+
+    .roster { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 22px 0 24px; }
+    .person { min-width: 0; position: relative; }
+    .person + .person { border-left: 1px solid var(--line); padding-left: 14px; }
+    .person-portrait { height: 142px; display: grid; place-items: end center; overflow: hidden; margin-bottom: 12px; }
+    .person-portrait img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    .person-portrait img.grok46 { filter: hue-rotate(160deg) saturate(.78) contrast(.97); }
+    .person .rank { color: var(--red); font: .65rem "DM Mono", monospace; }
+    .person h3 { font: 600 .84rem/1.1 "Space Grotesk", sans-serif; letter-spacing: -.02em; margin: 7px 0 10px; }
+    .score { font: 650 1.55rem/1 Fraunces, serif; }
+    .score small { font: .63rem "DM Mono", monospace; color: var(--muted); }
+
+    figure { margin: 0; }
+    .chart-wrap { margin-top: 54px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 25px 0 16px; overflow-x: auto; }
+    .chart { display: block; width: 100%; min-width: 700px; height: auto; }
+    .chart text { fill: var(--ink); font-family: "Space Grotesk", sans-serif; }
+    .chart .mono-text { font-family: "DM Mono", monospace; }
+    .chart-note { color: var(--muted); font-size: .64rem; letter-spacing: .025em; margin: 11px 0 0; }
+
+    .split { display: grid; grid-template-columns: minmax(0, .9fr) minmax(320px, 1.1fr); gap: 70px; align-items: start; }
+    .number { color: var(--red); font: 650 clamp(3.3rem, 7vw, 6.2rem)/.85 Fraunces, serif; margin: 30px 0 12px; }
+    .number small { display: block; color: var(--muted); font: .66rem "DM Mono", monospace; line-height: 1.4; letter-spacing: .07em; text-transform: uppercase; margin-top: 17px; }
+    .tiny-list { list-style: none; padding: 0; margin: 32px 0 0; border-top: 1px solid var(--ink); }
+    .tiny-list li { display: flex; justify-content: space-between; gap: 18px; border-bottom: 1px solid var(--line); padding: 11px 0; color: #455b70; font-size: .88rem; }
+    .tiny-list strong { color: var(--ink); font: 500 .73rem "DM Mono", monospace; white-space: nowrap; }
+
+    .evidence { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+    .evidence-item { padding: 22px 20px 24px 0; }
+    .evidence-item + .evidence-item { border-left: 1px solid var(--line); padding-left: 20px; }
+    .evidence strong { display: block; font: 650 2.5rem/1 Fraunces, serif; margin: 12px 0 4px; }
+    .evidence p { color: var(--muted); font-size: .83rem; line-height: 1.4; margin: 0; }
+
+    .findings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
+    .finding { border-top: 2px solid var(--blue); padding-top: 16px; }
+    .finding:nth-child(2) { border-color: var(--red); }
+    .finding:nth-child(3) { border-color: var(--gold); }
+    .finding .label { color: var(--muted); }
+    .finding p { color: #455b70; font-size: .91rem; margin: 0; }
+
+    .timeline { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--ink); padding-top: 24px; }
+    .step { padding-right: 14px; }
+    .step + .step { border-left: 1px solid var(--line); padding-left: 14px; }
+    .step .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--red); margin-bottom: 18px; }
+    .step:nth-child(3n) .dot { background: var(--blue); }
+    .step:nth-child(4n) .dot { background: var(--gold); }
+    .step h3 { font: 600 .83rem/1.1 "Space Grotesk", sans-serif; letter-spacing: -.02em; }
+    .step p { margin: 0; color: var(--muted); font-size: .75rem; line-height: 1.4; }
+
+    .v2 { display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 26px; }
+    .v2-copy { border-top: 2px solid var(--ink); padding-top: 26px; }
+    .v2-copy h2 { max-width: 800px; }
+    .v2-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 42px; }
+    .v2-card { border-top: 1px solid var(--line); padding-top: 15px; }
+    .v2-card .label { color: var(--red); }
+    .v2-card p { margin: 0; color: #455b70; font-size: .88rem; }
+
+    footer { border-top: 1px solid var(--line); padding: 42px 0 68px; }
+    .footer-row { display: flex; justify-content: space-between; align-items: start; gap: 30px; }
+    .footer-row img { width: 142px; mix-blend-mode: multiply; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 10px 22px; color: var(--muted); font: .64rem "DM Mono", monospace; text-transform: uppercase; letter-spacing: .06em; }
+    .footer-links a:hover { color: var(--red); }
+
+    @media (max-width: 900px) {
+      .roster { grid-template-columns: repeat(3, 1fr); row-gap: 28px; }
+      .person:nth-child(4) { border-left: 0; padding-left: 0; }
+      .split { grid-template-columns: 1fr; gap: 40px; }
+      .timeline { grid-template-columns: repeat(4, 1fr); row-gap: 26px; }
+      .step:nth-child(5) { border-left: 0; padding-left: 0; }
+    }
+    @media (max-width: 640px) {
+      .wrap { width: min(100% - 32px, 520px); }
+      .topbar { min-height: 65px; }
+      .brand span, nav a:nth-child(n+2) { display: none; }
+      .hero { padding: 72px 0 80px; }
+      h1 { font-size: clamp(3.6rem, 17vw, 6rem); }
+      section { padding: 72px 0; }
+      .section-head, .v2 { grid-template-columns: 1fr; gap: 10px; }
+      .section-no { padding-top: 0; }
+      .roster { grid-template-columns: repeat(2, 1fr); }
+      .person:nth-child(odd) { border-left: 0; padding-left: 0; }
+      .person:nth-child(4) { border-left: 1px solid var(--line); padding-left: 14px; }
+      .person-portrait { height: 130px; }
+      .evidence, .findings, .v2-grid { grid-template-columns: 1fr; }
+      .evidence-item, .evidence-item + .evidence-item { border-left: 0; padding-left: 0; border-bottom: 1px solid var(--line); }
+      .evidence-item:last-child { border-bottom: 0; }
+      .timeline { grid-template-columns: repeat(2, 1fr); }
+      .step:nth-child(odd), .step:nth-child(5) { border-left: 0; padding-left: 0; }
+      .footer-row { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to article</a>
+  <header>
+    <div class="wrap topbar">
+      <a class="brand" href="#top" aria-label="Bench-bench home">
+        <img src="images/bench-bench%20logo.png" alt="Bench-bench">
+        <span>results diary / 01</span>
+      </a>
+      <nav aria-label="Article sections">
+        <a href="#results">Results</a>
+        <a href="#findings">Findings</a>
+        <a href="#v2">v2</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero wrap" id="top">
+      <div class="eyebrow">Bench-bench / long-horizon evaluation</div>
+      <h1>A year is a <em>different</em> kind of test.</h1>
+      <p class="dek">Bench-bench asks an AI to coach Dave for 52 weeks—while sleep, money, work, childcare, and missed sessions keep changing the plan.</p>
+      <div class="hero-meta"><span>six live models</span><span>ten public seeds</span><span>three standardized tests</span></div>
+      <span class="scribble" aria-hidden="true"></span>
+    </section>
+
+    <section id="results">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-no">01 / score</div>
+          <div>
+            <h2>Who kept the year together?</h2>
+            <p class="lede">Final 1RM is the average of standardized tests at weeks 44, 48, and 52 after a fixed three-day taper. It is not the noisy weekly estimate.</p>
+          </div>
+        </div>
+
+        <div class="roster" aria-label="Live model ranking">
+          <article class="person"><div class="person-portrait"><img src="images/opus%205.png" alt="Claude Opus 5 character"></div><div class="rank">01 / live</div><h3>Claude Opus 5</h3><div class="score">100.06 <small>kg</small></div></article>
+          <article class="person"><div class="person-portrait"><img src="images/grok%204.5.png" alt="Grok 4.5 character"></div><div class="rank">02 / live</div><h3>Grok 4.5</h3><div class="score">99.19 <small>kg</small></div></article>
+          <article class="person"><div class="person-portrait"><img src="images/muse%20spark%201.2.png" alt="Muse Spark 1.2 character"></div><div class="rank">03 / live</div><h3>Muse Spark 1.2</h3><div class="score">98.62 <small>kg</small></div></article>
+          <article class="person"><div class="person-portrait"><img class="grok46" src="images/grok%204.5.png" alt="Grok 4.6 character treatment"></div><div class="rank">04 / live</div><h3>Grok 4.6</h3><div class="score">97.51 <small>kg</small></div></article>
+          <article class="person"><div class="person-portrait"><img src="images/gpt%205.6%20sol.png" alt="GPT-5.6 Sol character"></div><div class="rank">05 / live</div><h3>GPT-5.6 Sol</h3><div class="score">93.86 <small>kg</small></div></article>
+          <article class="person"><div class="person-portrait"><img src="images/k3.png" alt="Kimi K3 character"></div><div class="rank">06 / live</div><h3>Kimi K3</h3><div class="score">90.48 <small>kg</small></div></article>
+        </div>
+
+        <figure class="chart-wrap">
+          <svg class="chart" id="scoreChart" viewBox="0 0 960 520" role="img" aria-labelledby="score-title score-desc">
+            <title id="score-title">Live model final one-rep max scores</title>
+            <desc id="score-desc">Mean score with seed standard deviation for six live models. Dashed line marks the scripted-expert reference at 102.89 kilograms.</desc>
+          </svg>
+          <figcaption class="chart-note">mean final 1RM / whisker = seed standard deviation / dashed rule = scripted-expert reference, 102.89 kg</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap split">
+        <div>
+          <div class="section-no">02 / reading the result</div>
+          <div class="number">−1.68<small>kg / Grok 4.6 minus 4.5 on the same seeds</small></div>
+          <p class="lede">The newer Grok run was cheaper, less variable, and easier on the protocol—but it trained more conservatively. The paired 95% interval was −3.48 to +0.13 kg, so the difference is a useful signal, not a final verdict.</p>
+          <ul class="tiny-list">
+            <li><span>4.6 wins / losses</span><strong>2 / 8 seeds</strong></li>
+            <li><span>4.6 repair rate</span><strong>2.81%</strong></li>
+            <li><span>4.5 repair rate</span><strong>8.42%</strong></li>
+          </ul>
+        </div>
+        <figure class="chart-wrap" style="margin-top:0">
+          <svg class="chart" id="grokChart" viewBox="0 0 760 390" role="img" aria-labelledby="grok-title grok-desc">
+            <title id="grok-title">Grok 4.6 minus Grok 4.5 by seed</title>
+            <desc id="grok-desc">Paired score differences for ten public seeds. Negative values favor Grok 4.5.</desc>
+          </svg>
+          <figcaption class="chart-note">paired difference / negative favors Grok 4.5 / positive favors Grok 4.6</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="findings">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-no">03 / findings</div>
+          <div><h2>The score is only the surface.</h2><p class="lede">A year exposes the behavior around the plan: whether a model preserves slack, handles errors, and respects safety constraints.</p></div>
+        </div>
+        <div class="evidence" aria-label="Operational benchmark metrics">
+          <div class="evidence-item"><div class="label">highest score</div><strong>100.06 kg</strong><p>Claude Opus 5 led the live models, with 10/10 public seeds counted.</p></div>
+          <div class="evidence-item"><div class="label">cleanest high scorer</div><strong>2.81%</strong><p>Grok 4.6 had 19 rejected outputs across 677 decisions.</p></div>
+          <div class="evidence-item"><div class="label">safety boundary</div><strong>20 / 20</strong><p>Reckless-maximalist violated the pain constraint on every calibration seed.</p></div>
+        </div>
+        <div class="findings" style="margin-top:56px">
+          <article class="finding"><div class="label">01 / constraints</div><h3>More training was not the whole answer.</h3><p>The 900-minute weekly ledger, limited cash, commute time, and household coverage made reserve capacity part of the strategy.</p></article>
+          <article class="finding"><div class="label">02 / operations</div><h3>Protocol fluency is measurable.</h3><p>Repairs and transport failures are not decoration. They show whether an agent can keep a structured process alive across hundreds of decisions.</p></article>
+          <article class="finding"><div class="label">03 / safety</div><h3>A raw score can be disqualified.</h3><p>The reckless reference has a visible raw score, but it is not counted. Pain days are a constraint, not a footnote.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-no">04 / build log</div>
+          <div><h2>We built it by trying to break it.</h2><p class="lede">The benchmark became more useful each time a plausible policy revealed a missing mechanic, a silent correction, or a statistical shortcut.</p></div>
+        </div>
+        <div class="timeline" aria-label="Bench-bench development timeline">
+          <div class="step"><div class="dot"></div><h3>Brief</h3><p>Define the coach and the year.</p></div>
+          <div class="step"><div class="dot"></div><h3>Calibrate</h3><p>Make the hierarchy meaningful.</p></div>
+          <div class="step"><div class="dot"></div><h3>Break</h3><p>Find free stimulus and time.</p></div>
+          <div class="step"><div class="dot"></div><h3>Repair</h3><p>Expose errors instead of clipping.</p></div>
+          <div class="step"><div class="dot"></div><h3>Constrain</h3><p>Make safety and counting explicit.</p></div>
+          <div class="step"><div class="dot"></div><h3>Review</h3><p>Use independent criticism.</p></div>
+          <div class="step"><div class="dot"></div><h3>Run</h3><p>Test direct-provider agents.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="v2">
+      <div class="wrap v2">
+        <div class="section-no">05 / next</div>
+        <div class="v2-copy">
+          <h2>V2 should test whether an agent can run a small operation over time.</h2>
+          <p class="lede">The next version should feel less like a weekly form and more like an evolving year: a strategic plan, event-driven decisions, persistent memory, and several related futures to survive.</p>
+          <div class="v2-grid">
+            <article class="v2-card"><div class="label">two clocks</div><p>Strategic commitments alongside day-level events and recovery.</p></article>
+            <article class="v2-card"><div class="label">branch the future</div><p>Score hidden scenario branches instead of one lucky trajectory.</p></article>
+            <article class="v2-card"><div class="label">tools, not gymnastics</div><p>Narrow tools, durable notes, and no silent corrections.</p></article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-row">
+      <img src="images/bench-bench%20logo.png" alt="Bench-bench">
+      <div class="footer-links">
+        <a href="BENCHMARK_CARD.md">benchmark card</a>
+        <a href="reports/FINAL_PUBLIC_LEADERBOARD.md">base leaderboard</a>
+        <a href="runs/live-grok-4.6-full-20260812/state.json">grok 4.6 run</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const liveModels = [
+      { label: "Opus 5", score: 100.064, sd: 2.253, color: "#ef783b" },
+      { label: "Grok 4.5", score: 99.191, sd: 2.091, color: "#e54732" },
+      { label: "Muse 1.2", score: 98.616, sd: 1.333, color: "#2f7bb7" },
+      { label: "Grok 4.6", score: 97.514, sd: 1.551, color: "#5c78a4" },
+      { label: "GPT-5.6", score: 93.864, sd: 1.231, color: "#a8cce8" },
+      { label: "Kimi K3", score: 90.483, sd: 6.219, color: "#a66a00" }
+    ];
+    const grokDiffs = [-4.14, -5.89, -2.58, -.15, 1.98, -3.33, -.23, -2.72, 1.65, -1.36];
+    const svgNS = "http://www.w3.org/2000/svg";
+    const make = (tag, attrs, text = "") => { const e = document.createElementNS(svgNS, tag); Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v)); if (text) e.textContent = text; return e; };
+    const addText = (svg, x, y, text, attrs = {}) => svg.appendChild(make("text", { x, y, ...attrs }, text));
+
+    function drawScoreChart() {
+      const svg = document.getElementById("scoreChart");
+      const width = 960, height = 520, left = 170, right = 45, top = 46, bottom = 46, min = 86, max = 105;
+      const x = value => left + ((value - min) / (max - min)) * (width - left - right);
+      [90, 95, 100, 105].forEach(t => { const tx = x(t); svg.appendChild(make("line", { x1: tx, y1: top - 14, x2: tx, y2: height - bottom + 6, stroke: "#e4e9ec", "stroke-width": 1 })); addText(svg, tx, height - 16, t, { "text-anchor": "middle", "font-size": 12, "class": "mono-text", fill: "#738093" }); });
+      const expertX = x(102.892);
+      svg.appendChild(make("line", { x1: expertX, y1: top - 22, x2: expertX, y2: height - bottom + 6, stroke: "#122a45", "stroke-width": 2, "stroke-dasharray": "8 8" }));
+      addText(svg, expertX, 18, "expert 102.89", { "text-anchor": "middle", "font-size": 12, "class": "mono-text" });
+      liveModels.forEach((item, i) => {
+        const cy = top + i * 67 + 22, low = x(item.score - item.sd), high = x(item.score + item.sd), dot = x(item.score);
+        addText(svg, left - 18, cy + 5, item.label, { "text-anchor": "end", "font-size": 14, "font-weight": 600 });
+        svg.appendChild(make("line", { x1: left, y1: cy, x2: width - right, y2: cy, stroke: "#edf0f2", "stroke-width": 2 }));
+        svg.appendChild(make("line", { x1: low, y1: cy, x2: high, y2: cy, stroke: item.color, "stroke-width": 5, "stroke-linecap": "round" }));
+        svg.appendChild(make("line", { x1: low, y1: cy - 8, x2: low, y2: cy + 8, stroke: item.color, "stroke-width": 2 }));
+        svg.appendChild(make("line", { x1: high, y1: cy - 8, x2: high, y2: cy + 8, stroke: item.color, "stroke-width": 2 }));
+        svg.appendChild(make("circle", { cx: dot, cy, r: 8, fill: item.color, stroke: "#fbfaf7", "stroke-width": 3 }));
+        addText(svg, Math.min(width - right, dot + 16), cy + 5, item.score.toFixed(2), { "font-size": 15, "font-weight": 700, fill: item.color });
+      });
+      addText(svg, left, height - 1, "final 1RM / kg", { "font-size": 11, "class": "mono-text", fill: "#738093" });
+    }
+
+    function drawGrokChart() {
+      const svg = document.getElementById("grokChart");
+      const width = 760, height = 390, left = 82, right = 28, top = 27, bottom = 44, min = -6.5, max = 3;
+      const x = value => left + ((value - min) / (max - min)) * (width - left - right);
+      [-6, -4, -2, 0, 2].forEach(t => { const tx = x(t); svg.appendChild(make("line", { x1: tx, y1: top - 8, x2: tx, y2: height - bottom, stroke: t === 0 ? "#122a45" : "#e4e9ec", "stroke-width": t === 0 ? 2 : 1, "stroke-dasharray": t === 0 ? "7 7" : "none" })); addText(svg, tx, height - 15, t > 0 ? `+${t}` : t, { "text-anchor": "middle", "font-size": 11, "class": "mono-text", fill: "#738093" }); });
+      grokDiffs.forEach((diff, i) => { const cy = top + i * 26 + 18, dx = x(diff), zero = x(0), color = diff >= 0 ? "#4e8b63" : "#e54732"; addText(svg, left - 13, cy + 4, String(100 + i), { "text-anchor": "end", "font-size": 11, "class": "mono-text", fill: "#738093" }); svg.appendChild(make("line", { x1: zero, y1: cy, x2: dx, y2: cy, stroke: color, "stroke-width": 6, "stroke-linecap": "round" })); svg.appendChild(make("circle", { cx: dx, cy, r: 6, fill: color, stroke: "#fbfaf7", "stroke-width": 2 })); addText(svg, diff >= 0 ? dx + 11 : dx - 11, cy + 4, `${diff > 0 ? "+" : ""}${diff.toFixed(2)}`, { "text-anchor": diff >= 0 ? "start" : "end", "font-size": 11, "font-weight": 700, fill: color }); });
+      const ciL = x(-3.48), ciR = x(.13), ciM = x(-1.677), y = height - bottom + 17;
+      svg.appendChild(make("line", { x1: ciL, y1: y, x2: ciR, y2: y, stroke: "#7557a8", "stroke-width": 4 }));
+      svg.appendChild(make("line", { x1: ciL, y1: y - 6, x2: ciL, y2: y + 6, stroke: "#7557a8", "stroke-width": 2 }));
+      svg.appendChild(make("line", { x1: ciR, y1: y - 6, x2: ciR, y2: y + 6, stroke: "#7557a8", "stroke-width": 2 }));
+      svg.appendChild(make("circle", { cx: ciM, cy: y, r: 5, fill: "#7557a8" }));
+      addText(svg, left, y + 23, "paired mean + 95% interval", { "font-size": 11, "class": "mono-text", fill: "#7557a8" });
+    }
+    drawScoreChart();
+    drawGrokChart();
+  </script>
+</body>
+</html>

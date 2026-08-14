@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bench-bench: a long-horizon benchmark for coaching decisions under uncertainty, constraints, and a life that gets in the way.">
+  <title>Bench-bench — The year is the test</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,750&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #f7f5ef;
+      --paper-bright: #fffefb;
+      --paper-shadow: #e8e7e1;
+      --ink: #112945;
+      --black: #11110f;
+      --muted: #667387;
+      --blue: #2f7bb7;
+      --blue-soft: #a8cce8;
+      --red: #e54732;
+      --orange: #ef783b;
+      --gold: #a66a00;
+      --green: #4e8b63;
+      --purple: #7557a8;
+      --line: rgba(17, 41, 69, .18);
+      --line-strong: rgba(17, 41, 69, .36);
+      --shadow: 0 14px 0 rgba(17, 41, 69, .08), 0 24px 40px rgba(17, 41, 69, .08);
+      --radius: 22px;
+      --ease: cubic-bezier(.2,.75,.25,1);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(rgba(47,123,183,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(47,123,183,.045) 1px, transparent 1px),
+        var(--paper);
+      background-size: 34px 34px;
+      font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+      line-height: 1.55;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
+      opacity: .22;
+      mix-blend-mode: multiply;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(17,41,69,.06), transparent 26%),
+        radial-gradient(circle at 88% 42%, rgba(229,71,50,.045), transparent 24%),
+        repeating-linear-gradient(90deg, rgba(17,41,69,.02) 0 1px, transparent 1px 4px);
+    }
+
+    a { color: inherit; }
+    img { max-width: 100%; display: block; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 3px solid var(--red); outline-offset: 4px; }
+
+    .skip-nav {
+      position: absolute;
+      left: 18px;
+      top: -60px;
+      background: var(--black);
+      color: white;
+      padding: 10px 14px;
+      z-index: 30;
+    }
+    .skip-nav:focus { top: 18px; }
+
+    .wrap { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+    .mono, .eyebrow, .meta, .rank, .chart-note, .section-kicker, .tag, .data-note {
+      font-family: "DM Mono", ui-monospace, monospace;
+    }
+    .eyebrow, .section-kicker, .tag {
+      text-transform: uppercase;
+      letter-spacing: .13em;
+      font-size: .72rem;
+      font-weight: 500;
+    }
+
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 15;
+      border-bottom: 1.5px solid var(--line-strong);
+      background: rgba(247,245,239,.88);
+      backdrop-filter: blur(14px);
+    }
+    .nav-inner {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .nav-brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+    .nav-brand img { width: 132px; height: 42px; object-fit: contain; mix-blend-mode: multiply; }
+    .nav-mark { width: 12px; height: 12px; border-radius: 50%; background: var(--red); box-shadow: 17px 0 var(--blue), 34px 0 var(--gold); margin-right: 34px; }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
+    .nav-links a { text-decoration: none; color: var(--muted); font-size: .82rem; }
+    .nav-links a:hover { color: var(--ink); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; }
+
+    .hero { padding: 76px 0 48px; position: relative; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(300px, .8fr); gap: 64px; align-items: end; }
+    .hero-copy { max-width: 760px; }
+    .hero-kicker { color: var(--red); display: flex; align-items: center; gap: 11px; }
+    .hero-kicker::before { content: ""; width: 46px; border-top: 3px solid var(--red); transform: rotate(-2deg); }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { font-family: Fraunces, Georgia, serif; letter-spacing: -.035em; line-height: .98; }
+    h1 { font-size: clamp(3.6rem, 9vw, 8.3rem); max-width: 900px; margin: 20px 0 26px; font-weight: 650; }
+    h1 em { color: var(--red); font-style: normal; position: relative; white-space: nowrap; }
+    h1 em::after { content: ""; position: absolute; left: 2%; right: -4%; bottom: -.08em; height: .12em; background: var(--red); transform: rotate(-2deg); border-radius: 80%; opacity: .72; }
+    .hero-deck { max-width: 660px; font-size: clamp(1.12rem, 2vw, 1.42rem); line-height: 1.4; color: #263b54; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+    .tag { border: 1.5px solid var(--line-strong); padding: 8px 11px; background: rgba(255,254,251,.62); }
+    .tag.accent { border-color: var(--red); color: var(--red); }
+
+    .hero-aside { position: relative; }
+    .logo-card {
+      background: var(--paper-bright);
+      border: 2px solid var(--black);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      transform: rotate(1.2deg);
+    }
+    .logo-card img { width: 100%; aspect-ratio: 1.48 / 1; object-fit: contain; mix-blend-mode: multiply; }
+    .stamp {
+      position: absolute;
+      right: -14px;
+      bottom: -20px;
+      width: 116px;
+      height: 116px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border: 2px solid var(--red);
+      color: var(--red);
+      border-radius: 50%;
+      background: var(--paper);
+      font: 500 .64rem/1.2 "DM Mono", monospace;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      transform: rotate(11deg);
+    }
+    .stamp strong { display: block; font: 650 1.8rem/1 Fraunces, serif; letter-spacing: -.04em; }
+
+    .rule { border: 0; border-top: 1.5px solid var(--line-strong); margin: 0; }
+    .section { padding: 96px 0; position: relative; }
+    .section-header { display: grid; grid-template-columns: minmax(190px, .33fr) minmax(0, .67fr); gap: 36px; align-items: start; margin-bottom: 42px; }
+    .section-kicker { color: var(--red); padding-top: 8px; }
+    h2 { font-size: clamp(2.6rem, 5.4vw, 5.25rem); margin-bottom: 18px; }
+    h3 { font-size: clamp(1.55rem, 3vw, 2.5rem); margin-bottom: 12px; }
+    .lede { font-size: 1.12rem; color: #324963; max-width: 720px; }
+    .small { color: var(--muted); font-size: .9rem; }
+
+    .cast-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; align-items: end; }
+    .cast-card {
+      min-width: 0;
+      background: var(--paper-bright);
+      border: 1.5px solid var(--black);
+      padding: 10px;
+      box-shadow: 6px 7px 0 rgba(17,41,69,.12);
+      transition: transform .28s var(--ease), box-shadow .28s var(--ease);
+    }
+    .cast-card:nth-child(2n) { transform: rotate(1.2deg); }
+    .cast-card:nth-child(3n) { transform: rotate(-1deg); }
+    .cast-card:hover { transform: translateY(-8px) rotate(0deg); box-shadow: 8px 13px 0 rgba(17,41,69,.15); }
+    .cast-image { background: white; border-bottom: 1.5px solid var(--line); aspect-ratio: 1 / 1; overflow: hidden; display: grid; place-items: center; }
+    .cast-image img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    .cast-image img.grok46 { filter: hue-rotate(160deg) saturate(.78) contrast(.97); }
+    .cast-card .rank { color: var(--red); font-size: .66rem; margin: 12px 0 3px; }
+    .cast-card h3 { font: 600 .94rem/1.05 "Space Grotesk", sans-serif; letter-spacing: -.025em; margin-bottom: 9px; }
+    .cast-score { font: 650 1.55rem/1 Fraunces, serif; }
+    .cast-score span { font: 500 .67rem "DM Mono", monospace; color: var(--muted); }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 35px 0 50px; }
+    .stat { background: var(--paper-bright); border: 1.5px solid var(--line-strong); padding: 22px; min-height: 140px; }
+    .stat:nth-child(1) { border-top: 7px solid var(--red); }
+    .stat:nth-child(2) { border-top: 7px solid var(--blue); }
+    .stat:nth-child(3) { border-top: 7px solid var(--gold); }
+    .stat:nth-child(4) { border-top: 7px solid var(--green); }
+    .stat-label { text-transform: uppercase; letter-spacing: .12em; font: 500 .68rem "DM Mono", monospace; color: var(--muted); }
+    .stat-value { font: 650 clamp(2rem, 4vw, 3.2rem)/1 Fraunces, serif; margin: 16px 0 6px; }
+    .stat-note { color: var(--muted); font-size: .84rem; }
+
+    .chart-shell { background: var(--paper-bright); border: 1.5px solid var(--line-strong); padding: 18px 18px 10px; box-shadow: 8px 9px 0 rgba(17,41,69,.08); overflow-x: auto; }
+    .chart-shell + .chart-shell { margin-top: 22px; }
+    .chart { width: 100%; min-width: 760px; height: auto; display: block; }
+    .chart text { font-family: "Space Grotesk", sans-serif; fill: var(--ink); }
+    .chart .mono-text { font-family: "DM Mono", monospace; }
+    .chart-note { color: var(--muted); font-size: .7rem; letter-spacing: .025em; padding: 10px 2px 0; }
+
+    .pullquote {
+      margin: 48px 0;
+      padding: 28px 34px;
+      border-left: 7px solid var(--red);
+      background: rgba(229,71,50,.07);
+      font: 650 clamp(1.75rem, 3.2vw, 3rem)/1.08 Fraunces, serif;
+      letter-spacing: -.035em;
+      max-width: 920px;
+    }
+    .pullquote cite { display: block; margin-top: 17px; font: 500 .67rem "DM Mono", monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--red); }
+
+    .grok-layout { display: grid; grid-template-columns: minmax(0, .83fr) minmax(300px, 1.17fr); gap: 34px; align-items: start; }
+    .grok-copy { padding-top: 8px; }
+    .grok-copy .number { font: 650 clamp(3.5rem, 8vw, 7rem)/.85 Fraunces, serif; color: var(--red); margin: 24px 0; }
+    .grok-copy .number span { font: 500 .75rem "DM Mono", monospace; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+    .grok-list { margin: 26px 0 0; padding: 0; list-style: none; border-top: 1.5px solid var(--line-strong); }
+    .grok-list li { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: .92rem; }
+    .grok-list strong { font-family: "DM Mono", monospace; white-space: nowrap; }
+
+    .ops-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .ops-card { background: var(--paper-bright); border: 1.5px solid var(--line-strong); padding: 20px; }
+    .ops-card h3 { font: 600 .92rem "Space Grotesk", sans-serif; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 20px; }
+    .bar-row { display: grid; grid-template-columns: 73px 1fr 53px; gap: 8px; align-items: center; margin: 10px 0; font: 500 .66rem "DM Mono", monospace; }
+    .bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { background: #e7edf2; height: 12px; position: relative; border-radius: 1px; }
+    .bar-fill { height: 100%; width: calc(var(--value) * 1%); background: var(--blue); min-width: 2px; }
+    .bar-fill.red { background: var(--red); }
+    .bar-fill.gold { background: var(--gold); }
+    .bar-value { text-align: right; color: var(--muted); }
+
+    .findings-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .finding { background: var(--paper-bright); border: 1.5px solid var(--line-strong); padding: 24px; position: relative; min-height: 220px; }
+    .finding::before { content: attr(data-no); position: absolute; top: 18px; right: 20px; color: var(--blue-soft); font: 650 2.6rem/1 Fraunces, serif; }
+    .finding h3 { font-size: 1.65rem; padding-right: 30px; }
+    .finding p { color: #45586e; margin-bottom: 0; }
+
+    .timeline { position: relative; display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; padding: 35px 0 0; }
+    .timeline::before { content: ""; position: absolute; top: 59px; left: 0; right: 0; border-top: 2px solid var(--blue-soft); }
+    .timeline-item { position: relative; padding: 0 10px; }
+    .timeline-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--blue); border: 3px solid var(--paper); box-shadow: 0 0 0 2px var(--ink); margin: 15px auto 27px; position: relative; z-index: 1; }
+    .timeline-item:nth-child(3n) .timeline-dot { background: var(--green); }
+    .timeline-item:nth-child(4n) .timeline-dot { background: var(--purple); }
+    .timeline-item h3 { font: 600 .88rem/1.1 "Space Grotesk", sans-serif; letter-spacing: -.02em; text-align: center; margin-bottom: 8px; }
+    .timeline-item p { color: var(--muted); text-align: center; font-size: .76rem; line-height: 1.35; }
+
+    .v2-panel { background: var(--ink); color: var(--paper); padding: 46px; position: relative; overflow: hidden; box-shadow: 12px 13px 0 rgba(17,41,69,.2); }
+    .v2-panel::after { content: "V2"; position: absolute; right: -10px; bottom: -74px; color: rgba(255,255,255,.06); font: 750 18rem/.8 Fraunces, serif; pointer-events: none; }
+    .v2-panel h2 { max-width: 760px; color: var(--paper); }
+    .v2-panel .lede { color: #c5d4e2; max-width: 690px; }
+    .v2-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; position: relative; z-index: 1; margin-top: 36px; }
+    .v2-card { border: 1px solid rgba(255,255,255,.28); padding: 20px; min-height: 210px; background: rgba(255,255,255,.05); }
+    .v2-card .v2-no { color: var(--orange); font: 500 .72rem "DM Mono", monospace; }
+    .v2-card h3 { color: white; font-size: 1.55rem; margin: 16px 0 10px; }
+    .v2-card p { color: #c5d4e2; font-size: .88rem; }
+
+    .method { display: grid; grid-template-columns: minmax(0, .7fr) minmax(280px, .3fr); gap: 48px; align-items: start; }
+    .method-copy p { color: #45586e; max-width: 720px; }
+    .method-note { border-top: 2px solid var(--ink); padding-top: 15px; font-size: .82rem; color: var(--muted); }
+    .method-note strong { display: block; font: 500 .68rem "DM Mono", monospace; text-transform: uppercase; letter-spacing: .1em; color: var(--ink); margin-bottom: 9px; }
+
+    footer { padding: 48px 0 72px; border-top: 1.5px solid var(--line-strong); }
+    .footer-grid { display: flex; justify-content: space-between; gap: 30px; align-items: start; }
+    .footer-brand img { width: 160px; mix-blend-mode: multiply; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 14px 24px; font: 500 .72rem "DM Mono", monospace; color: var(--muted); }
+    .footer-links a:hover { color: var(--red); }
+
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity .65s var(--ease), transform .65s var(--ease); }
+    .reveal.is-visible { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid, .grok-layout, .method { grid-template-columns: 1fr; gap: 30px; }
+      .hero-aside { max-width: 520px; }
+      .cast-grid { grid-template-columns: repeat(3, 1fr); }
+      .timeline { grid-template-columns: repeat(4, 1fr); row-gap: 24px; }
+      .timeline::before { display: none; }
+      .timeline-dot { margin-bottom: 15px; }
+    }
+    @media (max-width: 720px) {
+      .wrap { width: min(100% - 28px, 620px); }
+      .nav-inner { min-height: 66px; }
+      .nav-links { gap: 10px; }
+      .nav-links a { font-size: .7rem; }
+      .nav-mark { display: none; }
+      .hero { padding: 55px 0 34px; }
+      .section { padding: 70px 0; }
+      .section-header { grid-template-columns: 1fr; gap: 14px; margin-bottom: 28px; }
+      .stat-grid, .ops-grid, .findings-grid, .v2-grid { grid-template-columns: 1fr; }
+      .cast-grid { grid-template-columns: repeat(2, 1fr); }
+      .v2-panel { padding: 28px 20px; }
+      .timeline { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { flex-direction: column; }
+    }
+
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  </style>
+</head>
+<body>
+  <a class="skip-nav" href="#main">Skip to article</a>
+  <header class="site-nav">
+    <div class="wrap nav-inner">
+      <a class="nav-brand" href="#top" aria-label="Bench-bench home">
+        <img src="images/bench-bench%20logo.png" alt="Bench-bench">
+        <span class="nav-mark" aria-hidden="true"></span>
+      </a>
+      <nav class="nav-links" aria-label="Article sections">
+        <a href="#scoreboard">Scoreboard</a>
+        <a href="#findings">Findings</a>
+        <a href="#process">Build log</a>
+        <a href="#v2">v2</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="wrap hero-grid">
+        <div class="hero-copy reveal">
+          <div class="eyebrow hero-kicker">Bench-bench / results diary 01</div>
+          <h1>The year is the <em>test.</em></h1>
+          <p class="hero-deck">What happens when an AI has to coach a returning lifter through a year of real constraints—sleep, money, missed sessions, a baby, and the stubborn physics of getting stronger?</p>
+          <div class="hero-meta" aria-label="Benchmark summary">
+            <span class="tag accent">52 weeks</span>
+            <span class="tag">60 live episodes</span>
+            <span class="tag">10 public seeds</span>
+            <span class="tag">three standardized tests</span>
+          </div>
+        </div>
+        <div class="hero-aside reveal">
+          <div class="logo-card">
+            <img src="images/bench-bench%20logo.png" alt="Hand-drawn Bench-bench logo with a barbell">
+          </div>
+          <div class="stamp" aria-label="One simulated year"><div><strong>1Y</strong>one simulated<br>year</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="scoreboard">
+      <div class="wrap">
+        <div class="section-header reveal">
+          <div class="section-kicker">01 / the cast</div>
+          <div>
+            <h2>Six models. One messy year.</h2>
+            <p class="lede">Bench-bench is a model-only long-horizon benchmark. The model is Dave’s coach: it plans training, allocates time and money, and tries to make progress while the simulator keeps moving the goalposts.</p>
+          </div>
+        </div>
+        <div class="cast-grid reveal" aria-label="Model ranking cards">
+          <article class="cast-card">
+            <div class="cast-image"><img src="images/opus%205.png" alt="Hand-drawn Claude Opus 5 character"></div>
+            <div class="rank">01 / live</div><h3>Claude Opus 5</h3><div class="cast-score">100.06 <span>kg</span></div>
+          </article>
+          <article class="cast-card">
+            <div class="cast-image"><img src="images/grok%204.5.png" alt="Hand-drawn Grok character"></div>
+            <div class="rank">02 / live</div><h3>Grok 4.5</h3><div class="cast-score">99.19 <span>kg</span></div>
+          </article>
+          <article class="cast-card">
+            <div class="cast-image"><img src="images/muse%20spark%201.2.png" alt="Hand-drawn Muse Spark 1.2 character"></div>
+            <div class="rank">03 / live</div><h3>Muse Spark 1.2</h3><div class="cast-score">98.62 <span>kg</span></div>
+          </article>
+          <article class="cast-card">
+            <div class="cast-image"><img class="grok46" src="images/grok%204.5.png" alt="Hand-drawn Grok family character representing Grok 4.6"></div>
+            <div class="rank">04 / live</div><h3>Grok 4.6</h3><div class="cast-score">97.51 <span>kg</span></div>
+          </article>
+          <article class="cast-card">
+            <div class="cast-image"><img src="images/gpt%205.6%20sol.png" alt="Hand-drawn GPT-5.6 Sol character"></div>
+            <div class="rank">05 / live</div><h3>GPT-5.6 Sol</h3><div class="cast-score">93.86 <span>kg</span></div>
+          </article>
+          <article class="cast-card">
+            <div class="cast-image"><img src="images/k3.png" alt="Hand-drawn Kimi K3 character"></div>
+            <div class="rank">06 / live</div><h3>Kimi K3</h3><div class="cast-score">90.48 <span>kg</span></div>
+          </article>
+        </div>
+
+        <div class="stat-grid reveal" aria-label="Headline results">
+          <div class="stat"><div class="stat-label">top live score</div><div class="stat-value">100.06 kg</div><div class="stat-note">Claude Opus 5, 10/10 seeds counted</div></div>
+          <div class="stat"><div class="stat-label">reference expert</div><div class="stat-value">102.89 kg</div><div class="stat-note">scripted-expert, 20 calibration seeds</div></div>
+          <div class="stat"><div class="stat-label">live spread</div><div class="stat-value">9.58 kg</div><div class="stat-note">Opus 5 mean minus Kimi K3 mean</div></div>
+          <div class="stat"><div class="stat-label">pain violations</div><div class="stat-value">0</div><div class="stat-note">all live model episodes counted</div></div>
+        </div>
+
+        <div class="chart-shell reveal">
+          <svg class="chart" id="liveChart" viewBox="0 0 980 540" role="img" aria-labelledby="live-chart-title live-chart-desc">
+            <title id="live-chart-title">Live model final 1RM scores</title>
+            <desc id="live-chart-desc">Mean final 1RM scores for six models. Error bars show seed standard deviation.</desc>
+          </svg>
+          <p class="chart-note">LIVE MODELS / dot = mean / whisker = seed standard deviation / dashed line = scripted-expert reference at 102.89 kg</p>
+        </div>
+        <div class="chart-shell reveal">
+          <svg class="chart" id="baselineChart" viewBox="0 0 980 500" role="img" aria-labelledby="baseline-chart-title baseline-chart-desc">
+            <title id="baseline-chart-title">Scripted baseline final 1RM scores</title>
+            <desc id="baseline-chart-desc">Six scripted reference policies, including the raw but constraint-violating reckless policy.</desc>
+          </svg>
+          <p class="chart-note">SCRIPTED REFERENCES / reckless-maximalist is shown as raw diagnostic performance; it violated the pain constraint on 20/20 seeds and has no counted score.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="findings">
+      <div class="wrap">
+        <div class="section-header reveal">
+          <div class="section-kicker">02 / what moved</div>
+          <div>
+            <h2>The score is only the surface.</h2>
+            <p class="lede">The benchmark became interesting when the obvious plan stopped being the best plan. The model has to make tradeoffs that arrive late, survive interruptions, and remain legible in the transcript.</p>
+          </div>
+        </div>
+
+        <div class="pullquote reveal">“The winning policy is not the one that trains hardest. It is the one that keeps a future week available.”<cite>Bench-bench working principle</cite></div>
+
+        <div class="findings-grid reveal">
+          <article class="finding" data-no="01">
+            <h3>Constraints became the task.</h3>
+            <p>A 900-minute weekly ledger, limited cash, commute time, partner coverage, and missed sessions made “more training” an incomplete answer. The model has to reserve capacity for the life around the barbell.</p>
+          </article>
+          <article class="finding" data-no="02">
+            <h3>Operational behavior is evidence.</h3>
+            <p>Opus 5 led the score but needed repairs on 19.2% of decisions. Grok 4.6 was much cleaner at 2.8%, yet scored lower. Protocol fluency and outcome quality are related—but not identical.</p>
+          </article>
+          <article class="finding" data-no="03">
+            <h3>One run is not a verdict.</h3>
+            <p>Grok 4.6 trailed Grok 4.5 by 1.68 kg on the same ten seeds, but the paired 95% interval was −3.48 to +0.13 kg. At temperature 1.0, a leaderboard is a sample of behavior, not a complete model identity.</p>
+          </article>
+          <article class="finding" data-no="04">
+            <h3>Safety has to be structural.</h3>
+            <p>Reckless-maximalist produced a visible raw score but failed the pain constraint on every calibration seed. It is not silently averaged into the leaderboard: violations remain visible and counted scores are unavailable.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="grok-layout reveal">
+          <div class="grok-copy">
+            <div class="section-kicker">03 / same seed, different coach</div>
+            <h2>Grok 4.5 vs 4.6</h2>
+            <p class="lede">The newer run was operationally cleaner, less variable, and cheaper—but it chose a more conservative training policy.</p>
+            <div class="number">−1.68 <span>kg mean difference / 4.6 minus 4.5</span></div>
+            <ul class="grok-list">
+              <li><span>4.6 wins / losses by seed</span><strong>2 / 8</strong></li>
+              <li><span>paired 95% interval</span><strong>−3.48…+0.13 kg</strong></li>
+              <li><span>repair rate</span><strong>2.81% vs 8.42%</strong></li>
+              <li><span>training minutes / year</span><strong>5,641 vs 6,205</strong></li>
+            </ul>
+          </div>
+          <div class="chart-shell">
+            <svg class="chart" id="grokChart" viewBox="0 0 980 430" role="img" aria-labelledby="grok-chart-title grok-chart-desc">
+              <title id="grok-chart-title">Grok 4.6 minus Grok 4.5 by public seed</title>
+              <desc id="grok-chart-desc">Paired score differences for ten public seeds. Negative values favor Grok 4.5.</desc>
+            </svg>
+            <p class="chart-note">PAIRED DIFFERENCE / negative bars favor Grok 4.5 / positive bars favor Grok 4.6</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="section-header reveal">
+          <div class="section-kicker">04 / the machine behind the score</div>
+          <div>
+            <h2>Every model also had to operate the protocol.</h2>
+            <p class="lede">A model can be smart and still be expensive, brittle, slow, or hard to steer. Those properties matter when an agent is expected to keep going for a year.</p>
+          </div>
+        </div>
+        <div class="ops-grid reveal">
+          <article class="ops-card"><h3>Rejected outputs</h3><div id="repairBars"></div></article>
+          <article class="ops-card"><h3>Transport failures</h3><div id="transportBars"></div></article>
+          <article class="ops-card"><h3>Cost / episode</h3><div id="costBars"></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="process">
+      <div class="wrap">
+        <div class="section-header reveal">
+          <div class="section-kicker">05 / the build log</div>
+          <div>
+            <h2>We built the benchmark by trying to break it.</h2>
+            <p class="lede">The useful result was not the first simulator. It was the sequence of failures that forced the mechanics, scoring, prompt, and artifact trail to become explicit.</p>
+          </div>
+        </div>
+        <div class="timeline reveal" aria-label="Bench-bench development timeline">
+          <div class="timeline-item"><div class="timeline-dot"></div><h3>Start brief</h3><p>Turn “coach Dave” into a measurable long-horizon task.</p></div>
+          <div class="timeline-item"><div class="timeline-dot"></div><h3>Calibration</h3><p>Find a 52-week hierarchy and a useful expert reference.</p></div>
+          <div class="timeline-item"><div class="timeline-dot"></div><h3>Mechanics</h3><p>Close free stimulus, time, and resource exploits.</p></div>
+          <div class="timeline-item"><div class="timeline-dot"></div><h3>Adversarial search</h3><p>Search legal action space instead of trusting four scripts.</p></div>
+          <div class="timeline-item"><div class="timeline-dot"></div><h3>Safety + stats</h3><p>Make violations, invalidity, and survivor bias visible.</p></div>
+          <div class="timeline-item"><div class="timeline-dot"></div><h3>Independent reviews</h3><p>Convert convergent criticism into release gates.</p></div>
+          <div class="timeline-item"><div class="timeline-dot"></div><h3>Live run</h3><p>Run direct-provider episodes with provenance and cost.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="v2">
+      <div class="wrap">
+        <div class="v2-panel reveal">
+          <div class="section-kicker" style="color:var(--orange)">06 / the next iteration</div>
+          <h2>Bench-bench v2 should feel less like a form—and more like a year.</h2>
+          <p class="lede">The next benchmark should test whether an agent can run a small, evolving operation over time: maintain a plan, preserve slack, remember what it learned, and recover when the future refuses to cooperate.</p>
+          <div class="v2-grid">
+            <article class="v2-card"><div class="v2-no">V2 / 01</div><h3>Two clocks</h3><p>A 365-day internal clock with event-driven decisions, plus a strategic plan that makes long-term commitments visible.</p></article>
+            <article class="v2-card"><div class="v2-no">V2 / 02</div><h3>Branch the future</h3><p>Score related hidden scenario branches—illness, closures, schedule shocks, cash pressure—not one lucky trajectory.</p></article>
+            <article class="v2-card"><div class="v2-no">V2 / 03</div><h3>Tools, not gymnastics</h3><p>Use narrow composable tools and persistent notes. Errors should teach the agent; silent clipping should never carry the score.</p></article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap method reveal">
+        <div class="method-copy">
+          <div class="section-kicker">Notes from the lab</div>
+          <h2>What this result does—and does not—say.</h2>
+          <p>Bench-bench measures decisions in a deterministic simulated environment with stochastic observations and execution. A higher score means the policy produced a stronger simulated Dave under the locked protocol. It does not establish that a model gives safe real-world exercise, medical, nutrition, sleep, or relationship advice.</p>
+          <p>The current live comparison covers six models × ten public seeds × 52 weeks. The five-model leaderboard is the base run; Grok 4.6 is a follow-up direct-provider run joined here as an explicit extension. The scripted references use burned calibration seeds 0–19. All live model episodes in this snapshot were counted under the pain constraint.</p>
+        </div>
+        <aside class="method-note"><strong>Protocol snapshot</strong>52 weeks / 364 simulated days<br>900-minute weekly ledger<br>tests at weeks 44, 48, 52<br>fixed three-day taper<br>engine hash<br><span class="mono">sha256:fdbd8293…</span></aside>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-grid">
+      <div class="footer-brand"><img src="images/bench-bench%20logo.png" alt="Bench-bench"></div>
+      <div class="footer-links">
+        <a href="BENCHMARK_CARD.md">Benchmark card</a>
+        <a href="reports/FINAL_PUBLIC_LEADERBOARD.md">Base leaderboard</a>
+        <a href="reports/final_public_leaderboard.json">Base raw results</a>
+        <a href="runs/live-grok-4.6-full-20260812/state.json">Grok 4.6 run</a>
+        <a href="https://andonlabs.com/evals/vending-bench-2" target="_blank" rel="noreferrer">Vending-Bench 2 ↗</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const liveModels = [
+      { label: "Claude Opus 5", score: 100.064, sd: 2.253, color: "#ef783b" },
+      { label: "Grok 4.5", score: 99.191, sd: 2.091, color: "#e54732" },
+      { label: "Muse Spark 1.2", score: 98.616, sd: 1.333, color: "#2f7bb7" },
+      { label: "Grok 4.6", score: 97.514, sd: 1.551, color: "#5c78a4" },
+      { label: "GPT-5.6 Sol", score: 93.864, sd: 1.231, color: "#a8cce8" },
+      { label: "Kimi K3", score: 90.483, sd: 6.219, color: "#a66a00" }
+    ];
+    const baselines = [
+      { label: "scripted-expert", score: 102.892, sd: .650, color: "#2f7bb7", counted: true },
+      { label: "recovery-aware", score: 99.008, sd: .699, color: "#4e8b63", counted: true },
+      { label: "skip-when-busy", score: 96.562, sd: .958, color: "#7557a8", counted: true },
+      { label: "rigid-linear", score: 92.346, sd: 1.774, color: "#5c78a4", counted: true },
+      { label: "reckless-maximalist*", score: 87.506, sd: 1.067, color: "#a66a00", counted: false },
+      { label: "random", score: 86.939, sd: 1.000, color: "#112945", counted: true }
+    ];
+
+    const grokDiffs = [
+      { seed: 100, diff: -4.14 }, { seed: 101, diff: -5.89 }, { seed: 102, diff: -2.58 }, { seed: 103, diff: -.15 },
+      { seed: 104, diff: 1.98 }, { seed: 105, diff: -3.33 }, { seed: 106, diff: -.23 }, { seed: 107, diff: -2.72 },
+      { seed: 108, diff: 1.65 }, { seed: 109, diff: -1.36 }
+    ];
+
+    const svgNS = "http://www.w3.org/2000/svg";
+    function node(tag, attrs = {}, content = "") {
+      const el = document.createElementNS(svgNS, tag);
+      Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+      if (content) el.textContent = content;
+      return el;
+    }
+    function drawText(svg, x, y, text, attrs = {}) {
+      svg.appendChild(node("text", { x, y, ...attrs }, text));
+    }
+    function drawRankChart(id, data, min, max, marker, markerLabel) {
+      const svg = document.getElementById(id);
+      const width = 980;
+      const rowH = 65;
+      const top = 49;
+      const left = 215;
+      const right = 56;
+      const bottom = 58;
+      const height = top + data.length * rowH + bottom;
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      const plotW = width - left - right;
+      const x = value => left + ((value - min) / (max - min)) * plotW;
+      const ticks = [];
+      const step = max - min > 18 ? 5 : 2;
+      for (let t = Math.ceil(min / step) * step; t <= max; t += step) ticks.push(t);
+      ticks.forEach(t => {
+        const tx = x(t);
+        svg.appendChild(node("line", { x1: tx, y1: top - 14, x2: tx, y2: height - bottom + 8, stroke: "#dbe5ed", "stroke-width": 1 }));
+        drawText(svg, tx, height - 20, String(t), { "text-anchor": "middle", "font-size": 13, "class": "mono-text", fill: "#667387" });
+      });
+      const markerX = x(marker);
+      svg.appendChild(node("line", { x1: markerX, y1: top - 25, x2: markerX, y2: height - bottom + 8, stroke: "#112945", "stroke-width": 2.5, "stroke-dasharray": "9 8" }));
+      drawText(svg, markerX, 18, markerLabel, { "text-anchor": "middle", "font-size": 13, "class": "mono-text", fill: "#112945" });
+      data.forEach((item, index) => {
+        const cy = top + index * rowH + 23;
+        const scoreX = x(item.score);
+        const lowX = x(Math.max(min, item.score - item.sd));
+        const highX = x(Math.min(max, item.score + item.sd));
+        drawText(svg, left - 20, cy + 5, item.label, { "text-anchor": "end", "font-size": 15, "font-weight": 600 });
+        svg.appendChild(node("line", { x1: left, y1: cy, x2: width - right, y2: cy, stroke: "#edf1f4", "stroke-width": 2 }));
+        svg.appendChild(node("line", { x1: lowX, y1: cy, x2: highX, y2: cy, stroke: item.color, "stroke-width": 5, "stroke-linecap": "round", "stroke-dasharray": item.counted === false ? "7 6" : "none", opacity: item.counted === false ? .7 : .9 }));
+        svg.appendChild(node("line", { x1: lowX, y1: cy - 8, x2: lowX, y2: cy + 8, stroke: item.color, "stroke-width": 2 }));
+        svg.appendChild(node("line", { x1: highX, y1: cy - 8, x2: highX, y2: cy + 8, stroke: item.color, "stroke-width": 2 }));
+        svg.appendChild(node("circle", { cx: scoreX, cy, r: 8, fill: item.color, stroke: "#fffefb", "stroke-width": 3 }));
+        drawText(svg, Math.min(width - right + 8, scoreX + 17), cy + 5, item.score.toFixed(2), { "font-size": 16, "font-weight": 700, fill: item.color });
+      });
+      drawText(svg, left, height - 2, "final 1RM (kg)", { "font-size": 12, "class": "mono-text", fill: "#667387" });
+    }
+
+    function drawGrokChart() {
+      const svg = document.getElementById("grokChart");
+      const width = 980, height = 430, left = 108, right = 46, top = 37, bottom = 48;
+      const min = -6.5, max = 3.0;
+      const x = v => left + ((v - min) / (max - min)) * (width - left - right);
+      [-6, -4, -2, 0, 2].forEach(t => {
+        const tx = x(t);
+        svg.appendChild(node("line", { x1: tx, y1: top - 10, x2: tx, y2: height - bottom, stroke: t === 0 ? "#112945" : "#dbe5ed", "stroke-width": t === 0 ? 2.5 : 1, "stroke-dasharray": t === 0 ? "8 6" : "none" }));
+        drawText(svg, tx, height - 17, t > 0 ? `+${t}` : String(t), { "text-anchor": "middle", "font-size": 13, "class": "mono-text", fill: "#667387" });
+      });
+      grokDiffs.forEach((item, index) => {
+        const cy = top + index * 32 + 20;
+        const dx = x(item.diff);
+        const zero = x(0);
+        drawText(svg, left - 18, cy + 4, `seed ${item.seed}`, { "text-anchor": "end", "font-size": 13, "class": "mono-text", fill: "#667387" });
+        svg.appendChild(node("line", { x1: left, y1: cy, x2: width - right, y2: cy, stroke: "#edf1f4", "stroke-width": 2 }));
+        svg.appendChild(node("line", { x1: zero, y1: cy, x2: dx, y2: cy, stroke: item.diff >= 0 ? "#4e8b63" : "#e54732", "stroke-width": 7, "stroke-linecap": "round" }));
+        svg.appendChild(node("circle", { cx: dx, cy, r: 7, fill: item.diff >= 0 ? "#4e8b63" : "#e54732", stroke: "#fffefb", "stroke-width": 3 }));
+        drawText(svg, item.diff >= 0 ? dx + 13 : dx - 13, cy + 4, `${item.diff > 0 ? "+" : ""}${item.diff.toFixed(2)}`, { "text-anchor": item.diff >= 0 ? "start" : "end", "font-size": 13, "font-weight": 700, fill: item.diff >= 0 ? "#4e8b63" : "#e54732" });
+      });
+      const ciY = height - bottom + 17;
+      const ciLeft = x(-3.48), ciRight = x(.13), ciMean = x(-1.677);
+      svg.appendChild(node("line", { x1: ciLeft, y1: ciY, x2: ciRight, y2: ciY, stroke: "#7557a8", "stroke-width": 4 }));
+      svg.appendChild(node("line", { x1: ciLeft, y1: ciY - 7, x2: ciLeft, y2: ciY + 7, stroke: "#7557a8", "stroke-width": 2 }));
+      svg.appendChild(node("line", { x1: ciRight, y1: ciY - 7, x2: ciRight, y2: ciY + 7, stroke: "#7557a8", "stroke-width": 2 }));
+      svg.appendChild(node("circle", { cx: ciMean, cy: ciY, r: 6, fill: "#7557a8" }));
+      drawText(svg, left, ciY + 25, "paired mean and 95% interval", { "font-size": 12, "class": "mono-text", fill: "#7557a8" });
+    }
+
+    const ops = [
+      { label: "Opus", repair: 19.2, transport: 0, cost: 5.95 },
+      { label: "Grok 4.5", repair: 8.4, transport: 0, cost: .92 },
+      { label: "Grok 4.6", repair: 2.8, transport: 1, cost: .87 },
+      { label: "Muse", repair: 4.4, transport: 0, cost: 1.08 },
+      { label: "GPT", repair: 2.2, transport: 0, cost: 2.81 },
+      { label: "Kimi", repair: 5.8, transport: 702, cost: 2.01 }
+    ];
+    function renderBars(id, key, max, suffix, tone) {
+      const root = document.getElementById(id);
+      ops.forEach(item => {
+        const row = document.createElement("div"); row.className = "bar-row";
+        const label = document.createElement("span"); label.className = "bar-label"; label.textContent = item.label;
+        const track = document.createElement("div"); track.className = "bar-track";
+        const fill = document.createElement("div"); fill.className = `bar-fill ${tone || ""}`; fill.style.setProperty("--value", Math.max(0, item[key] / max * 100)); track.appendChild(fill);
+        const value = document.createElement("span"); value.className = "bar-value"; value.textContent = `${item[key].toFixed(key === "cost" ? 2 : 1)}${suffix}`;
+        row.append(label, track, value); root.appendChild(row);
+      });
+    }
+
+    drawRankChart("liveChart", liveModels, 88, 105, 102.892, "expert 102.89");
+    drawRankChart("baselineChart", baselines, 84, 105, 102.892, "expert 102.89");
+    drawGrokChart();
+    renderBars("repairBars", "repair", 20, "%", "red");
+    renderBars("transportBars", "transport", 702, "", "gold");
+    renderBars("costBars", "cost", 6, "", "");
+
+    const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add("is-visible"); }), { threshold: .08 });
+    document.querySelectorAll(".reveal").forEach((el, index) => { el.style.transitionDelay = `${Math.min(index % 5, 4) * 70}ms`; observer.observe(el); });
+  </script>
+</body>
+</html>

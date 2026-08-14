@@ -1,14 +1,14 @@
 # Bench-bench Current Artifact Verification
 
-- Engine/config hash: `sha256:d5585a5bb69088a0cb7b3f4f78b70dc79a3caa59a3fcbbc00a9fcebde6d3add1`
-- Overall: **PASS**
+- Engine/config hash: `sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1`
+- Overall: **FAIL**
 
 | Check | Result |
 |---|:---:|
 | adversarial_search_reproduces | PASS |
 | all_json_reports_have_hash | PASS |
 | all_markdown_reports_have_hash | PASS |
-| authoritative_leaderboard_not_generated_before_live_run | PASS |
+| authoritative_leaderboard_not_generated_before_live_run | FAIL |
 | baseline_gate_reproduces | PASS |
 | card_adversarial_numbers_match | PASS |
 | card_and_manifest_have_hash | PASS |
@@ -21,7 +21,7 @@
 | private_seed_values_not_materialized | PASS |
 | public_leaderboard_pending | PASS |
 | public_transcript_count | PASS |
-| stale_run_directories_removed | PASS |
+| stale_run_directories_removed | FAIL |
 | transcripts_have_current_hash | PASS |
 | twelve_week_diagnostic_reproduces | PASS |
 
