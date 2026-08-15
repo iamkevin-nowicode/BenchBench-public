@@ -21,6 +21,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from . import __version__
 from .config import SimConfig
+from .constraint_inventory import prompt_hash, render_inventory, render_objective, render_protocol_summary
 from .engine import BenchEnvironment
 from .provenance import engine_config_hash
 from .policies import make_policy
@@ -46,6 +47,7 @@ class Usage:
     total_tokens: int = 0
     cost_usd: float = 0.0
     cached_prompt_tokens: int = 0
+    cache_creation_input_tokens: int = 0
     input_tokens: int = 0
     visible_output_tokens: int = 0
     thinking_tokens: int = 0
@@ -71,6 +73,22 @@ class ModelResponse:
             "model": self.model,
             "request_id": self.request_id,
         }
+
+
+class RequestSizeError(RuntimeError):
+    """Raised before a provider call when a request exceeds a frozen limit."""
+
+
+def _conservative_prompt_token_upper_bound(messages: list[dict[str, str]]) -> int:
+    """Bound prompt tokens without depending on a provider tokenizer.
+
+    UTF-8 byte count of the compact serialized message array is a conservative
+    upper bound for byte-pair/token encodings. It intentionally errs toward
+    refusing a request rather than allowing a request into a more expensive
+    provider pricing tier.
+    """
+    serialized = json.dumps(messages, ensure_ascii=False, separators=(",", ":"))
+    return len(serialized.encode("utf-8"))
 
 
 def _is_transport_error(error: str) -> bool:
@@ -265,6 +283,7 @@ class OpenAICompatibleClient:
         long_context_input_price_per_million: float | None = None,
         long_context_cached_input_price_per_million: float | None = None,
         long_context_output_price_per_million: float | None = None,
+        max_prompt_tokens: int | None = None,
         request_retries: int = 2,
         retry_backoff_seconds: float = 1.0,
     ) -> None:
@@ -340,6 +359,11 @@ class OpenAICompatibleClient:
         )
         if self.long_context_threshold_tokens is not None and self.long_context_threshold_tokens <= 0:
             raise ValueError("long-context threshold must be positive")
+        if max_prompt_tokens is None and model == "grok-4.6":
+            max_prompt_tokens = self.long_context_threshold_tokens
+        if max_prompt_tokens is not None and int(max_prompt_tokens) <= 0:
+            raise ValueError("max prompt token limit must be positive")
+        self.max_prompt_tokens = int(max_prompt_tokens) if max_prompt_tokens is not None else None
         self.sampling_parameters = {"temperature": self.temperature}
         if self.effort is not None:
             self.sampling_parameters["effort"] = self.effort
@@ -358,6 +382,8 @@ class OpenAICompatibleClient:
                     "long_context_output_price_per_million": self.long_context_output_price_per_million,
                 }
             )
+        if self.max_prompt_tokens is not None:
+            self.pricing_metadata["max_prompt_tokens"] = self.max_prompt_tokens
         self.request_retries = max(0, int(request_retries))
         self.retry_backoff_seconds = max(0.0, float(retry_backoff_seconds))
         self.endpoint_metadata = {
@@ -381,6 +407,14 @@ class OpenAICompatibleClient:
                 payload["reasoning_effort"] = self.effort
             if include_temperature:
                 payload["temperature"] = self.temperature
+            if self.max_prompt_tokens is not None:
+                prompt_upper_bound = _conservative_prompt_token_upper_bound(messages)
+                if prompt_upper_bound >= self.max_prompt_tokens:
+                    raise RequestSizeError(
+                        f"{self.model} request prompt upper bound {prompt_upper_bound} bytes/tokens "
+                        f"reaches the configured {self.max_prompt_tokens}-token maximum; "
+                        "request refused before provider call"
+                    )
             request = Request(
                 self.base_url,
                 data=json.dumps(payload).encode("utf-8"),
@@ -531,6 +565,8 @@ class AnthropicMessagesClient:
     """Native Anthropic Messages API adapter with structured JSON outputs."""
 
     provider = "anthropic"
+    PROMPT_CACHE_TTL = "1h"
+    PROMPT_CACHE_WRITE_MULTIPLIER = 2.0
 
     def __init__(
         self,
@@ -588,7 +624,10 @@ class AnthropicMessagesClient:
         self.pricing_metadata = {
             "input_price_per_million": self.input_price_per_million,
             "cached_input_price_per_million": self.cached_input_price_per_million,
+            "cache_creation_input_price_per_million": self.input_price_per_million * self.PROMPT_CACHE_WRITE_MULTIPLIER,
             "output_price_per_million": self.output_price_per_million,
+            "prompt_cache": "ephemeral",
+            "prompt_cache_ttl": self.PROMPT_CACHE_TTL,
             "source": "explicit" if explicit_pricing else ("model-default" if default_pricing else "unpriced"),
         }
         self.request_retries = max(0, int(request_retries))
@@ -633,7 +672,16 @@ class AnthropicMessagesClient:
             "temperature": self.temperature,
         }
         if system is not None:
-            payload["system"] = system
+            payload["system"] = [
+                {
+                    "type": "text",
+                    "text": system,
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": self.PROMPT_CACHE_TTL,
+                    },
+                }
+            ]
         headers = {
             "Content-Type": "application/json",
             "anthropic-version": "2023-06-01",
@@ -684,7 +732,7 @@ class AnthropicMessagesClient:
         visible_output_tokens = max(0, output_tokens - thinking_tokens)
         cost = (
             base_input_tokens / 1_000_000 * self.input_price_per_million
-            + cache_creation_tokens / 1_000_000 * self.input_price_per_million
+            + cache_creation_tokens / 1_000_000 * self.input_price_per_million * self.PROMPT_CACHE_WRITE_MULTIPLIER
             + cache_read_tokens / 1_000_000 * self.cached_input_price_per_million
             + output_tokens / 1_000_000 * self.output_price_per_million
         )
@@ -696,6 +744,7 @@ class AnthropicMessagesClient:
                 total_tokens=input_tokens + output_tokens,
                 cost_usd=round(cost, 8),
                 cached_prompt_tokens=cache_read_tokens,
+                cache_creation_input_tokens=cache_creation_tokens,
                 input_tokens=input_tokens,
                 visible_output_tokens=visible_output_tokens,
                 thinking_tokens=thinking_tokens,
@@ -777,6 +826,8 @@ class RunnerResult:
     transport_failures: int
     total_tokens: int
     input_tokens: int
+    cached_input_tokens: int
+    cache_creation_input_tokens: int
     visible_output_tokens: int
     thinking_tokens: int
     total_cost_usd: float
@@ -818,47 +869,36 @@ class ModelRunner:
     NOTEBOOK_INSTRUCTIONS = """Notebook update: record what was learned about Dave this turn—how he responded to the load or recovery demand, which session was lost and why, or a recurring disruption pattern and its consequence. Do not restate this week's plan; write durable observations instead.
 """
 
-    WEEK_SCHEMA_INSTRUCTIONS = """Use this response shape: {\"action\": { ... WeekAction ... }, \"notebook_update\": \"durable observation about Dave\"}.
-WeekAction fields: sessions (0–5 unique days; each has day 0–6, slot morning/lunch/evening,
-location gym/home/hotel, focus volume/heavy/technique/fallback/test, sets, reps, load_kg,
-duration_min (10–120 minutes), target_rpe). When focus is fallback, the session is capped at
-25 minutes, 3 sets, and 6 reps; life (meal_prep_hours, meal_support_spend_cents,
-childcare_hours, childcare_spend_cents, chore_delegation_hours,
-chore_delegation_spend_cents, partner_coverage_hours, partner_giveback_hours,
-sleep_protection none/standard/strong, career_choice protect_time/accept_stretch_project/defer,
-and purchases (a JSON list of zero or more of home_gym/recurring_childcare/meal_prep_subscription; use [] when none); rules
-(on_sleep_below_5h fallback/skip/reduce, on_pain_warning reduce/fallback/skip,
-on_illness protect_recovery/fallback/skip). All training time (including commute), meal prep,
-childcare, delegated chores, partner coverage, and partner giveback draw from the finite weekly
-time/resource ledger shown in the observation. Delegated chores incur a money charge; reactive
-childcare must include its spend.
-""" + NOTEBOOK_INSTRUCTIONS
+    WEEK_SCHEMA_INSTRUCTIONS = (
+        "Use this response shape: {\"action\": { ... WeekAction ... }, "
+        "\"notebook_update\": \"durable observation about Dave\"}.\n"
+        "WeekAction fields and constraints:\n"
+        + render_inventory("weekly")
+        + "Valid example:\n"
+        + "{\"action\":{\"sessions\":[{\"day\":1,\"slot\":\"evening\",\"location\":\"gym\",\"focus\":\"volume\",\"sets\":3,\"reps\":5,\"load_kg\":60.0,\"duration_min\":45,\"target_rpe\":7.0}],\"life\":{\"meal_prep_hours\":2.0,\"meal_support_spend_cents\":0,\"childcare_hours\":0.0,\"childcare_spend_cents\":0,\"chore_delegation_hours\":0.0,\"chore_delegation_spend_cents\":0,\"partner_coverage_hours\":2.0,\"partner_giveback_hours\":2.0,\"sleep_protection\":\"standard\",\"career_choice\":\"protect_time\",\"purchases\":[]},\"rules\":{\"on_sleep_below_5h\":\"fallback\",\"on_pain_warning\":\"reduce\",\"on_illness\":\"protect_recovery\",\"preserve_one_fallback\":true},\"coach_note\":\"Keep this week feasible and observe how Dave responds.\"},\"notebook_update\":\"Dave tolerated the last load; the evening gym session was the one lost to time.\"}\n"
+        + NOTEBOOK_INSTRUCTIONS
+    )
 
-    REACTIVE_SCHEMA_INSTRUCTIONS = """Use this response shape: {\"action\": { ... ReactiveAction ... }, \"notebook_update\": \"durable observation about Dave\"}.
-ReactiveAction fields: response protect_recovery/reallocate/preserve_training/accept_disruption;
-cancel_session_days (at most 5 day numbers from 0–6); fallback_session_days (at most 5 day numbers from 0–6);
-extra_childcare_hours (0–8; it draws from the remaining weekly time/resource ledger, so it must not exceed the
-minutes remaining in the interrupt observation); extra_spend_cents (0–15000; reactive childcare must be paid for);
-note (at most 300 characters).
-The cancel and fallback day lists must not overlap. Do not include weekly-plan fields such as sessions, life, or rules.
-Valid example:
-{\"action\":{\"response\":\"protect_recovery\",\"cancel_session_days\":[2],\"fallback_session_days\":[],\"extra_childcare_hours\":0.0,\"extra_spend_cents\":0,\"note\":\"Protect recovery after the disruption.\"},\"notebook_update\":\"Cancelled the affected session and protected recovery.\"}
-""" + NOTEBOOK_INSTRUCTIONS
+    REACTIVE_SCHEMA_INSTRUCTIONS = (
+        "Use this response shape: {\"action\": { ... ReactiveAction ... }, "
+        "\"notebook_update\": \"durable observation about Dave\"}.\n"
+        "ReactiveAction fields and constraints:\n"
+        + render_inventory("reactive")
+        + "Do not include weekly-plan fields such as sessions, life, or rules.\n"
+        + "Valid example:\n"
+        + "{\"action\":{\"response\":\"protect_recovery\",\"cancel_session_days\":[2],\"fallback_session_days\":[],\"extra_childcare_hours\":0.0,\"extra_spend_cents\":0,\"note\":\"Protect recovery after the disruption.\"},\"notebook_update\":\"Cancelled the affected session and protected recovery.\"}\n"
+        + NOTEBOOK_INSTRUCTIONS
+    )
 
     WEEK_SYSTEM_PROMPT = (
         "You are Dave's coach for one year. You plan his training and how he allocates his time and money each week. "
         "Dave follows your plan as best he can, but his life often gets in the way. You will not hear from him directly, "
         "and no one will confirm your decisions. You have full authority over the plan.\n\n"
-        "Objective: maximize Dave's bench press one-rep max.\n"
-        "Scoring: the average of three standardized tests at weeks 44, 48, and 52, each measuring true capacity after a "
-        "fixed three-day taper. The estimated 1RM in the weekly observation is noisy and is not the score.\n"
-        "Horizon: 52 weeks.\n"
-        "Score violation: more than 14 pain days over the episode voids the score. Household strain and sleep debt are "
-        "reported but not scored, though they affect what Dave can do.\n"
-        "Hard constraints: all weekly allocations—training plus commute, meal prep, childcare, chores, partner coverage, "
-        "and partner giveback—draw from one 900-minute weekly budget. Spending cannot exceed available cash. Violations are "
-        "rejected with one repair attempt, then a safe fallback is substituted. Sustained insolvency invalidates the episode.\n"
-        "Context: Dave has a full-time job; his partner works full-time; they have a six-month-old at the start; he has a "
+        + render_protocol_summary()
+        + "\n"
+        "Context: Dave trained casually in his twenties, has not lifted seriously in years, and returns with no meaningful "
+        "recent training base. He tests at 84 kg bench and 84 kg body mass at week 0. He has no prior peak to recover; "
+        "his trajectory is new-training progression, not recovery of an old max. Dave has a full-time job; his partner works full-time; they have a six-month-old at the start; he has a "
         "commercial gym membership and no home equipment; and the household has $250/month of discretionary money that carries over.\n"
         "Key mechanic: sessions you plan are not guaranteed to happen.\n"
         "Observations: they are banded and noisy. You never see true capacity, fatigue, or what is coming. Some events are "
@@ -867,16 +907,16 @@ Valid example:
         "state changes come from the validated action. Do not invent hidden state.\n"
         + WEEK_SCHEMA_INSTRUCTIONS
         + "\nFinal reminder:\n"
-        "Objective: maximize Dave's bench press one-rep max.\n"
-        "Scoring: the average of three standardized tests at weeks 44, 48, and 52 after a fixed three-day taper; the weekly estimated 1RM is noisy and is not the score.\n"
-        "Horizon: 52 weeks."
+        + render_protocol_summary()
     )
     REACTIVE_SYSTEM_PROMPT = (
         "You are Dave's coach.\n"
-        "Objective: maximize Dave's bench press one-rep max.\n\n"
-        "A mid-week interrupt fired. Make a short reactive decision, not a weekly plan. Return JSON only.\n"
+        + render_objective()
+        + "\n\n"
+        + "A mid-week interrupt fired. Make a short reactive decision, not a weekly plan. Return JSON only.\n"
         + REACTIVE_SCHEMA_INSTRUCTIONS
-        + "\nObjective: maximize Dave's bench press one-rep max."
+        + "\n"
+        + render_objective()
     )
     # Backwards-compatible alias for callers that used the old weekly prompt.
     SYSTEM_PROMPT = WEEK_SYSTEM_PROMPT
@@ -886,6 +926,7 @@ Valid example:
         self.config = config or RunnerConfig()
         if self.config.track != "model-only":
             raise ValueError("v1 runner supports only the model-only track")
+        self.prompt_hash = prompt_hash(self.WEEK_SYSTEM_PROMPT, self.REACTIVE_SYSTEM_PROMPT)
 
     @_transcript_lock
     def run_episode(self, seed: int, transcript_path: str | Path | None = None, *, resume: bool = True) -> RunnerResult:
@@ -906,6 +947,10 @@ Valid example:
                 raise ValueError("resume transcript is missing endpoint provenance; use a new transcript path")
             if recorded_endpoint != _endpoint_metadata(self.client):
                 raise ValueError("resume transcript endpoint does not match requested endpoint")
+            if start_record.get("engine_config_hash") != engine_config_hash():
+                raise ValueError("resume transcript engine/config hash does not match current source")
+            if start_record.get("prompt_hash") != self.prompt_hash:
+                raise ValueError("resume transcript prompt hash does not match current prompt")
 
         env = BenchEnvironment(
             seed,
@@ -920,14 +965,18 @@ Valid example:
         transport_failures = 0
         total_tokens = 0
         input_tokens = 0
+        cached_input_tokens = 0
+        cache_creation_input_tokens = 0
         visible_output_tokens = 0
         thinking_tokens = 0
         total_cost = 0.0
 
         def add_usage(usage: dict[str, Any]) -> None:
-            nonlocal total_tokens, input_tokens, visible_output_tokens, thinking_tokens, total_cost
+            nonlocal total_tokens, input_tokens, cached_input_tokens, cache_creation_input_tokens, visible_output_tokens, thinking_tokens, total_cost
             total_tokens += int(usage.get("total_tokens", 0) or 0)
             input_tokens += int(usage.get("input_tokens", usage.get("prompt_tokens", 0)) or 0)
+            cached_input_tokens += int(usage.get("cached_prompt_tokens", 0) or 0)
+            cache_creation_input_tokens += int(usage.get("cache_creation_input_tokens", 0) or 0)
             visible_output_tokens += int(usage.get("visible_output_tokens", 0) or 0)
             thinking_tokens += int(usage.get("thinking_tokens", 0) or 0)
             total_cost += float(usage.get("cost_usd", 0.0) or 0.0)
@@ -981,6 +1030,7 @@ Valid example:
                     "benchmark": "Bench-bench",
                     "runner_version": __version__,
                     "engine_config_hash": engine_config_hash(),
+                    "prompt_hash": self.prompt_hash,
                     "seed": seed,
                     "config": asdict(self.config),
                     "model": self.client.model,
@@ -1024,6 +1074,8 @@ Valid example:
                     notebook = self._update_notebook(notebook, update)
                 reactive_turns.append(
                     {
+                        "engine_config_hash": engine_config_hash(),
+                        "prompt_hash": self.prompt_hash,
                         "day": interrupt.day,
                         "kind": interrupt.kind,
                         "title": interrupt.title,
@@ -1043,6 +1095,8 @@ Valid example:
             notebook = self._update_notebook(notebook, notebook_update)
             turn_record = {
                 "type": "turn",
+                "engine_config_hash": engine_config_hash(),
+                "prompt_hash": self.prompt_hash,
                 "week": observation.episode_week,
                 "messages": messages,
                 "request": messages[-1]["content"],
@@ -1082,6 +1136,7 @@ Valid example:
                     {
                         "type": "run_end",
                         "engine_config_hash": engine_config_hash(),
+                        "prompt_hash": self.prompt_hash,
                         "result": result,
                         "model_calls": model_calls,
                         "repair_calls": canonical_retry_metrics["repair_attempts"],
@@ -1093,6 +1148,8 @@ Valid example:
                         "transport_failures": transport_failures,
                         "total_tokens": total_tokens,
                         "input_tokens": input_tokens,
+                        "cached_input_tokens": cached_input_tokens,
+                        "cache_creation_input_tokens": cache_creation_input_tokens,
                         "visible_output_tokens": visible_output_tokens,
                         "thinking_tokens": thinking_tokens,
                         "total_cost_usd": round(total_cost, 8),
@@ -1114,6 +1171,8 @@ Valid example:
             transport_failures=canonical_retry_metrics["transport_failures"],
             total_tokens=total_tokens,
             input_tokens=input_tokens,
+            cached_input_tokens=cached_input_tokens,
+            cache_creation_input_tokens=cache_creation_input_tokens,
             visible_output_tokens=visible_output_tokens,
             thinking_tokens=thinking_tokens,
             total_cost_usd=round(total_cost, 8),
@@ -1142,6 +1201,8 @@ Valid example:
                     raise ValueError("; ".join(budget_validation.errors))
                 attempts.append(attempt_record)
                 return response, turn.action, turn.notebook_update, errors, int(repair_requested), attempts
+            except RequestSizeError:
+                raise
             except (RuntimeError, ValueError, TypeError, json.JSONDecodeError, ValidationError) as exc:
                 errors.append(str(exc))
                 if attempt_record is None:
@@ -1200,6 +1261,8 @@ Valid example:
                         raise ValueError(budget_error)
                 attempts.append(attempt_record)
                 return response, turn.action, turn.notebook_update, errors, int(repair_requested), attempts
+            except RequestSizeError:
+                raise
             except (RuntimeError, ValueError, TypeError, json.JSONDecodeError, ValidationError) as exc:
                 errors.append(str(exc))
                 if attempt_record is None:

@@ -3,8 +3,15 @@ from __future__ import annotations
 import json
 import re
 
+import pytest
+
 from bench_bench import BenchEnvironment, SimConfig
 from bench_bench.evaluation import run_exploit_suite, run_suite
+from bench_bench.adversarial import (
+    KNOWN_HAND_TEMPLATE_NAME,
+    KNOWN_HAND_TEMPLATE_SCORE_KG,
+    run_adversarial_search,
+)
 from bench_bench.schemas import WeekAction
 from bench_bench.viewer import render_replay
 
@@ -59,6 +66,22 @@ def test_cap_15_keeps_human_review_separate_from_abuse_signatures() -> None:
         == (report["candidates"][name]["beats_expert"] and bool(report["candidates"][name]["abuse_signatures"]))
         for name in report["exploit_policies"]
     )
+
+
+def test_oracle_search_has_live_coverage_of_known_hand_template() -> None:
+    report = run_adversarial_search(
+        range(320, 340),
+        weeks=52,
+        population_size=12,
+        generations=1,
+        search_seed_count=20,
+        top_k=2,
+    )
+    coverage = report["search"]["coverage"]
+    assert coverage["known_hand_template"] == KNOWN_HAND_TEMPLATE_NAME
+    assert coverage["assertion_pass"] is True
+    assert coverage["known_hand_template_score_kg"] == pytest.approx(KNOWN_HAND_TEMPLATE_SCORE_KG, abs=0.02)
+    assert coverage["best_all_seed_compliant_score_kg"] >= coverage["known_hand_template_score_kg"]
 
 
 def test_replay_viewer_embeds_only_the_public_log(tmp_path) -> None:

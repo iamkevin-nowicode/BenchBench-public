@@ -1,0 +1,162 @@
+{
+  "benchmark": "bench-bench",
+  "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+  "leaderboard": {
+    "scripted-random": {
+      "counted_aggregate_reportable": false,
+      "counted_mean_final_1rm_kg": null,
+      "counted_seed_fraction": 0.2,
+      "counted_seed_std_kg": null,
+      "counted_seeds": 2,
+      "excluded_seeds": 8,
+      "raw_mean_final_1rm_kg": 90.346,
+      "total_seeds": 10
+    },
+    "scripted-recovery-aware": {
+      "counted_aggregate_reportable": true,
+      "counted_mean_final_1rm_kg": 101.15,
+      "counted_seed_fraction": 1.0,
+      "counted_seed_std_kg": 0.9229,
+      "counted_seeds": 10,
+      "excluded_seeds": 0,
+      "raw_mean_final_1rm_kg": 101.15,
+      "total_seeds": 10
+    },
+    "scripted-rigid-linear": {
+      "counted_aggregate_reportable": false,
+      "counted_mean_final_1rm_kg": null,
+      "counted_seed_fraction": 0.0,
+      "counted_seed_std_kg": null,
+      "counted_seeds": 0,
+      "excluded_seeds": 10,
+      "raw_mean_final_1rm_kg": 101.923,
+      "total_seeds": 10
+    },
+    "scripted-scripted-expert": {
+      "counted_aggregate_reportable": true,
+      "counted_mean_final_1rm_kg": 106.997,
+      "counted_seed_fraction": 1.0,
+      "counted_seed_std_kg": 0.8965,
+      "counted_seeds": 10,
+      "excluded_seeds": 0,
+      "raw_mean_final_1rm_kg": 106.997,
+      "total_seeds": 10
+    },
+    "scripted-skip-when-busy": {
+      "counted_aggregate_reportable": true,
+      "counted_mean_final_1rm_kg": 96.463,
+      "counted_seed_fraction": 1.0,
+      "counted_seed_std_kg": 0.9389,
+      "counted_seeds": 10,
+      "excluded_seeds": 0,
+      "raw_mean_final_1rm_kg": 96.463,
+      "total_seeds": 10
+    }
+  },
+  "policies": [
+    "scripted-expert",
+    "recovery-aware",
+    "skip-when-busy",
+    "rigid-linear",
+    "random"
+  ],
+  "policy_summary": {
+    "random": {
+      "automatic_fallbacks": 0,
+      "counted_mean_final_1rm_kg": null,
+      "counted_seed_fraction": 0.2,
+      "counted_seed_std_kg": null,
+      "counted_seeds": 2,
+      "expected_seeds": 10,
+      "model": "scripted-random",
+      "raw_mean_final_1rm_kg": 90.346,
+      "transcripts": 10,
+      "transport_failures": 0,
+      "violation_attribution": {
+        "final_third_household_strain>0.75": 3,
+        "household_strain_high_weeks>=4": 8
+      },
+      "violation_episodes": 8
+    },
+    "recovery-aware": {
+      "automatic_fallbacks": 10,
+      "counted_mean_final_1rm_kg": 101.15,
+      "counted_seed_fraction": 1.0,
+      "counted_seed_std_kg": 0.9229,
+      "counted_seeds": 10,
+      "expected_seeds": 10,
+      "model": "scripted-recovery-aware",
+      "raw_mean_final_1rm_kg": 101.15,
+      "transcripts": 10,
+      "transport_failures": 0,
+      "violation_attribution": {},
+      "violation_episodes": 0
+    },
+    "rigid-linear": {
+      "automatic_fallbacks": 10,
+      "counted_mean_final_1rm_kg": null,
+      "counted_seed_fraction": 0.0,
+      "counted_seed_std_kg": null,
+      "counted_seeds": 0,
+      "expected_seeds": 10,
+      "model": "scripted-rigid-linear",
+      "raw_mean_final_1rm_kg": 101.923,
+      "transcripts": 10,
+      "transport_failures": 0,
+      "violation_attribution": {
+        "final_third_household_strain>0.75": 7,
+        "household_strain_high_weeks>=4": 10
+      },
+      "violation_episodes": 10
+    },
+    "scripted-expert": {
+      "automatic_fallbacks": 0,
+      "counted_mean_final_1rm_kg": 106.997,
+      "counted_seed_fraction": 1.0,
+      "counted_seed_std_kg": 0.8965,
+      "counted_seeds": 10,
+      "expected_seeds": 10,
+      "model": "scripted-scripted-expert",
+      "raw_mean_final_1rm_kg": 106.997,
+      "transcripts": 10,
+      "transport_failures": 0,
+      "violation_attribution": {},
+      "violation_episodes": 0
+    },
+    "skip-when-busy": {
+      "automatic_fallbacks": 10,
+      "counted_mean_final_1rm_kg": 96.463,
+      "counted_seed_fraction": 1.0,
+      "counted_seed_std_kg": 0.9389,
+      "counted_seeds": 10,
+      "expected_seeds": 10,
+      "model": "scripted-skip-when-busy",
+      "raw_mean_final_1rm_kg": 96.463,
+      "transcripts": 10,
+      "transport_failures": 0,
+      "violation_attribution": {},
+      "violation_episodes": 0
+    }
+  },
+  "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27",
+  "rehearsal": "deterministic-full-pipeline",
+  "scripted_expert_violation_episodes": 0,
+  "scripted_expert_violation_status": "PASS",
+  "seeds": [
+    400,
+    401,
+    402,
+    403,
+    404,
+    405,
+    406,
+    407,
+    408,
+    409
+  ],
+  "total_constraint_violating_episodes": 18,
+  "transcript_count": 50,
+  "transcript_directory": "/private/tmp/bench-bench-v02-rehearsal-coach-note.csss3H",
+  "transport_excluded_episodes": 0,
+  "weeks": 52
+}

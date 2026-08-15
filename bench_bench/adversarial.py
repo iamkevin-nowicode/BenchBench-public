@@ -12,13 +12,14 @@ from dataclasses import asdict, dataclass, replace
 import math
 import random
 from statistics import fmean, stdev
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
-from .config import SimConfig
+from .config import SimConfig, sleep_protection_time_cost_minutes
 from .engine import BenchEnvironment
 from .policies import _open_days, _rules, _session
-from .provenance import engine_config_hash
+from .provenance import current_prompt_hash, engine_config_hash
 from .scoring import MIN_COUNTED_SEED_FRACTION, counted_score, constraint_violations
+from .phase3 import MAX_WEEKLY_VALIDATION_FALLBACK_RATE
 from .schemas import InterruptObservation, LifeAllocation, ReactiveAction, SessionPlan, StandingRules, WeekAction, WeekObservation
 
 
@@ -39,6 +40,11 @@ RELEASE_ABUSE_THRESHOLDS = {
     "high_volume_reps_sets": 96,
 }
 HUMAN_REVIEW_MARGIN_KG = 5.0
+KNOWN_HAND_TEMPLATE_NAME = "regression-reviewer-4x4x5-070-40min"
+# The frequency multiplier has been removed; this is the current expected
+# score of the fixed hand template under executed-volume accounting.
+KNOWN_HAND_TEMPLATE_SCORE_KG = 108.87
+PHASE3_ORACLE_EFFECT_SIZE_THRESHOLD = 1.0
 
 
 @dataclass(frozen=True)
@@ -134,6 +140,7 @@ class AdversarialGenome:
     meal_support_spend_cents: int = 0
     childcare_spend_cents: int = 0
     chore_delegation_hours: float = 0.0
+    chore_delegation_spend_cents: int = 0
     partner_coverage_hours: float = 2.0
     partner_giveback_hours: float = 2.0
     sleep_protection: str = "standard"
@@ -180,6 +187,7 @@ class AdversarialGenome:
             meal_support_spend_cents=min(25_000, max(0, self.meal_support_spend_cents)),
             childcare_spend_cents=min(25_000, max(0, self.childcare_spend_cents)),
             chore_delegation_hours=min(12.0, max(0.0, self.chore_delegation_hours)),
+            chore_delegation_spend_cents=min(25_000, max(0, self.chore_delegation_spend_cents)),
             partner_coverage_hours=min(16.0, max(0.0, self.partner_coverage_hours)),
             partner_giveback_hours=min(16.0, max(0.0, self.partner_giveback_hours)),
             sleep_protection=self.sleep_protection if self.sleep_protection in SLEEP_VALUES else "standard",
@@ -220,16 +228,24 @@ class CandidateEpisode:
     mean_household_strain: float = 0.0
     household_strain_high_weeks: int = 0
     final_third_mean_household_strain: float = 0.0
+    validation_fallback_rate: float = 0.0
+    feasible_for_phase3: bool = True
+    feasibility_reason: str | None = None
 
     def as_dict(self) -> dict[str, Any]:
         values = asdict(self)
         values["constraint_violations"] = list(self.constraint_violations)
         values["raw_final_1rm_kg"] = self.final_1rm_kg
-        values["counted_final_1rm_kg"] = counted_score(
-            self.final_1rm_kg,
-            invalid_reason=self.invalid_reason,
-            violations=self.constraint_violations,
+        values["counted_final_1rm_kg"] = (
+            counted_score(
+                self.final_1rm_kg,
+                invalid_reason=self.invalid_reason,
+                violations=self.constraint_violations,
+            )
+            if self.feasible_for_phase3
+            else None
         )
+        values["feasible_for_phase3"] = self.feasible_for_phase3
         return values
 
 
@@ -256,6 +272,7 @@ class CandidateEvaluation:
     counted_episodes: int = 0
     constraint_violating_episodes: int = 0
     constraint_violation_counts: dict[str, int] | None = None
+    feasibility_discarded_episodes: int = 0
 
     def summary(self) -> dict[str, Any]:
         return {
@@ -282,6 +299,7 @@ class CandidateEvaluation:
             ) if self.episodes else 0.0,
             "constraint_violating_episodes": self.constraint_violating_episodes,
             "constraint_violation_counts": self.constraint_violation_counts or {},
+            "feasibility_discarded_episodes": self.feasibility_discarded_episodes,
         }
 
 
@@ -324,6 +342,7 @@ def _random_genome(rng: random.Random) -> AdversarialGenome:
         meal_support_spend_cents=rng.choice((0, 1_200, 3_000)),
         childcare_spend_cents=rng.choice((0, 2_000, 5_000)),
         chore_delegation_hours=rng.choice((0.0, 1.0, 2.0, 4.0)),
+        chore_delegation_spend_cents=rng.choice((0, 1_200, 2_400, 4_800)),
         partner_coverage_hours=rng.choice((0.0, 1.0, 2.0, 3.0, 4.0, 6.0, 8.0)),
         partner_giveback_hours=rng.choice((0.0, 1.0, 2.0, 3.0, 4.0, 6.0, 8.0)),
         sleep_protection=rng.choice(SLEEP_VALUES),
@@ -347,6 +366,7 @@ def _mutate(genome: AdversarialGenome, rng: random.Random) -> AdversarialGenome:
             "session_count", "focus", "sets", "reps", "load_ratio", "progression_per_week",
             "duration_min", "target_rpe", "location", "meal_prep_hours", "childcare_hours",
             "meal_support_spend_cents", "childcare_spend_cents", "chore_delegation_hours",
+            "chore_delegation_spend_cents",
             "partner_coverage_hours", "partner_giveback_hours", "sleep_protection",
             "on_sleep_below_5h", "on_pain_warning", "on_illness", "buy_home_rack",
             "purchase_week", "skip_when_strained", "final_week_test", "final_test_ratio",
@@ -382,6 +402,8 @@ def _mutate(genome: AdversarialGenome, rng: random.Random) -> AdversarialGenome:
         updates[field] = rng.choice((0, 2_000, 5_000))
     elif field == "chore_delegation_hours":
         updates[field] = rng.choice((0.0, 1.0, 2.0, 4.0))
+    elif field == "chore_delegation_spend_cents":
+        updates[field] = rng.choice((0, 1_200, 2_400, 4_800))
     elif field in {"partner_coverage_hours", "partner_giveback_hours"}:
         updates[field] = rng.choice((0.0, 1.0, 2.0, 3.0, 4.0, 6.0, 8.0))
     elif field == "sleep_protection":
@@ -428,6 +450,7 @@ class AdversarialPolicy:
             + life.partner_coverage_hours
             + life.partner_giveback_hours
         )
+        sleep_minutes = sleep_protection_time_cost_minutes(life.sleep_protection)
         external = 240 if any(
             event.week == observation.episode_week and event.title == "grandparents visit"
             for event in observation.upcoming_known_events
@@ -435,8 +458,8 @@ class AdversarialPolicy:
         return math.ceil(
             training
             + life_minutes
+            + sleep_minutes
             + external
-            + max(0, observation.weekly_fixed_household_minutes)
         )
 
     def _legalize(self, observation: WeekObservation, sessions: list[SessionPlan], life: LifeAllocation, rules: StandingRules) -> WeekAction:
@@ -566,7 +589,7 @@ class AdversarialPolicy:
             childcare_hours=genome.childcare_hours,
             childcare_spend_cents=childcare_spend,
             chore_delegation_hours=genome.chore_delegation_hours,
-            chore_delegation_spend_cents=0,
+            chore_delegation_spend_cents=genome.chore_delegation_spend_cents,
             partner_coverage_hours=genome.partner_coverage_hours,
             partner_giveback_hours=genome.partner_giveback_hours,
             sleep_protection=genome.sleep_protection,
@@ -600,6 +623,40 @@ def _regression_genomes() -> tuple[tuple[str, AdversarialGenome], ...]:
         buy_home_rack=False,
     )
     return (
+        (
+            KNOWN_HAND_TEMPLATE_NAME,
+            replace(
+                base,
+                session_count=4,
+                week_templates=(
+                    WeekTemplate(
+                        session_count=4,
+                        focuses=("volume", "technique"),
+                        sets=(4, 4),
+                        reps=(5, 5),
+                        load_ratios=(0.70, 0.70),
+                        durations=(40, 40),
+                        # RPE was not specified by the reviewer. Preserve the
+                        # reference policy's default rather than inventing a
+                        # lower-intensity prescription for this regression.
+                        target_rpes=(8.0, 8.0),
+                        location="home",
+                    ),
+                ),
+                meal_prep_hours=2.0,
+                chore_delegation_hours=1.0,
+                chore_delegation_spend_cents=1_200,
+                partner_coverage_hours=2.0,
+                partner_giveback_hours=2.0,
+                sleep_protection="strong",
+                on_sleep_below_5h="fallback",
+                on_pain_warning="fallback",
+                on_illness="protect_recovery",
+                buy_home_rack=True,
+                purchase_week=8,
+                purchase_sequence=("home_gym",),
+            ),
+        ),
         ("regression-volume-stacking", replace(base, focus="volume", sets=8, reps=15)),
         ("regression-compressed-fallback", replace(base, focus="fallback", sets=3, reps=6, duration_min=25)),
         ("regression-volume-8x4", replace(base, focus="volume", sets=8, reps=4)),
@@ -689,10 +746,63 @@ def _evaluate_genome(name: str, genome: AdversarialGenome, seeds: list[int], con
                 break
             env.submit_week(action, reactive_responder=policy.reactive)
         if invalid_reason is not None:
-            episodes.append(CandidateEpisode(seed, None, 0, 0, 0.0, 0, invalid_reason))
+            episodes.append(
+                CandidateEpisode(
+                    seed=seed,
+                    final_1rm_kg=None,
+                    completed_sessions=0,
+                    pain_days=0,
+                    household_strain=0.0,
+                    fallback_actions=0,
+                    invalid_reason=invalid_reason,
+                    feasible_for_phase3=False,
+                    feasibility_reason="validation_error",
+                )
+            )
             continue
         result = env.final_result()
         week_records = [record for record in env.log_records if record.get("type") == "week"]
+        if len(week_records) != config.weeks:
+            episodes.append(
+                CandidateEpisode(
+                    seed=seed,
+                    final_1rm_kg=None,
+                    completed_sessions=0,
+                    pain_days=0,
+                    household_strain=0.0,
+                    fallback_actions=0,
+                    invalid_reason=(
+                        f"liveness failure: expected {config.weeks} weekly decisions, "
+                        f"observed {len(week_records)}"
+                    ),
+                    feasible_for_phase3=False,
+                    feasibility_reason="incomplete_episode",
+                )
+            )
+            continue
+        if config.weeks == 52 and len(env.private_snapshot()["hidden_standardized_test_scores"]) != 3:
+            episodes.append(
+                CandidateEpisode(
+                    seed=seed,
+                    final_1rm_kg=None,
+                    completed_sessions=0,
+                    pain_days=0,
+                    household_strain=0.0,
+                    fallback_actions=0,
+                    invalid_reason="liveness failure: expected three hidden standardized tests",
+                    feasible_for_phase3=False,
+                    feasibility_reason="missing_hidden_test",
+                )
+            )
+            continue
+        fallback_actions = sum(1 for record in week_records if record["validation"]["fallback_used"])
+        fallback_rate = fallback_actions / max(1, len(week_records))
+        feasible = fallback_rate <= MAX_WEEKLY_VALIDATION_FALLBACK_RATE
+        feasibility_reason = (
+            None
+            if feasible
+            else f"weekly_validation_fallback_rate>{MAX_WEEKLY_VALIDATION_FALLBACK_RATE:g}"
+        )
         episodes.append(
             CandidateEpisode(
                 seed=seed,
@@ -700,7 +810,7 @@ def _evaluate_genome(name: str, genome: AdversarialGenome, seeds: list[int], con
                 completed_sessions=result.completed_sessions,
                 pain_days=result.pain_days,
                 household_strain=result.household_strain,
-                fallback_actions=sum(1 for record in week_records if record["validation"]["fallback_used"]),
+                fallback_actions=fallback_actions,
                 invalid_reason=result.invalid_reason,
                 constraint_violations=constraint_violations(
                     pain_days=result.pain_days,
@@ -713,14 +823,19 @@ def _evaluate_genome(name: str, genome: AdversarialGenome, seeds: list[int], con
                 mean_household_strain=result.mean_household_strain,
                 household_strain_high_weeks=result.household_strain_high_weeks,
                 final_third_mean_household_strain=result.final_third_mean_household_strain,
+                validation_fallback_rate=round(fallback_rate, 6),
+                feasible_for_phase3=feasible and result.invalid_reason is None,
+                feasibility_reason=feasibility_reason,
             )
         )
     structural_valid = [
         episode for episode in episodes
         if episode.final_1rm_kg is not None and episode.invalid_reason is None
     ]
-    valid = [episode for episode in structural_valid if not episode.constraint_violations]
+    phase3_eligible = [episode for episode in structural_valid if episode.feasible_for_phase3]
+    valid = [episode for episode in phase3_eligible if not episode.constraint_violations]
     invalid = len(episodes) - len(structural_valid)
+    feasibility_discarded = len(structural_valid) - len(phase3_eligible)
     violation_counts: dict[str, int] = {}
     for episode in structural_valid:
         for violation in episode.constraint_violations:
@@ -747,8 +862,9 @@ def _evaluate_genome(name: str, genome: AdversarialGenome, seeds: list[int], con
             raw_mean_final_1rm_kg=round(fmean(raw_scores), 4) if raw_scores else None,
             raw_seed_std_kg=round(stdev(raw_scores), 4) if len(raw_scores) > 1 else (0.0 if raw_scores else None),
             counted_episodes=0,
-            constraint_violating_episodes=len(structural_valid),
+            constraint_violating_episodes=sum(bool(episode.constraint_violations) for episode in phase3_eligible),
             constraint_violation_counts=violation_counts,
+            feasibility_discarded_episodes=feasibility_discarded,
         )
     scores = [float(episode.final_1rm_kg) for episode in valid]
     counted_fraction = len(valid) / len(episodes) if episodes else 0.0
@@ -773,8 +889,9 @@ def _evaluate_genome(name: str, genome: AdversarialGenome, seeds: list[int], con
         raw_mean_final_1rm_kg=round(fmean(raw_scores), 4),
         raw_seed_std_kg=round(stdev(raw_scores), 4) if len(raw_scores) > 1 else 0.0,
         counted_episodes=len(valid),
-        constraint_violating_episodes=len(structural_valid) - len(valid),
+        constraint_violating_episodes=sum(bool(episode.constraint_violations) for episode in phase3_eligible),
         constraint_violation_counts=violation_counts,
+        feasibility_discarded_episodes=feasibility_discarded,
     )
 
 
@@ -783,7 +900,12 @@ def _rank(evaluation: CandidateEvaluation) -> tuple[float, float]:
     # are compliant on every search seed.  Survivor-bias candidates are kept
     # in the separate diagnostic ranking below rather than being eligible for
     # comparison or release claims.
-    if evaluation.invalid_episodes or evaluation.constraint_violating_episodes or evaluation.mean_final_1rm_kg is None:
+    if (
+        evaluation.invalid_episodes
+        or evaluation.constraint_violating_episodes
+        or evaluation.feasibility_discarded_episodes
+        or evaluation.mean_final_1rm_kg is None
+    ):
         return (-float("inf"), -float("inf"))
     return (evaluation.mean_final_1rm_kg, -(evaluation.mean_pain_days or 0.0))
 
@@ -804,6 +926,7 @@ def _diagnostic_record(evaluation: CandidateEvaluation) -> dict[str, Any]:
         total
         and evaluation.invalid_episodes == 0
         and evaluation.constraint_violating_episodes == 0
+        and evaluation.feasibility_discarded_episodes == 0
         and counted_fraction >= MIN_COUNTED_SEED_FRACTION
     )
     return {
@@ -820,6 +943,7 @@ def _diagnostic_record(evaluation: CandidateEvaluation) -> dict[str, Any]:
         "invalid_episodes": evaluation.invalid_episodes,
         "constraint_violating_episodes": evaluation.constraint_violating_episodes,
         "constraint_violation_counts": evaluation.constraint_violation_counts or {},
+        "feasibility_discarded_episodes": evaluation.feasibility_discarded_episodes,
     }
 
 
@@ -905,6 +1029,138 @@ def _reference_expert_mean(seeds: list[int], config: SimConfig) -> float | None:
     return round(fmean(scores), 4)
 
 
+def _formal_oracle_summary(
+    evaluations: Iterable[CandidateEvaluation],
+    seeds: list[int],
+) -> dict[str, Any]:
+    """Summarize adaptation headroom from a full-seed candidate population.
+
+    The best static candidate is the single all-seed-compliant genome with the
+    highest counted mean. The per-seed oracle is the best counted score among
+    that same eligible population for each seed. The reported headroom is the
+    paired difference between those two vectors, so common seed difficulty is
+    removed before its SD is computed.
+    """
+    eligible = [
+        evaluation
+        for evaluation in evaluations
+        if len(evaluation.episodes) == len(seeds)
+        and evaluation.invalid_episodes == 0
+        and evaluation.constraint_violating_episodes == 0
+        and evaluation.feasibility_discarded_episodes == 0
+        and evaluation.mean_final_1rm_kg is not None
+    ]
+    if not eligible:
+        return {
+            "status": "no_all_seed_compliant_candidates",
+            "candidate_count": 0,
+            "best_static_policy": None,
+            "best_static_mean_kg": None,
+            "per_seed_oracle_scores_kg": {},
+            "headroom_kg": None,
+            "headroom_seed_sd_kg": None,
+            "headroom_effect_size": None,
+        }
+    best_static = max(eligible, key=lambda evaluation: evaluation.mean_final_1rm_kg or -float("inf"))
+    static_scores = {
+        episode.seed: float(episode.final_1rm_kg)
+        for episode in best_static.episodes
+        if episode.final_1rm_kg is not None
+    }
+    per_seed_oracle: dict[int, float] = {}
+    for seed in seeds:
+        scores = [
+            float(episode.final_1rm_kg)
+            for evaluation in eligible
+            for episode in evaluation.episodes
+            if episode.seed == seed and episode.final_1rm_kg is not None
+        ]
+        if scores:
+            per_seed_oracle[seed] = max(scores)
+    headroom_values = [
+        per_seed_oracle[seed] - static_scores[seed]
+        for seed in seeds
+        if seed in per_seed_oracle and seed in static_scores
+    ]
+    headroom_mean = fmean(headroom_values) if headroom_values else None
+    headroom_sd = stdev(headroom_values) if len(headroom_values) > 1 else (0.0 if headroom_values else None)
+    return {
+        "status": "ok" if len(headroom_values) == len(seeds) else "incomplete_seed_coverage",
+        "candidate_count": len(eligible),
+        "best_static_policy": best_static.name,
+        "best_static_mean_kg": best_static.mean_final_1rm_kg,
+        "best_static_scores_kg": static_scores,
+        "per_seed_oracle_scores_kg": per_seed_oracle,
+        "headroom_kg": round(headroom_mean, 4) if headroom_mean is not None else None,
+        "headroom_seed_sd_kg": round(headroom_sd, 4) if headroom_sd is not None else None,
+        "headroom_effect_size": (
+            round(headroom_mean / headroom_sd, 4)
+            if headroom_mean is not None and headroom_sd not in (None, 0.0)
+            else None
+        ),
+        "eligible_policy_names": [evaluation.name for evaluation in eligible],
+    }
+
+
+def _search_coverage_summary(
+    evaluations: Mapping[AdversarialGenome, CandidateEvaluation],
+    regression: tuple[tuple[str, AdversarialGenome], ...],
+    seeds: list[int],
+    search_seeds: list[int],
+) -> dict[str, Any]:
+    """Assert that the full-seed search can reproduce the known hand policy."""
+    if len(search_seeds) != len(seeds):
+        return {
+            "status": "not_checked_search_did_not_use_all_certification_seeds",
+            "known_hand_template": KNOWN_HAND_TEMPLATE_NAME,
+            "assertion_pass": None,
+        }
+    hand_genome = next(
+        genome for name, genome in regression if name == KNOWN_HAND_TEMPLATE_NAME
+    ).normalized()
+    hand_evaluation = evaluations.get(hand_genome)
+    if hand_evaluation is None:
+        raise AssertionError(
+            f"search liveness failed: {KNOWN_HAND_TEMPLATE_NAME} was not evaluated"
+        )
+    if (
+        hand_evaluation.mean_final_1rm_kg is None
+        or hand_evaluation.invalid_episodes
+        or hand_evaluation.constraint_violating_episodes
+        or hand_evaluation.feasibility_discarded_episodes
+    ):
+        raise AssertionError(
+            f"known hand template is not all-seed-compliant: {KNOWN_HAND_TEMPLATE_NAME}"
+        )
+    eligible = [
+        evaluation
+        for evaluation in evaluations.values()
+        if evaluation.mean_final_1rm_kg is not None
+        and evaluation.invalid_episodes == 0
+        and evaluation.constraint_violating_episodes == 0
+        and evaluation.feasibility_discarded_episodes == 0
+    ]
+    if not eligible:
+        raise AssertionError("search liveness failed: no all-seed-compliant candidate")
+    best = max(eligible, key=lambda evaluation: evaluation.mean_final_1rm_kg or -float("inf"))
+    hand_score = float(hand_evaluation.mean_final_1rm_kg)
+    best_score = float(best.mean_final_1rm_kg)
+    if best_score + 1e-9 < hand_score:
+        raise AssertionError(
+            "search coverage failed: best all-seed-compliant candidate "
+            f"{best_score:.4f} kg is below {KNOWN_HAND_TEMPLATE_NAME} "
+            f"({hand_score:.4f} kg)"
+        )
+    return {
+        "status": "ok",
+        "known_hand_template": KNOWN_HAND_TEMPLATE_NAME,
+        "known_hand_template_score_kg": round(hand_score, 4),
+        "best_all_seed_compliant_policy": best.name,
+        "best_all_seed_compliant_score_kg": round(best_score, 4),
+        "assertion_pass": True,
+    }
+
+
 def run_adversarial_search(
     seeds: Iterable[int] = range(20),
     weeks: int = 52,
@@ -914,6 +1170,8 @@ def run_adversarial_search(
     generations: int = 3,
     search_seed_count: int = 6,
     top_k: int = 5,
+    elite_fraction: float = 0.0625,
+    random_immigrant_fraction: float = 0.25,
 ) -> dict[str, Any]:
     """Search legal action-field policies, then re-evaluate the finalists."""
     seed_list = list(seeds)
@@ -926,7 +1184,11 @@ def run_adversarial_search(
         raise ValueError("adversarial search requires at least one seed")
     rng = random.Random(20260807)
     regression = _regression_genomes()
-    genomes = [genome for _, genome in regression]
+    regression_genomes = [genome for _, genome in regression]
+    # Regression genomes are part of the initial population, not merely
+    # appended to the final report. This keeps known regions alive while the
+    # search explores new regions.
+    genomes = list(regression_genomes)
     while len(genomes) < population_size:
         genomes.append(_random_genome(rng))
     seen: set[AdversarialGenome] = set()
@@ -950,12 +1212,24 @@ def run_adversarial_search(
             best_by_genome[genome] = evaluation
             scored.append(evaluation)
         scored.sort(key=_rank, reverse=True)
-        elites = [evaluation.genome for evaluation in scored[: max(4, population_size // 8)] if evaluation.mean_final_1rm_kg is not None]
+        elite_count = max(4, int(population_size * max(0.0, min(1.0, elite_fraction))))
+        elites = [evaluation.genome for evaluation in scored[:elite_count] if evaluation.mean_final_1rm_kg is not None]
         if not elites:
-            elites = [genome for _, genome in regression]
-        genomes = list(elites)
-        while len(genomes) < population_size:
+            elites = list(regression_genomes)
+        immigrant_count = max(
+            1,
+            min(
+                population_size,
+                int(population_size * max(0.0, min(1.0, random_immigrant_fraction))),
+            ),
+        )
+        genomes = list(regression_genomes)
+        genomes.extend(elites)
+        target_before_immigrants = max(0, population_size - immigrant_count)
+        while len(genomes) < target_before_immigrants:
             genomes.append(_mutate(rng.choice(elites), rng))
+        while len(genomes) < population_size:
+            genomes.append(_random_genome(rng))
 
     ranked = sorted(best_by_genome.values(), key=_rank, reverse=True)
     final_genomes: list[AdversarialGenome] = []
@@ -987,6 +1261,13 @@ def run_adversarial_search(
         _diagnostic_record(evaluation)
         for evaluation in sorted(best_by_genome.values(), key=_diagnostic_rank, reverse=True)
     ]
+    oracle = _formal_oracle_summary(best_by_genome.values(), seed_list)
+    coverage = _search_coverage_summary(
+        best_by_genome,
+        regression,
+        seed_list,
+        search_seeds,
+    )
     candidates = {
         evaluation.name: {
             "genome": evaluation.genome.as_dict(),
@@ -999,6 +1280,7 @@ def run_adversarial_search(
     return {
         "benchmark": "Bench-bench",
         "engine_config_hash": engine_config_hash(),
+        "prompt_hash": current_prompt_hash(),
         "phase": 4,
         "config": config.as_dict(),
         "seeds": seed_list,
@@ -1015,6 +1297,8 @@ def run_adversarial_search(
             "search_seeds": search_seeds,
             "population_size": population_size,
             "generations": generations,
+            "elite_fraction": elite_fraction,
+            "random_immigrant_fraction": random_immigrant_fraction,
             "unique_genomes_evaluated": len(best_by_genome),
             "regression_families": [label for label, _ in regression],
             "diagnostic_ranking": diagnostic_ranking,
@@ -1031,6 +1315,9 @@ def run_adversarial_search(
             "invalid_search_candidates": sum(
                 evaluation.invalid_episodes > 0 for evaluation in best_by_genome.values()
             ),
+            "oracle": oracle,
+            "coverage": coverage,
+            "oracle_effect_size_threshold": PHASE3_ORACLE_EFFECT_SIZE_THRESHOLD,
         },
         "comparison": {
             "expert_mean_final_1rm_kg": expert_mean,

@@ -11,7 +11,7 @@ from statistics import fmean, stdev
 from typing import Any, Iterable
 
 from .engine import FinalResult, WeekOutcome, _State
-from .provenance import engine_config_hash
+from .provenance import current_prompt_hash, engine_config_hash
 from .runner import retry_metrics_from_records
 from .scoring import (
     HOUSEHOLD_STRAIN_HIGH_WEEK_LIMIT,
@@ -19,6 +19,8 @@ from .scoring import (
     MAX_EPISODE_DAYS,
     MIN_COUNTED_SEED_FRACTION,
     PAIN_DAYS_LIMIT,
+    counted_score,
+    constraint_violations,
     score_fields,
 )
 from .schemas import (
@@ -110,7 +112,12 @@ def _transport_error_counts(records: list[dict[str, Any]]) -> dict[str, int]:
     return dict(sorted(counts.items()))
 
 
-def analyze_transcript(path: str | Path) -> dict[str, Any]:
+def analyze_transcript(
+    path: str | Path,
+    *,
+    historical_pilot: bool = False,
+    exclude_transport_failures: bool = True,
+) -> dict[str, Any]:
     path = Path(path)
     records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
     start = next(record for record in records if record.get("type") == "run_start")
@@ -119,9 +126,27 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
     private_fields = sorted(_private_field_hits(records))
     transport_errors = _transport_error_counts(records)
     retry_metrics = retry_metrics_from_records(records)
+    successful_model_decisions = 0
+    for record in records:
+        if record.get("type") != "turn":
+            continue
+        attempt_groups = [record.get("attempts", [])]
+        attempt_groups.extend(
+            reactive.get("attempts", []) for reactive in record.get("reactive_turns", []) or []
+        )
+        for attempts in attempt_groups:
+            if any(
+                attempt.get("is_model_call", True)
+                and not attempt.get("error")
+                and not attempt.get("fallback")
+                for attempt in attempts
+            ):
+                successful_model_decisions += 1
     configured_weeks = int(start.get("config", {}).get("weeks", 0) or 0)
     recorded_hash = start.get("engine_config_hash")
     current_hash = engine_config_hash()
+    recorded_prompt_hash = start.get("prompt_hash")
+    current_prompt = current_prompt_hash()
     replayed_under_current_engine = bool(start.get("replayed_under_current_engine", False))
     observed_weeks = [int(record["week"]) for record in turns]
     transcript_violations: list[str] = []
@@ -129,8 +154,10 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         transcript_violations.append(f"expected_{configured_weeks}_turns_got_{len(turns)}")
     if configured_weeks and sorted(observed_weeks) != list(range(1, configured_weeks + 1)):
         transcript_violations.append("week_sequence_not_unique_and_complete")
-    if recorded_hash != current_hash:
+    if recorded_hash != current_hash and not historical_pilot:
         transcript_violations.append("engine_config_hash_mismatch")
+    if recorded_prompt_hash != current_prompt and not historical_pilot:
+        transcript_violations.append("prompt_hash_mismatch")
     sessions = [session for turn in turns for session in turn["action"].get("sessions", [])]
     none_sleep_weeks = sum(turn["action"].get("life", {}).get("sleep_protection") == "none" for turn in turns)
     imbalanced_weeks = sum(
@@ -147,36 +174,66 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
     if not isinstance(final_result, dict):
         final_result = {}
     required_final_fields = (
-        "final_1rm_kg",
-        "pain_days",
-        "household_strain_peak",
-        "mean_household_strain",
-        "household_strain_high_weeks",
-        "final_third_mean_household_strain",
-        "invalid_reason",
+        ("final_1rm_kg", "pain_days", "invalid_reason")
+        if historical_pilot
+        else (
+            "final_1rm_kg",
+            "pain_days",
+            "household_strain_peak",
+            "mean_household_strain",
+            "household_strain_high_weeks",
+            "final_third_mean_household_strain",
+            "invalid_reason",
+        )
     )
     for field_name in required_final_fields:
         if field_name not in final_result:
             transcript_violations.append(f"missing_final_result_field:{field_name}")
     invalid_reason = final_result.get("invalid_reason")
     config_data = start.get("config", {})
-    score = score_fields(
-        final_result.get("final_1rm_kg"),
-        invalid_reason=invalid_reason,
-        pain_days=final_result.get("pain_days"),
-        household_strain_high_weeks=final_result.get("household_strain_high_weeks"),
-        final_third_mean_household_strain=final_result.get("final_third_mean_household_strain"),
-        household_strain_limit=float(
-            config_data.get("household_strain_limit", HOUSEHOLD_STRAIN_LIMIT)
-        ),
-        household_strain_high_week_limit=int(
-            config_data.get("household_strain_high_week_limit", HOUSEHOLD_STRAIN_HIGH_WEEK_LIMIT)
-        ),
-    )
+    if historical_pilot:
+        historical_violations = tuple(
+            violation
+            for violation in constraint_violations(pain_days=final_result.get("pain_days"))
+            if violation in {"missing_pain_days", "invalid_pain_days"}
+            or violation.startswith("pain_days>")
+        )
+        score = {
+            "raw_final_1rm_kg": (
+                float(final_result["final_1rm_kg"])
+                if final_result.get("final_1rm_kg") is not None
+                else None
+            ),
+            "counted_final_1rm_kg": counted_score(
+                final_result.get("final_1rm_kg"),
+                invalid_reason=invalid_reason,
+                violations=historical_violations,
+            ),
+            "constraint_violations": list(historical_violations),
+        }
+    else:
+        score = score_fields(
+            final_result.get("final_1rm_kg"),
+            invalid_reason=invalid_reason,
+            pain_days=final_result.get("pain_days"),
+            household_strain_high_weeks=final_result.get("household_strain_high_weeks"),
+            final_third_mean_household_strain=final_result.get("final_third_mean_household_strain"),
+            household_strain_limit=float(
+                config_data.get("household_strain_limit", HOUSEHOLD_STRAIN_LIMIT)
+            ),
+            household_strain_high_week_limit=int(
+                config_data.get("household_strain_high_week_limit", HOUSEHOLD_STRAIN_HIGH_WEEK_LIMIT)
+            ),
+        )
     exclusion_reasons: list[str] = []
     if invalid_reason is not None:
         exclusion_reasons.append(f"invalid: {invalid_reason}")
     exclusion_reasons.extend(f"constraint: {violation}" for violation in score["constraint_violations"])
+    transport_excluded = bool(exclude_transport_failures and retry_metrics["transport_failures"])
+    if transport_excluded:
+        exclusion_reasons.append(
+            f"transport: {retry_metrics['transport_failures']} provider failure(s)"
+        )
     if transcript_violations:
         exclusion_reasons.extend(f"transcript: {violation}" for violation in transcript_violations)
     final_pain_days = final_result.get("pain_days")
@@ -189,6 +246,8 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
     )
     usage_totals = {
         "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
         "visible_output_tokens": 0,
         "thinking_tokens": 0,
         "total_tokens": 0,
@@ -201,6 +260,8 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
             for attempt in attempts:
                 usage = attempt.get("usage", {}) or {}
                 usage_totals["input_tokens"] += int(usage.get("input_tokens", usage.get("prompt_tokens", 0)) or 0)
+                usage_totals["cached_input_tokens"] += int(usage.get("cached_prompt_tokens", 0) or 0)
+                usage_totals["cache_creation_input_tokens"] += int(usage.get("cache_creation_input_tokens", 0) or 0)
                 usage_totals["visible_output_tokens"] += int(usage.get("visible_output_tokens", 0) or 0)
                 usage_totals["thinking_tokens"] += int(usage.get("thinking_tokens", 0) or 0)
                 usage_totals["total_tokens"] += int(usage.get("total_tokens", 0) or 0)
@@ -227,6 +288,8 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         "weeks": len(turns),
         "configured_weeks": configured_weeks,
         "valid": not exclusion_reasons and all(field_name in final_result for field_name in required_final_fields),
+        "transport_excluded": transport_excluded,
+        "historical_pilot": historical_pilot,
         "invalid_reason": invalid_reason,
         "exclusion_reasons": exclusion_reasons,
         # Keep the legacy field as the raw engine result for compatibility;
@@ -249,6 +312,7 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         "missed_sessions": int(final_result.get("missed_sessions", 0)),
         "fallback_sessions": int(final_result.get("fallback_sessions", 0)),
         "model_calls": int(end.get("model_calls", 0)),
+        "successful_model_decisions": successful_model_decisions,
         # ``repair_calls`` is retained as the number of repair prompts sent.
         # The release repair rate uses rejected_output_decisions instead.
         "repair_calls": retry_metrics["repair_attempts"],
@@ -264,8 +328,11 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         ) if retry_metrics["decisions"] else 0.0,
         "total_tokens": int(end.get("total_tokens", usage_totals["total_tokens"])),
         "input_tokens": int(end.get("input_tokens", usage_totals["input_tokens"])),
+        "cached_input_tokens": int(end.get("cached_input_tokens", usage_totals["cached_input_tokens"])),
+        "cache_creation_input_tokens": int(end.get("cache_creation_input_tokens", usage_totals["cache_creation_input_tokens"])),
         "visible_output_tokens": int(end.get("visible_output_tokens", usage_totals["visible_output_tokens"])),
         "thinking_tokens": int(end.get("thinking_tokens", usage_totals["thinking_tokens"])),
+        "output_tokens": int(end.get("visible_output_tokens", usage_totals["visible_output_tokens"])) + int(end.get("thinking_tokens", usage_totals["thinking_tokens"])),
         "total_cost_usd": float(end.get("total_cost_usd", usage_totals["cost_usd"])),
         "heavy_session_fraction": round(heavy_sessions / len(sessions), 4) if sessions else 0.0,
         "none_sleep_weeks": none_sleep_weeks,
@@ -278,20 +345,52 @@ def analyze_transcript(path: str | Path) -> dict[str, Any]:
         "engine_config_hash": recorded_hash,
         "current_engine_config_hash": current_hash,
         "engine_config_hash_matches": recorded_hash == current_hash,
+        "prompt_hash": recorded_prompt_hash,
+        "current_prompt_hash": current_prompt,
+        "prompt_hash_matches": recorded_prompt_hash == current_prompt,
         "replayed_under_current_engine": replayed_under_current_engine,
     }
 
 
-def analyze_paths(paths: Iterable[str | Path]) -> list[dict[str, Any]]:
+def analyze_paths(
+    paths: Iterable[str | Path],
+    *,
+    historical_pilot: bool = False,
+    exclude_transport_failures: bool = True,
+) -> list[dict[str, Any]]:
     """Analyze an explicit transcript set without importing stale neighbors."""
-    return [analyze_transcript(path) for path in sorted((Path(path) for path in paths), key=str)]
+    return [
+        analyze_transcript(
+            path,
+            historical_pilot=historical_pilot,
+            exclude_transport_failures=exclude_transport_failures,
+        )
+        for path in sorted((Path(path) for path in paths), key=str)
+    ]
 
 
-def analyze_directory(directory: str | Path) -> list[dict[str, Any]]:
+def analyze_directory(
+    directory: str | Path,
+    *,
+    historical_pilot: bool = False,
+    exclude_transport_failures: bool = True,
+) -> list[dict[str, Any]]:
     """Analyze every transcript below a directory, in stable relative order."""
     root = Path(directory).resolve()
-    paths = sorted(root.rglob("*.jsonl"), key=lambda path: path.relative_to(root).as_posix())
-    records = analyze_paths(paths)
+    paths = sorted(
+        (
+            path
+            for path in root.rglob("*.jsonl")
+            if "archive" not in path.relative_to(root).parts
+            and not path.name.endswith(".current-engine.jsonl")
+        ),
+        key=lambda path: path.relative_to(root).as_posix(),
+    )
+    records = analyze_paths(
+        paths,
+        historical_pilot=historical_pilot,
+        exclude_transport_failures=exclude_transport_failures,
+    )
     for record, path in zip(records, paths):
         record["path"] = path.relative_to(root).as_posix()
     return records
@@ -342,8 +441,9 @@ def leaderboard_aggregates(records: Iterable[dict[str, Any]]) -> dict[str, dict[
     return aggregates
 
 
-def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
+def leaderboard_markdown(records: Iterable[dict[str, Any]], *, title_override: str | None = None) -> str:
     all_values = list(records)
+    historical_pilot = bool(all_values) and all(record.get("historical_pilot") for record in all_values)
     values = [
         record
         for record in all_values
@@ -362,11 +462,18 @@ def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
         for record in all_values
     )
     replayed = bool(all_values) and all(record.get("replayed_under_current_engine") for record in all_values)
-    if replayed and configured_weeks >= 52:
+    if title_override:
+        title = title_override
+    elif historical_pilot:
+        title = "# Bench-bench v0.1 Pilot Analyzer Report (Historical)"
+    elif replayed and configured_weeks >= 52:
         title = "# Bench-bench Generated Public Leaderboard"
     else:
         title = "# Bench-bench Generated Public Leaderboard" if live_endpoint and configured_weeks >= 52 else "# Bench-bench Phase 3 Mini-Leaderboard"
     description = (
+        "Historical compatibility analysis of the archived v0.1 pilot transcripts. The transcripts retain their original engine/config hash; this report does not claim current-engine replay. Any provider transport failure excludes that transcript from counted aggregates while retaining its raw score."
+        if historical_pilot
+        else
         "This is an offline re-evaluation of the checked-in public model actions under the current engine/config hash; no model calls were made during regeneration."
         if replayed
         else
@@ -380,7 +487,8 @@ def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
         "",
         description,
         "",
-        f"- Engine/config hash: `{engine_config_hash()}`",
+        f"- Analysis engine/config hash: `{engine_config_hash()}`",
+        f"- Prompt hash: `{current_prompt_hash()}`",
         "| Model | Valid seeds | Excluded | Counted mean final 1RM (kg) | Counted seed SD (kg) | Decisions | Mean calls | Mean cost | Rejected decisions | Repair attempts | Successful repairs | Transport failures | Auto fallbacks | Violations | Raw mean final 1RM (kg) |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|",
     ]
@@ -443,7 +551,13 @@ def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
         ]
     )
     hash_matches = sum(record.get("engine_config_hash_matches") is True for record in all_values)
-    lines.append(f"- Engine/config hash audit: {'PASS' if hash_matches == len(all_values) else 'FAILED'} on {hash_matches}/{len(all_values)} transcripts.")
+    if historical_pilot:
+        source_hashes = sorted({str(record.get("engine_config_hash")) for record in all_values})
+        lines.append(
+            f"- Historical transcript engine/config hash: {', '.join(f'`{value}`' for value in source_hashes)}; current-engine match is intentionally not required."
+        )
+    else:
+        lines.append(f"- Engine/config hash audit: {'PASS' if hash_matches == len(all_values) else 'FAILED'} on {hash_matches}/{len(all_values)} transcripts.")
     lines.append(f"- Endpoint metadata: {endpoint_status} on {sum(bool(record.get('endpoint_metadata')) for record in all_values)}/{len(all_values)} transcripts.")
     lines.append(f"- Endpoint identities: {', '.join(sorted(endpoint_values)) if endpoint_values else 'none'}.")
     if privacy_counts:
@@ -475,6 +589,24 @@ def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
         lines.append(f"- Invalid-episode audit: EXCLUDED {len(invalid_records)}/{len(all_values)} transcripts ({details}).")
     else:
         lines.append("- Invalid-episode audit: PASS (no invalid episodes detected).")
+    transport_excluded_records = [record for record in all_values if record.get("transport_excluded")]
+    if transport_excluded_records:
+        lines.append(
+            f"- Transport exclusion: EXCLUDED {len(transport_excluded_records)}/{len(all_values)} transcripts from counted aggregates; raw scores and failure counts remain visible."
+        )
+    else:
+        lines.append("- Transport exclusion: PASS (no transcripts excluded for provider transport failures).")
+    if historical_pilot:
+        zero_model_decision_counts: dict[str, int] = defaultdict(int)
+        for record in all_values:
+            if record.get("successful_model_decisions", 0) == 0:
+                zero_model_decision_counts[str(record["model"])] += 1
+        if zero_model_decision_counts:
+            details = ", ".join(
+                f"{model}: {count}/{sum(1 for item in all_values if item.get('model') == model)}"
+                for model, count in sorted(zero_model_decision_counts.items())
+            )
+            lines.append(f"- Zero-successful-model-decision transcripts: {details}.")
     if constraint_records:
         violation_counts: dict[str, int] = defaultdict(int)
         for record in constraint_records:
@@ -497,6 +629,9 @@ def leaderboard_markdown(records: Iterable[dict[str, Any]]) -> str:
     else:
         lines.append("- No exploit signature crossed the analyzer thresholds.")
     method = (
+        "The analyzer reads the archived v0.1 runner transcripts in historical compatibility mode. It applies the v0.1 pain-only counted rule, excludes any transcript with provider transport failures from counted aggregates, and retains raw scores and transport metrics for audit."
+        if historical_pilot
+        else
         "The analyzer reads public model transcripts and re-evaluated final results. Structurally invalid or pain-violating episodes remain in audit records, their raw final 1RM is retained, and only counted scores enter aggregates."
         if replayed
         else "The analyzer reads only public model transcripts and final results. Structurally invalid or pain-violating episodes remain in audit records, their raw final 1RM is retained, and only counted scores enter aggregates."
@@ -513,16 +648,21 @@ def write_analysis(records: list[dict[str, Any]], json_path: str | Path, markdow
     invalid_records = [record for record in records if record.get("invalid_reason") is not None]
     constraint_records = [record for record in records if record.get("constraint_violations") or record.get("violations")]
     excluded_records = [record for record in records if not record.get("valid", record.get("invalid_reason") is None)]
+    historical_pilot = bool(records) and all(record.get("historical_pilot") for record in records)
+    transport_excluded_records = [record for record in records if record.get("transport_excluded")]
     json_path.write_text(
         json.dumps(
             {
                 "engine_config_hash": engine_config_hash(),
+                "prompt_hash": current_prompt_hash(),
+                "analysis_mode": "historical_pilot" if historical_pilot else "current",
                 "records": records,
                 "leaderboard": leaderboard_aggregates(records),
                 "valid_record_count": len(records) - len(excluded_records),
                 "excluded_invalid_count": len(invalid_records),
                 "constraint_violating_count": len(constraint_records),
                 "excluded_record_count": len(excluded_records),
+                "transport_excluded_count": len(transport_excluded_records),
             },
             indent=2,
             sort_keys=True,
@@ -530,4 +670,11 @@ def write_analysis(records: list[dict[str, Any]], json_path: str | Path, markdow
         + "\n",
         encoding="utf-8",
     )
-    markdown_path.write_text(leaderboard_markdown(records), encoding="utf-8")
+    title_override = (
+        "# Bench-bench v0.2 Paid Smoke Analysis"
+        if json_path.name == "current_v02_smoke_analysis.json"
+        else None
+    )
+    markdown_path.write_text(
+        leaderboard_markdown(records, title_override=title_override), encoding="utf-8"
+    )

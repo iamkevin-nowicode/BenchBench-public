@@ -7,6 +7,18 @@ window; it does not switch the simulator to a different model.
 from dataclasses import dataclass
 
 
+SLEEP_PROTECTION_LEDGER_MINUTES = {
+    "none": 0,
+    "standard": 30,
+    "strong": 60,
+}
+
+
+def sleep_protection_time_cost_minutes(protection: str) -> int:
+    """Return the shared-ledger cost of reserving sleep protection time."""
+    return SLEEP_PROTECTION_LEDGER_MINUTES.get(protection, 0)
+
+
 @dataclass(frozen=True)
 class SimConfig:
     weeks: int = 52
@@ -31,6 +43,12 @@ class SimConfig:
     # per-episode optimum and a smooth over-reaching penalty beyond it.
     weekly_stimulus_optimum: float = 0.90
     weekly_overreach_penalty_strength: float = 0.90
+    # Frequency is not an independent efficacy multiplier.  These legacy
+    # fields remain readable so old transcript configs can be replayed, but
+    # the engine ignores them; current adaptation is a function of accumulated
+    # executed volume.
+    frequency_bonus_per_additional_session: float = 0.05
+    frequency_bonus_session_cap: int = 4
     # Backwards-compatible input name for old offline experiments.  It is an
     # optimum override, never a hard output cap.
     weekly_stimulus_cap: float | None = None
@@ -47,6 +65,21 @@ class SimConfig:
     # Unavoidable childcare, chores, and household administration are charged
     # from the same pool before an authored allocation is considered.
     weekly_fixed_household_minutes: int = 180
+    sleep_protection_standard_minutes: int = 30
+    sleep_protection_strong_minutes: int = 60
+    # Parent-sleep center for the synthetic calendar. Direction is grounded
+    # by parent actigraphy; the exact value is a benchmark calibration choice.
+    sleep_baseline_hours: float = 6.72
+    # Sleep protection changes the probability of carrying out a session only
+    # below this threshold.  The breakpoint and slopes are calibration choices
+    # informed by the supplied adherence evidence, not measured coefficients.
+    sleep_adherence_threshold_hours: float = 6.0
+    sleep_adherence_penalty_per_hour_below_threshold: float = 0.16
+    # Once a session occurs, sleep changes the quality of its stimulus through
+    # this modest term. Severe restriction remains consequential; ordinary
+    # 6–8 hour weeks are intentionally shallow.
+    sleep_quality_penalty_per_hour_below_threshold: float = 0.06
+    sleep_quality_floor: float = 0.78
     delegated_chore_cost_per_hour_cents: int = 1_200
     reactive_childcare_cost_per_hour_cents: int = 1_400
     # Calibration adopted after durable-capacity drift and multi-test scoring;
@@ -101,11 +134,24 @@ class SimConfig:
         return self.monthly_budget_cents // 4
 
     @property
+    def usable_weekly_time_budget_minutes(self) -> int:
+        """Minutes left for an authored action after fixed household time."""
+        fixed = self.weekly_fixed_household_minutes if self.enable_household_system else 0
+        return max(0, self.weekly_time_budget_minutes - fixed)
+
+    @property
     def effective_weekly_stimulus_optimum(self) -> float:
         """Return the smooth-curve optimum, honoring the legacy alias."""
         if self.weekly_stimulus_cap is not None:
             return max(0.05, float(self.weekly_stimulus_cap))
         return max(0.05, float(self.weekly_stimulus_optimum))
+
+    def sleep_protection_time_cost_minutes(self, protection: str) -> int:
+        if protection == "standard":
+            return self.sleep_protection_standard_minutes
+        if protection == "strong":
+            return self.sleep_protection_strong_minutes
+        return 0
 
     @classmethod
     def twelve_week(cls) -> "SimConfig":
@@ -127,11 +173,20 @@ class SimConfig:
             "weekly_stimulus_cap": self.weekly_stimulus_cap,
             "weekly_stimulus_optimum": self.weekly_stimulus_optimum,
             "weekly_overreach_penalty_strength": self.weekly_overreach_penalty_strength,
+            "frequency_bonus_per_additional_session": self.frequency_bonus_per_additional_session,
+            "frequency_bonus_session_cap": self.frequency_bonus_session_cap,
             "minimum_meaningful_load_ratio": self.minimum_meaningful_load_ratio,
             "session_reps_per_minute": self.session_reps_per_minute,
             "productive_week_stimulus_threshold": self.productive_week_stimulus_threshold,
             "weekly_time_budget_minutes": self.weekly_time_budget_minutes,
             "weekly_fixed_household_minutes": self.weekly_fixed_household_minutes,
+            "sleep_protection_standard_minutes": self.sleep_protection_standard_minutes,
+            "sleep_protection_strong_minutes": self.sleep_protection_strong_minutes,
+            "sleep_baseline_hours": self.sleep_baseline_hours,
+            "sleep_adherence_threshold_hours": self.sleep_adherence_threshold_hours,
+            "sleep_adherence_penalty_per_hour_below_threshold": self.sleep_adherence_penalty_per_hour_below_threshold,
+            "sleep_quality_penalty_per_hour_below_threshold": self.sleep_quality_penalty_per_hour_below_threshold,
+            "sleep_quality_floor": self.sleep_quality_floor,
             "delegated_chore_cost_per_hour_cents": self.delegated_chore_cost_per_hour_cents,
             "reactive_childcare_cost_per_hour_cents": self.reactive_childcare_cost_per_hour_cents,
             "fitness_to_strength_kg": self.fitness_to_strength_kg,

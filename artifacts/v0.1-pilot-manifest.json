@@ -8,6 +8,12 @@
   "byte_count": 130784450,
   "runner_version": "0.1.0",
   "pricing_table_version": "bench_bench.runner._MODEL_PRICING_USD_PER_MILLION@sha256:5fd68548de5bb67bd8977dfa1d0bee091dab3aaf0c4a0a386a62182b6de1cb81",
+  "engine_config_hashes": [
+    "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1"
+  ],
+  "prompt_hashes": [
+    "sha256:13f3ca6e3a5c412fcf6dcf9b30f12394f7f9ad6291d51a8d102600a76d3903e2"
+  ],
   "transcript_tree_sha256": "sha256:00dda00a64147e70527eae4efdb54468714d71514870d56dcfecd2847c829148",
   "transcripts": [
     {

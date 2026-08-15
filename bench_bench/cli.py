@@ -332,10 +332,6 @@ def _make_live_client(args: argparse.Namespace, model: str, api_key: str | None)
         "input_price_per_million": args.input_price_per_million,
         "cached_input_price_per_million": args.cached_input_price_per_million,
         "output_price_per_million": args.output_price_per_million,
-        "long_context_threshold_tokens": args.long_context_threshold_tokens,
-        "long_context_input_price_per_million": args.long_context_input_price_per_million,
-        "long_context_cached_input_price_per_million": args.long_context_cached_input_price_per_million,
-        "long_context_output_price_per_million": args.long_context_output_price_per_million,
         "request_retries": args.request_retries,
         "retry_backoff_seconds": args.retry_backoff_seconds,
     }
@@ -351,6 +347,11 @@ def _make_live_client(args: argparse.Namespace, model: str, api_key: str | None)
         args.base_url,
         model,
         effort=None if args.effort == "not-exposed" else args.effort,
+        long_context_threshold_tokens=args.long_context_threshold_tokens,
+        long_context_input_price_per_million=args.long_context_input_price_per_million,
+        long_context_cached_input_price_per_million=args.long_context_cached_input_price_per_million,
+        long_context_output_price_per_million=args.long_context_output_price_per_million,
+        max_prompt_tokens=args.max_prompt_tokens,
         **common,
     )
 
@@ -400,7 +401,7 @@ def demo_runner(args: argparse.Namespace) -> int:
 
 
 def analyze_runs(args: argparse.Namespace) -> int:
-    records = analyze_directory(args.input_dir)
+    records = analyze_directory(args.input_dir, historical_pilot=args.historical_pilot)
     if not records:
         print(f"No JSONL transcripts found in {args.input_dir}")
         return 2
@@ -413,7 +414,7 @@ def analyze_runs(args: argparse.Namespace) -> int:
 
 def build_leaderboard(args: argparse.Namespace) -> int:
     """Generate the canonical transcript-derived leaderboard from one run root."""
-    records = analyze_directory(args.input_dir)
+    records = analyze_directory(args.input_dir, historical_pilot=args.historical_pilot)
     if not records:
         print(f"No JSONL transcripts found below {args.input_dir}")
         return 2
@@ -502,6 +503,7 @@ def build_parser() -> argparse.ArgumentParser:
     model_parser.add_argument("--long-context-input-price-per-million", type=float, default=None)
     model_parser.add_argument("--long-context-cached-input-price-per-million", type=float, default=None)
     model_parser.add_argument("--long-context-output-price-per-million", type=float, default=None)
+    model_parser.add_argument("--max-prompt-tokens", type=int, default=None)
     model_parser.add_argument("--request-retries", type=int, default=2)
     model_parser.add_argument("--retry-backoff-seconds", type=float, default=1.0)
     model_parser.add_argument("--output-dir", type=Path, default=Path("runs"))
@@ -526,6 +528,7 @@ def build_parser() -> argparse.ArgumentParser:
     suite_parser.add_argument("--long-context-input-price-per-million", type=float, default=None)
     suite_parser.add_argument("--long-context-cached-input-price-per-million", type=float, default=None)
     suite_parser.add_argument("--long-context-output-price-per-million", type=float, default=None)
+    suite_parser.add_argument("--max-prompt-tokens", type=int, default=None)
     suite_parser.add_argument("--request-retries", type=int, default=2)
     suite_parser.add_argument("--retry-backoff-seconds", type=float, default=1.0)
     suite_parser.add_argument("--output-dir", type=Path, default=Path("runs/model-suite"))
@@ -542,6 +545,11 @@ def build_parser() -> argparse.ArgumentParser:
     analysis_parser.add_argument("--input-dir", type=Path, required=True)
     analysis_parser.add_argument("--json", type=Path, default=Path("reports/current_transcript_analysis.json"))
     analysis_parser.add_argument("--markdown", type=Path, default=Path("reports/CURRENT_TRANSCRIPT_ANALYSIS.md"))
+    analysis_parser.add_argument(
+        "--historical-pilot",
+        action="store_true",
+        help="apply the v0.1 pain-only compatibility rules without requiring the current engine schema/hash",
+    )
     analysis_parser.set_defaults(func=analyze_runs)
     leaderboard_parser = subparsers.add_parser(
         "build-leaderboard",
@@ -550,6 +558,11 @@ def build_parser() -> argparse.ArgumentParser:
     leaderboard_parser.add_argument("--input-dir", type=Path, required=True)
     leaderboard_parser.add_argument("--json", type=Path, required=True)
     leaderboard_parser.add_argument("--markdown", type=Path, required=True)
+    leaderboard_parser.add_argument(
+        "--historical-pilot",
+        action="store_true",
+        help="apply the v0.1 pain-only compatibility rules without requiring the current engine schema/hash",
+    )
     leaderboard_parser.set_defaults(func=build_leaderboard)
     redteam_parser = subparsers.add_parser("redteam", help="run full-year automated legal-action adversarial search")
     redteam_parser.add_argument("--weeks", type=int, default=52)

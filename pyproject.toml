@@ -20,3 +20,4 @@ include = ["bench_bench*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+pythonpath = ["."]

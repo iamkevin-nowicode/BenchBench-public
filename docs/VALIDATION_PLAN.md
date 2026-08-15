@@ -14,6 +14,39 @@ random
 
 ## Required experiments
 
+### Phase 3 measurement contract
+
+Before oracle search or policy-ladder certification, the harness applies the
+same accounting to every candidate. A candidate episode with a weekly
+validation-fallback rate above 5% is infeasible and is discarded from counted
+and gate aggregates. Its raw score and fallback rate remain diagnostics, so a
+safe-fallback trajectory cannot masquerade as the authored policy.
+
+Absolute final 1RM in kg remains the headline. The comparison/gate metric is
+the paired per-seed normalized delta:
+
+`candidate score(seed) − scripted-expert score(seed)`
+
+The normalized mean and sample SD are reportable as diagnostics for structural
+episodes, but a candidate is eligible for a Phase 3 comparison only when every
+expected seed is feasible and has a reference value. The paired effect size is
+the normalized mean divided by the normalized sample SD. The harness also
+reports raw seed SD, reference seed SD, and the candidate/reference volatility
+ratio so a mean-only gate cannot hide a stability difference.
+
+The Phase 3 release gate is the held-out policy ladder: all load and
+session-frequency rungs must be all-seed compliant; adjacent rungs must reach
+paired effect size 0.64 at the intended certification seed count; and every
+life-allocation field must have an explicit ledger, cash, household, or event
+consequence. Partner-giveback's seed-wise optimum is reported as a diagnostic,
+not collapsed into a magnitude dominance ratio. The search must also reach or
+exceed the named hand-written regression genome on every certification seed
+before any headroom claim is reportable. Oracle headroom remains a secondary
+diagnostic; the earlier 3× proposal is not a release gate and the 1×
+paired-headroom-SD value is reported for context only. The within-seed
+load-ratio response surface, including peak location and spread, remains a
+standing diagnostic rather than a release gate.
+
 ### Baseline comparison
 
 Measure final 1RM, injury burden, adherence, life stability, variance, and seed sensitivity across many episodes.

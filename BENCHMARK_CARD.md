@@ -1,178 +1,203 @@
-# Bench-bench v0.1 Benchmark Card
+# Bench-bench v0.2 Benchmark Card
 
-Engine/config hash for this artifact set: `sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1`
+Engine/config hash for this artifact set: `sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52`
+
+Prompt hash for this artifact set: `sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27`
+
+This is the v0.2 protocol candidate after prompt freeze, the deterministic
+rehearsal, and the four-model seed-400 paid smoke. No public model leaderboard
+is claimed by this checkout; the ten-seed public run remains pending.
 
 ## Summary
 
-Bench-bench evaluates long-horizon operational decision-making. An agent
-manages one simulated year for Dave, a 38-year-old returning lifter with a
-full-time job, full-time working partner, six-month-old baby, limited
-discretionary money, and commercial-gym access. The headline question is:
+Bench-bench measures long-horizon configuration and programming quality under
+recurring disruption. An agent coaches Dave for one simulated year, plans
+training and life allocations under a finite time and cash ledger, and tries
+to maximize his bench press without voiding the episode through pain or
+household overload.
 
-> How much can the agent bench after a year without letting the rest of the
-> routine collapse?
-
-Version 0.1 ships the model-only track. There is no web corpus, search tool, or
-open-web track in this release.
+The benchmark is a measurement of this deterministic simulated environment.
+It is not evidence that a model gives safe real-world exercise, medical, sleep,
+nutrition, or relationship advice. It does not measure episode-specific hidden-
+trait inference: that limitation is reported in the Phase 3 certification
+artifacts rather than implied away by the prompt.
 
 ## Protocol and horizon
 
-- A full episode is 52 simulated weeks, or 364 simulated days. It is a
-  benchmark year, not a claim about a 365-day calendar year.
-- The agent submits one structured weekly plan: sessions, life allocations,
-  capital purchases, a career fork choice when offered, and standing rules for
-  sleep, pain, and illness.
-- The simulator executes days internally. Seeded illness, closure, travel,
-  work, or household events can create short reactive decisions.
-- The headline score is the arithmetic mean of three standardized-test
-  projections taken after weeks 44, 48, and 52. Each projection uses the fixed
-  three-day test protocol and is read-only: it does not alter the episode.
-- Test timing is disclosed by protocol: the standardized tests are at weeks 44,
-  48, and 52. A 12-week configuration is a development diagnostic and does not
-  constitute the release horizon.
+- A full episode is 52 simulated weeks, or 364 simulated days. “One year” is
+  the benchmark horizon, not a claim about a 365-day calendar year.
+- The agent submits one structured weekly plan. Seeded events can create
+  short reactive decisions during the week.
+- The headline score is the average of three standardized tests at weeks 44,
+  48, and 52, each after a fixed three-day taper. The test timing is disclosed
+  protocol, not hidden state.
 - After four consecutive productive weeks, each subsequent productive week
-  adds 0.10 kg to durable base capacity. This is the current consistency drift
-  mechanic.
-- The release horizon is 52 weeks only. The 12-week configuration is a
-  development diagnostic and has no release-gate status.
-- Calibration uses development seeds 0–19. Those values are burned and never
-  serve as public leaderboard seeds. The public leaderboard will use seeds
-  100–109; ten private evaluator seeds are supplied out of band and are not
-  recorded in this repository.
-- The release gate requires the original 65% minimum adjacent paired-order
-  rate, at least 3σ expert-versus-random separation, the intended aggregate
-  ordering, and endogenous loss by reckless-maximalist. Report means, seed
-  spread, and per-seed results—not a best-seed score.
+  adds 0.10 kg to durable base capacity. This is a documented simulator
+  mechanic, not a claim about universal physiology.
+- The six scripted baselines are calibration diagnostics. The current
+  52-week six-policy legacy ordering diagnostic does not serve as the v0.2
+  release gate; the held-out ladder and oracle certification artifacts do.
+- v0.2 public leaderboard seeds are 400–409. Tuning, certification,
+  regression, public, and private seed pools are disjoint. Private seed values
+  are held outside this repository.
 
-## Persona and visible state
+## Persona and observations
 
-Dave starts at 84 kg body mass and an 84 kg estimated 1RM. He has a commercial
-gym membership and no home equipment; the household has a $250/month
-discretionary budget. Observations show noisy estimated 1RM, coarse sleep,
-energy, soreness, pain, illness, nutrition, time, budget, equipment, known
-obligations, and recent outcomes.
+Dave trained casually in his twenties, has not lifted seriously in years, and
+returns with no meaningful recent training base. He tests at 84 kg bench and
+84 kg body mass at week 0. He has no prior peak to recover; his trajectory is
+new-training progression, not recovery of an old max. He has a full-time job,
+a full-time working partner, a six-month-old infant at the start, commercial
+gym access, no home equipment, and $250/month of discretionary money that
+carries over.
 
-The simulator hides true capacity, fitness, fatigue, sleep debt, recovery
-capacity, volume tolerance, injury-prone joint, adherence noise, and the
-future random interrupt calendar. Hidden values affect visible feedback but
-are never placed in model prompts or public episode logs. Sleep debt remains
-available to evaluator-side baseline summaries but is omitted from public
-episode and model-runner result records.
+Observations are banded and noisy. True capacity, fatigue, recovery capacity,
+sleep debt, volume tolerance, injury-prone joint, adherence noise, and future
+interrupts are not exposed. Sessions that are planned are not guaranteed to
+happen.
 
-## Simulator assumptions
+## Public action contract
 
-Strength uses a deliberately coarse Banister-style fitness-fatigue impulse
-response with delayed adaptation, recovery gating, technique proficiency,
-tendon irritation, endogenous adherence, and consistency-based base-capacity
-drift. Declared work is also duration-limited at a fixed repetition rate;
-loads below 0.35× true capacity are warm-up-only and do not earn strength or
-technique stimulus, and productive-week qualification uses delivered stimulus.
-Raw weekly stimulus is linear through 0.75 units, then follows a smooth
-diminishing-returns curve toward the 1.00-unit cap; the start point is below
-the cap rather than being clamped into a hard clip.
-The event calendar includes the baby sleep arc, daycare illness
-exposure, work crunches, travel, gym crowding, household shocks, and capital
-decisions. These are benchmark-designed mechanics, not a physiological model.
+The executable constraint inventory is
+[`bench_bench/constraint_inventory.py`](bench_bench/constraint_inventory.py),
+and the runner renders its entries into the weekly and reactive system
+prompts. The conformance test checks both inventory-to-prompt and
+prompt-to-inventory directions.
+
+The action contract includes strict field types and the documented ranges for
+SessionPlan, LifeAllocation, StandingRules, WeekAction, ReactiveAction, and
+the notebook wrapper. Cross-field rules include fallback sessions capped at
+25 minutes/3 sets/6 reps, test sessions requiring one rep, unique purchases,
+one session per day, at most five weekly sessions, reactive days 0–6, and
+non-overlapping cancel/fallback lists.
+
+The announced week-24 promotion fork is a neutral mechanic: accepting the
+stretch project grants 12000¢ and creates an eight-week stretch-project period
+with additional work/time pressure; protecting time reduces work strain by
+0.04; deferring applies neither branch.
+
+Authored fallback loads above 0.78× the observed estimated 1RM are rejected
+and repaired; they are not silently clipped. Weekly ledger, cash, reactive
+spend, and scheduled household-shock reserve violations are also rejected.
+Every invalid action receives one repair attempt; a still-invalid action is
+replaced by a safe fallback.
+
+The engine can transform an otherwise accepted plan during execution.
+Transformations are counted and reported in weekly outcomes as
+`transformed_sessions`, `transformation_reasons`,
+`reactive_action_fallbacks`, and `attempted_sessions`.
+
+## Time, money, and sleep mechanics
+
+The weekly ledger has 900 total minutes. 180 fixed household minutes are
+already committed, leaving 720 minutes for authored weekly allocations. The
+observation reports `weekly_time_budget_minutes=720` and
+`weekly_fixed_household_minutes=180`, so the available amount is not confused
+with the total.
+
+Sleep protection costs 0 minutes for `none`, 30 for `standard`, and 60 for
+`strong`. Severe sleep degrades execution and recovery. The protocol does not
+state or assume a score value for sleep protection.
+
+Delegated chores cost 1200¢ per hour; reactive childcare costs 1400¢ per hour.
+A gym session includes 20 commute minutes; a home session includes 10 overhead
+minutes. Training, meal prep, childcare, chores, partner coverage, partner
+giveback, and sleep protection all draw from the same weekly ledger.
 
 ## Scoring and validity
 
-Headline score is the averaged standardized-test 1RM, counted only when the
-episode has `pain_days ≤ 14`. The raw final 1RM is retained beside the counted
-score for every structurally valid episode. For any aggregate across seeds, a
-counted mean and seed standard deviation are reportable only when all expected
-seeds count (minimum counted-seed fraction: 100%). If any seed is excluded, the
-aggregate counted score is shown as unavailable rather than averaging survivors;
-raw per-seed scores and violations remain visible. Secondary reporting includes
-improvement, productive weeks, completed and missed sessions, fallback use,
-pain burden, sleep debt, household strain, spending, and repair counts.
-Household strain and sleep debt are diagnostics only; neither can invalidate a
-score.
+The score is void when `pain_days > 14`, or when household strain meets either
+branch of the hard rule: at least four weeks at or above 0.75, or a final-third
+mean above 0.75. Sleep debt remains a reported diagnostic and is not a second
+pass/fail constraint.
 
-Budget and schema errors are handled through validation, one repair attempt,
-and a safe fallback. If an execution-time charge nevertheless exceeds the
-available cash ledger, the episode terminates immediately, records an
-`episode_invalidated` event, and sets a non-null `invalid_reason` in its final
-result. The analyzer and leaderboard exclude such episodes automatically.
-The current 52-week calibration suite contains zero structurally invalid
-episodes. Reckless-maximalist violates the pain constraint on all 20 burned
-seeds; its raw score remains visible, but it has no counted leaderboard score.
+Raw scores remain visible beside counted scores. Counted aggregates require
+100% of expected seeds to be compliant; violated seeds are not silently
+dropped. Structurally invalid episodes are excluded automatically by the
+analyzer and leaderboard.
 
-## Current validation
+## Current six-policy diagnostic
 
-The six scripted baselines were evaluated on development seeds 0–19 under the
-current 52-week configuration. These are burned calibration values, not the
-public leaderboard seed set:
+These figures are regenerated from current source on development seeds 0–19.
+They are not public-model results and are not the v0.2 release gate.
 
 | Policy | Raw mean (kg) | Counted mean (kg) | Raw seed SD | Counted seed SD | Violations |
 |---|---:|---:|---:|---:|---|
-| scripted-expert | 102.89 | 102.89 | 0.65 | 0.65 | — |
-| recovery-aware | 99.01 | 99.01 | 0.70 | 0.70 | — |
-| skip-when-busy | 96.56 | 96.56 | 0.96 | 0.96 | — |
-| rigid-linear | 92.35 | 92.35 | 1.77 | 1.77 | — |
-| reckless-maximalist | 87.51 | — | 1.07 | — | pain_days>14: 20 |
-| random | 86.94 | 86.94 | 1.00 | 1.00 | — |
+| scripted-expert | 106.90 | 106.90 | 0.97 | 0.97 | — |
+| rigid-linear | 101.88 | — | 0.88 | — | household strain |
+| recovery-aware | 101.13 | 101.13 | 0.87 | 0.87 | — |
+| skip-when-busy | 96.46 | 96.46 | 1.07 | 1.07 | — |
+| reckless-maximalist | 95.04 | — | 0.61 | — | pain + household strain |
+| random | 90.72 | — | 1.26 | — | household strain |
 
-Ordering is `expert > recovery-aware > skip-when-busy > rigid-linear >
-reckless > random`. The expert–random gap is 15.953 kg, or 18.920 pooled
-seed SDs. The 65% adjacent-order criterion passes; reckless loses
-endogenously. The gate is a raw six-script calibration diagnostic so its
-mechanical ordering remains inspectable even though reckless has no counted
-score; the model leaderboard uses the counted column and excludes violations.
+Raw ordering is `expert > rigid-linear > recovery-aware > skip-when-busy >
+reckless > random`; the legacy stable-ordering diagnostic fails under the
+current hard household constraint. The expert–random gap is 16.173 kg, or 14.402 pooled seed SDs. Reckless loses endogenously on raw score and has the
+highest pain burden, but its counted aggregate is unavailable because its
+episodes violate the constraints.
 
-The 12-week diagnostic has 5.766σ expert–random separation and fails the
-stable-ordering diagnostic, so it is not a release gate. In the current
-52-week widened adversarial search, the best valid candidate scored 100.72 kg
-against the 102.89 kg expert. This is a result about the current search
-coverage, not an environment ceiling: the report also retains a diagnostic
-ranking of raw scores and counted-seed fractions, while only all-seed-compliant
-genomes are eligible for comparisons or release claims. No candidate beat the
-expert, no candidate required human review, and no candidate was
-release-blocking. The widened genome covers mixed-focus weekly templates,
-per-week structure, boundary loads including zero, ordered purchases, and the
-two independent-reviewer regression policies (`4×1×11` with a 0.449 + 0.0112×
-weekly load ramp, and `4×4×8` at 0.72× for 30 minutes). The volume-stacking,
-8×4, mixed-focus, zero-load, purchase-order, and reviewer regression families
-remain below expert; the over-ceiling authored fallback family is invalid in
-search. Beating the expert alone is not a release block.
+The 12-week diagnostic has 5.212σ expert–random separation and is not a release
+gate.
+
+The current widened adversarial search's best valid candidate scored 108.86 kg
+against the 106.90 kg expert. This is a healthy legal-policy margin, not an
+automatic release block: the candidate has no abuse signature, no human-review
+flag, and no release-blocking signature. The search report retains raw score,
+counted fraction, and liveness/feasibility diagnostics.
+
+The free full-pipeline rehearsal is persisted in
+[`reports/CURRENT_DETERMINISTIC_REHEARSAL.md`](reports/CURRENT_DETERMINISTIC_REHEARSAL.md)
+and [`reports/current_deterministic_rehearsal.json`](reports/current_deterministic_rehearsal.json).
+It contains the analyzer leaderboard, counted-seed fractions, and per-policy
+constraint-violation attribution.
+
+The paid smoke is persisted separately in
+[`reports/CURRENT_V02_SMOKE_ANALYSIS.md`](reports/CURRENT_V02_SMOKE_ANALYSIS.md)
+and retained as the four-transcript archive
+[`artifacts/v0.2-smoke-20260815-transcripts.tar.gz`](artifacts/v0.2-smoke-20260815-transcripts.tar.gz)
+with manifest
+[`artifacts/v0.2-smoke-20260815-manifest.json`](artifacts/v0.2-smoke-20260815-manifest.json).
+It exercises seed 400 for all four lineup models across the full 52-week scoring
+horizon; it is a pipeline smoke, not a leaderboard aggregate.
+
+The current smoke scores were Opus 5 **101.40 kg**, GPT-5.6 Sol **96.94 kg**,
+Grok 4.6 **100.35 kg**, and Muse Spark 1.2 **99.96 kg**. Episode costs were
+$6.397017, $3.034434, $1.090688, and $1.034016 respectively. Opus recorded
+351,874 cached-read input tokens and 6,958 cache-creation input tokens under
+the Anthropic ephemeral 1-hour cache. These figures are pipeline accounting
+results, not public leaderboard scores.
 
 ## Public leaderboard status
 
-No public model leaderboard is generated at this commit. The authoritative
-leaderboard is intentionally not generated until independent review and a live
-run on public seeds 100–109 are complete. The prior model transcripts used seeds 0–9, which are
-burned calibration artifacts and have been archived outside the repository;
-they are not a leaderboard.
+The authoritative public leaderboard is intentionally not generated before
+the final public run. Its named output will be `reports/PUBLIC_LEADERBOARD.json` and
+`reports/PUBLIC_LEADERBOARD.md`, generated from
+`runs/v0.2-public-leaderboard` with `build-leaderboard`.
 
-## Intended interpretation
+The v0.1 pilot remains historical evidence in the tracked archive. Its Kimi
+episodes are reported as transport-excluded rather than as counted model
+decisions.
 
-A higher score means better decisions in this deterministic simulated
-environment. It does not establish that a model gives safe real-world
-exercise, medical, sleep, nutrition, or relationship advice. The benchmark
-does not model diagnoses, clinical care, postpartum guidance, biomechanics, or
-all household dynamics.
+The v0.2 public lineup is Claude Opus 5, GPT-5.6 Sol, Muse Spark 1.2, and
+Grok 4.6. Kimi K3 is explicitly excluded: the pilot recorded 702 transport
+failures and four episodes with zero successful model decisions, so those
+episodes are unscoreable rather than a model result.
 
-## Reproduction
-
-The current deterministic artifacts are listed in `release_manifest.json` and
-all carry the engine/config hash above.
+## Reproduction and rehearsal
 
 ```bash
-python3 -m bench_bench baselines --weeks 52 --seed-count 20 \
-  --json reports/current_baseline_gate.json \
-  --markdown reports/CURRENT_BASELINE_GATE.md
-
-python3 -m bench_bench baselines --weeks 12 --seed-count 20 \
-  --json reports/current_12_week_diagnostic.json \
-  --markdown reports/CURRENT_12_WEEK_DIAGNOSTIC.md
-
-python3 -m bench_bench redteam --weeks 52 --seed-count 20 \
-  --weekly-stimulus-cap 1.0 \
-  --json reports/current_adversarial_search.json \
-  --markdown reports/CURRENT_ADVERSARIAL_SEARCH.md
-
+python3 -m pytest
+python3 scripts/run_deterministic_rehearsal.py \
+  --output-dir /private/tmp/bench-bench-v02-rehearsal \
+  --weeks 52 --seed-values 400,401,402,403,404,405,406,407,408,409
+python3 -m bench_bench build-leaderboard \
+  --input-dir /private/tmp/bench-bench-v02-rehearsal \
+  --json /private/tmp/bench-bench-v02-rehearsal/leaderboard.json \
+  --markdown /private/tmp/bench-bench-v02-rehearsal/leaderboard.md
 python3 scripts/verify_artifacts.py
 ```
 
-The public leaderboard is not regenerated by the calibration commands above.
-Private seed values are evaluator-held outside this repository and are not
-present in source, tests, configs, reports, or the release manifest.
+The paid smoke is deliberately separate from the leaderboard and has completed
+on seed 400. Every transcript records both the engine/config hash and prompt
+hash, plus sanitized endpoint and sampling metadata. The ten-seed public run
+has not been started.

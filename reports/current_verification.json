@@ -1,133 +1,140 @@
 {
-  "all_checks_pass": false,
+  "all_checks_pass": true,
   "benchmark": "Bench-bench",
   "card_reference_values": {
     "adversarial": {
       "best_candidate": "adversarial-001",
-      "best_candidate_mean_final_1rm_kg": 100.7185,
-      "candidates_beating_expert": [],
-      "expert_mean_final_1rm_kg": 102.892,
+      "best_candidate_mean_final_1rm_kg": 108.8565,
+      "candidates_beating_expert": [
+        "adversarial-001",
+        "adversarial-002",
+        "adversarial-003",
+        "adversarial-004",
+        "adversarial-005",
+        "regression-reviewer-4x4x5-070-40min"
+      ],
+      "expert_mean_final_1rm_kg": 106.8975,
       "human_review_candidates": [],
       "release_blocked_candidates": []
     },
     "baseline_mean_final_1rm_kg": {
-      "random": 86.939,
-      "reckless-maximalist": 87.506,
-      "recovery-aware": 99.0075,
-      "rigid-linear": 92.346,
-      "scripted-expert": 102.892,
-      "skip-when-busy": 96.5615
+      "random": 90.7245,
+      "reckless-maximalist": 95.0445,
+      "recovery-aware": 101.1265,
+      "rigid-linear": 101.8805,
+      "scripted-expert": 106.8975,
+      "skip-when-busy": 96.4615
     },
     "baseline_seed_std_kg": {
-      "random": 1.0,
-      "reckless-maximalist": 1.0668,
-      "recovery-aware": 0.6987,
-      "rigid-linear": 1.7744,
-      "scripted-expert": 0.6495,
-      "skip-when-busy": 0.9578
+      "random": 1.2612,
+      "reckless-maximalist": 0.6097,
+      "recovery-aware": 0.8724,
+      "rigid-linear": 0.8837,
+      "scripted-expert": 0.9651,
+      "skip-when-busy": 1.075
     },
     "gate": {
       "adjacent_sigma": {
         "random->reckless-maximalist": {
-          "gap_kg": 0.567,
-          "pooled_seed_std_kg": 1.0339,
-          "sigma": 0.5484
+          "gap_kg": 4.32,
+          "pooled_seed_std_kg": 0.9905,
+          "sigma": 4.3612
         },
         "reckless-maximalist->rigid-linear": {
-          "gap_kg": 4.84,
-          "pooled_seed_std_kg": 1.464,
-          "sigma": 3.306
+          "gap_kg": 6.836,
+          "pooled_seed_std_kg": 0.7592,
+          "sigma": 9.0046
         },
         "recovery-aware->scripted-expert": {
-          "gap_kg": 3.8845,
-          "pooled_seed_std_kg": 0.6745,
-          "sigma": 5.7587
+          "gap_kg": 5.771,
+          "pooled_seed_std_kg": 0.9199,
+          "sigma": 6.2734
         },
         "rigid-linear->skip-when-busy": {
-          "gap_kg": 4.2155,
-          "pooled_seed_std_kg": 1.4258,
-          "sigma": 2.9566
+          "gap_kg": -5.419,
+          "pooled_seed_std_kg": 0.984,
+          "sigma": -5.5071
         },
         "skip-when-busy->recovery-aware": {
-          "gap_kg": 2.446,
-          "pooled_seed_std_kg": 0.8383,
-          "sigma": 2.9177
+          "gap_kg": 4.665,
+          "pooled_seed_std_kg": 0.979,
+          "sigma": 4.7653
         }
       },
-      "expert_minus_random_kg": 15.953,
-      "gate_enforced": true,
-      "gate_pass": true,
-      "invalid_episode_free": true,
-      "ordering_pass": true,
-      "pairwise_order_rates": {
-        "random<reckless": 0.7,
-        "random<rigid": 1.0,
-        "recovery<expert": 1.0,
-        "rigid_or_reckless<skip": 1.0,
-        "skip<recovery": 1.0
-      },
-      "pooled_seed_std_kg": 0.8432,
-      "reckless_loses_endogenously": true,
-      "separation_ratio": 18.9204,
-      "stable_order_rate_threshold": 0.65,
-      "stable_ordering_pass": true
-    },
-    "public_leaderboard_seed_values": [
-      100,
-      101,
-      102,
-      103,
-      104,
-      105,
-      106,
-      107,
-      108,
-      109
-    ],
-    "public_leaderboard_status": "pending_independent_review_and_live_run",
-    "twelve_week_diagnostic": {
-      "adjacent_sigma": {
-        "random->reckless-maximalist": {
-          "gap_kg": -0.041,
-          "pooled_seed_std_kg": 1.1972,
-          "sigma": -0.0342
-        },
-        "reckless-maximalist->rigid-linear": {
-          "gap_kg": 4.459,
-          "pooled_seed_std_kg": 0.8366,
-          "sigma": 5.3299
-        },
-        "recovery-aware->scripted-expert": {
-          "gap_kg": 0.8145,
-          "pooled_seed_std_kg": 0.8302,
-          "sigma": 0.981
-        },
-        "rigid-linear->skip-when-busy": {
-          "gap_kg": -0.152,
-          "pooled_seed_std_kg": 0.8358,
-          "sigma": -0.1819
-        },
-        "skip-when-busy->recovery-aware": {
-          "gap_kg": 1.687,
-          "pooled_seed_std_kg": 0.8621,
-          "sigma": 1.9568
-        }
-      },
-      "expert_minus_random_kg": 6.7675,
+      "expert_minus_random_kg": 16.173,
       "gate_enforced": false,
       "gate_pass": null,
       "invalid_episode_free": true,
       "ordering_pass": false,
       "pairwise_order_rates": {
-        "random<reckless": 0.45,
+        "random<reckless": 1.0,
         "random<rigid": 1.0,
         "recovery<expert": 1.0,
-        "rigid_or_reckless<skip": 0.4,
+        "rigid_or_reckless<skip": 0.0,
         "skip<recovery": 1.0
       },
-      "pooled_seed_std_kg": 1.1738,
+      "pooled_seed_std_kg": 1.123,
       "reckless_loses_endogenously": true,
-      "separation_ratio": 5.7655,
+      "separation_ratio": 14.4022,
+      "stable_order_rate_threshold": 0.65,
+      "stable_ordering_pass": false
+    },
+    "public_leaderboard_seed_values": [
+      400,
+      401,
+      402,
+      403,
+      404,
+      405,
+      406,
+      407,
+      408,
+      409
+    ],
+    "public_leaderboard_status": "pending_full_public_run",
+    "twelve_week_diagnostic": {
+      "adjacent_sigma": {
+        "random->reckless-maximalist": {
+          "gap_kg": 2.435,
+          "pooled_seed_std_kg": 1.4386,
+          "sigma": 1.6926
+        },
+        "reckless-maximalist->rigid-linear": {
+          "gap_kg": 4.084,
+          "pooled_seed_std_kg": 0.7461,
+          "sigma": 5.4738
+        },
+        "recovery-aware->scripted-expert": {
+          "gap_kg": 1.288,
+          "pooled_seed_std_kg": 0.8357,
+          "sigma": 1.5413
+        },
+        "rigid-linear->skip-when-busy": {
+          "gap_kg": -4.128,
+          "pooled_seed_std_kg": 0.8546,
+          "sigma": -4.8301
+        },
+        "skip-when-busy->recovery-aware": {
+          "gap_kg": 3.9125,
+          "pooled_seed_std_kg": 0.9055,
+          "sigma": 4.3208
+        }
+      },
+      "expert_minus_random_kg": 7.5915,
+      "gate_enforced": false,
+      "gate_pass": null,
+      "invalid_episode_free": true,
+      "ordering_pass": false,
+      "pairwise_order_rates": {
+        "random<reckless": 0.9,
+        "random<rigid": 1.0,
+        "recovery<expert": 1.0,
+        "rigid_or_reckless<skip": 0.0,
+        "skip<recovery": 1.0
+      },
+      "pooled_seed_std_kg": 1.4566,
+      "reckless_loses_endogenously": true,
+      "separation_ratio": 5.2118,
       "stable_order_rate_threshold": 0.65,
       "stable_ordering_pass": false
     }
@@ -136,7 +143,7 @@
     "adversarial_search_reproduces": true,
     "all_json_reports_have_hash": true,
     "all_markdown_reports_have_hash": true,
-    "authoritative_leaderboard_not_generated_before_live_run": false,
+    "authoritative_leaderboard_state_valid": true,
     "baseline_gate_reproduces": true,
     "card_adversarial_numbers_match": true,
     "card_and_manifest_have_hash": true,
@@ -145,14 +152,17 @@
     "card_diagnostic_numbers_match": true,
     "card_gate_numbers_match": true,
     "card_public_status_matches": true,
+    "pilot_archive_manifest_complete": true,
     "private_seed_git_history_clear": true,
     "private_seed_values_not_materialized": true,
-    "public_leaderboard_pending": true,
+    "public_leaderboard_pending_or_complete": true,
     "public_transcript_count": true,
-    "stale_run_directories_removed": false,
+    "stale_run_directories_removed": true,
     "transcripts_have_current_hash": true,
+    "transcripts_have_current_prompt_hash": true,
     "twelve_week_diagnostic_reproduces": true
   },
-  "engine_config_hash": "sha256:fdbd829339622163df8a27d64fe6467e353c1b2bd8ff289b25e36783e8d2e9a1",
+  "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+  "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27",
   "public_transcript_count": 0
 }

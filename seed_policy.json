@@ -7,6 +7,7 @@
   "regression_seed_values": [340, 341, 342, 343, 344, 345, 346, 347, 348, 349],
   "private_seed_count": 10,
   "private_seed_values": "ten fixed evaluator-held values supplied out-of-band; never included in model prompts or release artifacts",
+  "private_seed_disjoint_from_pools": ["300-319", "320-339", "340-349", "400-409"],
   "paired_evaluation": true,
   "development_validation_seed_values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
   "development_note": "Values 0–19 are burned historical fixtures. v0.2 tuning, certification, regression, and public pools are disjoint and are not private evaluator values.",

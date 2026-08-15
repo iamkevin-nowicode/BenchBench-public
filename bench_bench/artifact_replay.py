@@ -9,7 +9,7 @@ from typing import Any
 
 from .config import SimConfig
 from .engine import BenchEnvironment
-from .provenance import engine_config_hash
+from .provenance import current_prompt_hash, engine_config_hash
 
 
 def replay_transcript_current_engine(source: str | Path, destination: str | Path) -> Path:
@@ -26,6 +26,7 @@ def replay_transcript_current_engine(source: str | Path, destination: str | Path
 
     new_start = deepcopy(start)
     new_start["engine_config_hash"] = engine_config_hash()
+    new_start["prompt_hash"] = current_prompt_hash()
     new_start["replayed_under_current_engine"] = True
     new_start["replay_source"] = "public model action transcript; engine-only offline replay"
     output: list[dict[str, Any]] = [new_start]
@@ -48,6 +49,7 @@ def replay_transcript_current_engine(source: str | Path, destination: str | Path
         )
         rewritten_turn = deepcopy(turn)
         rewritten_turn["engine_config_hash"] = engine_config_hash()
+        rewritten_turn["prompt_hash"] = current_prompt_hash()
         rewritten_turn["outcome"] = outcome.as_dict()
         actual_interrupts = current_week_record.get("interrupts", [])
         rewritten_reactive = []
@@ -65,6 +67,7 @@ def replay_transcript_current_engine(source: str | Path, destination: str | Path
         {
             "type": "run_end",
             "engine_config_hash": engine_config_hash(),
+            "prompt_hash": current_prompt_hash(),
             "result": result,
             "model_calls": int(old_end.get("model_calls", 0)),
             "repair_calls": int(old_end.get("repair_calls", 0)),

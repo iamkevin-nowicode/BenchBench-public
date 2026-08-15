@@ -8,6 +8,7 @@ rounded values printed in BENCHMARK_CARD.md against those outputs.
 from __future__ import annotations
 
 import json
+import hashlib
 import math
 import re
 import subprocess
@@ -17,13 +18,14 @@ from typing import Any
 
 from bench_bench.adversarial import run_adversarial_search
 from bench_bench.evaluation import run_suite
-from bench_bench.provenance import engine_config_hash
+from bench_bench.provenance import current_prompt_hash, engine_config_hash
 from bench_bench.runner_analysis import analyze_directory
 
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORTS = ROOT / "reports"
 HASH = engine_config_hash()
+PROMPT_HASH = current_prompt_hash()
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -60,6 +62,7 @@ def _write_verification(checks: dict[str, bool], references: dict[str, Any], tra
         "card_reference_values": references,
         "checks": checks,
         "engine_config_hash": HASH,
+        "prompt_hash": PROMPT_HASH,
         "public_transcript_count": transcript_count,
     }
     (REPORTS / "current_verification.json").write_text(
@@ -70,6 +73,7 @@ def _write_verification(checks: dict[str, bool], references: dict[str, Any], tra
         "# Bench-bench Current Artifact Verification",
         "",
         f"- Engine/config hash: `{HASH}`",
+        f"- Prompt hash: `{PROMPT_HASH}`",
         f"- Overall: **{status}**",
         "",
         "| Check | Result |",
@@ -80,7 +84,7 @@ def _write_verification(checks: dict[str, bool], references: dict[str, Any], tra
     lines.extend(
         [
             "",
-            "This verification reruns the deterministic calibration gate, the 12-week diagnostic, and the adversarial search; confirms that the public leaderboard is still pending its live run; and checks every numeric validation value printed in BENCHMARK_CARD.md. It makes no model or network calls.",
+            "This verification reruns the deterministic calibration gate, the 12-week diagnostic, and the adversarial search; validates either the pre-run pending state or the complete public artifact state; and checks every numeric validation value printed in BENCHMARK_CARD.md. It makes no model or network calls.",
             "",
         ]
     )
@@ -121,26 +125,75 @@ def main() -> None:
         )
     )
 
-    transcript_directory = ROOT / "runs" / "public-leaderboard"
-    transcripts = sorted(transcript_directory.glob("*.jsonl")) if transcript_directory.exists() else []
-    stored_leaderboard_path = REPORTS / "authoritative_leaderboard.json"
+    manifest = _load(ROOT / "release_manifest.json")
+    public_directory_value = manifest.get("public_transcript_directory", "runs/v0.2-public-leaderboard")
+    transcript_directory = ROOT / public_directory_value
+    transcripts = sorted(
+        path
+        for path in transcript_directory.rglob("*.jsonl")
+        if not path.name.endswith(".current-engine.jsonl")
+    ) if transcript_directory.exists() else []
+    stored_leaderboard_path = ROOT / manifest.get(
+        "authoritative_leaderboard_json", "reports/PUBLIC_LEADERBOARD.json"
+    )
     stored_leaderboard = _load(stored_leaderboard_path) if stored_leaderboard_path.exists() else {}
-    checks["public_leaderboard_pending"] = not transcripts and not stored_leaderboard
+    public_status = manifest.get("authoritative_leaderboard_status")
+    expected_public_count = int(
+        manifest.get("public_run_preregistration", {}).get(
+            "episode_count",
+            len(manifest.get("public_models", [])) * len(manifest.get("public_leaderboard_seed_values", [])),
+        )
+    )
+    pending_public = not transcripts and not stored_leaderboard
+    complete_public = (
+        public_status == "public_run_complete_card_pending"
+        and len(transcripts) == expected_public_count
+        and bool(stored_leaderboard)
+    )
+    checks["public_leaderboard_pending_or_complete"] = pending_public or complete_public
 
     json_reports = sorted(REPORTS.glob("*.json"))
     markdown_reports = sorted(REPORTS.glob("*.md"))
-    checks["all_json_reports_have_hash"] = all(_load(path).get("engine_config_hash") == HASH for path in json_reports)
-    checks["all_markdown_reports_have_hash"] = all(HASH in path.read_text(encoding="utf-8") for path in markdown_reports)
+    # Historical/retracted pilot reports intentionally retain the hash of the
+    # engine that produced them.  Current-source verification applies only to
+    # generated current reports and the active card.
+    historical_report_names = {
+        "PILOT_V0.1_LEADERBOARD.json",
+        "final_public_leaderboard.json",
+        "FINAL_PUBLIC_LEADERBOARD.md",
+        "BENCH_BENCH_RESULTS_REPORT.md",
+        "PILOT_V0.1_LEADERBOARD.md",
+    }
+    current_json_reports = [path for path in json_reports if path.name not in historical_report_names]
+    current_markdown_reports = [path for path in markdown_reports if path.name.startswith("CURRENT_")]
+    checks["all_json_reports_have_hash"] = all(
+        _load(path).get("engine_config_hash") == HASH and _load(path).get("prompt_hash") == PROMPT_HASH
+        for path in current_json_reports
+    )
+    checks["all_markdown_reports_have_hash"] = all(
+        HASH in path.read_text(encoding="utf-8") and PROMPT_HASH in path.read_text(encoding="utf-8")
+        for path in current_markdown_reports
+    )
     checks["transcripts_have_current_hash"] = not transcripts or all(
         json.loads(line).get("engine_config_hash") == HASH
         for path in transcripts
         for line in path.read_text(encoding="utf-8").splitlines()
         if line.strip() and json.loads(line).get("type") in {"run_start", "turn", "run_end"}
     )
+    checks["transcripts_have_current_prompt_hash"] = not transcripts or all(
+        json.loads(line).get("prompt_hash") == PROMPT_HASH
+        for path in transcripts
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and json.loads(line).get("type") in {"run_start", "turn", "run_end"}
+    )
 
     card = (ROOT / "BENCHMARK_CARD.md").read_text(encoding="utf-8")
-    manifest = _load(ROOT / "release_manifest.json")
-    checks["card_and_manifest_have_hash"] = HASH in card and manifest.get("engine_config_hash") == HASH
+    checks["card_and_manifest_have_hash"] = (
+        HASH in card
+        and PROMPT_HASH in card
+        and manifest.get("engine_config_hash") == HASH
+        and manifest.get("prompt_hash") == PROMPT_HASH
+    )
 
     card_baselines: dict[str, tuple[float, float]] = {}
     card_counted: dict[str, float | None] = {}
@@ -178,8 +231,14 @@ def main() -> None:
     manifest_public_seeds = manifest.get("public_leaderboard_seed_values", [])
     checks["card_public_status_matches"] = (
         "intentionally not generated" in card
-        and manifest.get("authoritative_leaderboard_status") == "pending_independent_review_and_live_run"
-        and manifest_public_seeds == list(range(100, 110))
+        and manifest.get("authoritative_leaderboard_status")
+        in {
+            "pending_independent_review_and_live_run",
+            "pending_prompt_freeze_rehearsal_and_live_run",
+            "pending_full_public_run",
+            "public_run_complete_card_pending",
+        }
+        and manifest_public_seeds == list(range(400, 410))
     )
 
     seed_policy_text = (ROOT / "seed_policy.json").read_text(encoding="utf-8")
@@ -213,10 +272,54 @@ def main() -> None:
             check=False,
         ).returncode == 0
     checks["private_seed_git_history_clear"] = bool(revisions) and not history_has_private_seed_array
-    checks["authoritative_leaderboard_not_generated_before_live_run"] = not list(REPORTS.glob("*LEADERBOARD*"))
+    leaderboard_json_exists = (ROOT / manifest.get("authoritative_leaderboard_json", "reports/PUBLIC_LEADERBOARD.json")).exists()
+    leaderboard_markdown_exists = (ROOT / manifest.get("authoritative_leaderboard_markdown", "reports/PUBLIC_LEADERBOARD.md")).exists()
+    checks["authoritative_leaderboard_state_valid"] = (
+        (pending_public and not leaderboard_json_exists and not leaderboard_markdown_exists)
+        or (complete_public and leaderboard_json_exists and leaderboard_markdown_exists)
+    )
     runs_directory = ROOT / "runs"
-    checks["stale_run_directories_removed"] = runs_directory.exists() and not list(runs_directory.iterdir()) and not list(runs_directory.rglob("*.lock"))
-    checks["public_transcript_count"] = len(transcripts) == 0
+    allowed_run_roots = {"archive", ".DS_Store"}
+    if public_status == "public_run_complete_card_pending":
+        allowed_run_roots.add(transcript_directory.name)
+    unexpected_run_roots = []
+    if runs_directory.exists():
+        unexpected_run_roots = [
+            path.name
+            for path in runs_directory.iterdir()
+            if path.name not in allowed_run_roots
+        ]
+    disposable_run_roots = [runs_directory / name for name in unexpected_run_roots]
+    lock_files_outside_archive = [
+        lock
+        for root in disposable_run_roots
+        if root.exists()
+        for lock in root.rglob("*.lock")
+    ]
+    checks["stale_run_directories_removed"] = not unexpected_run_roots and not lock_files_outside_archive
+    checks["public_transcript_count"] = (
+        len(transcripts) == 0
+        if public_status != "public_run_complete_card_pending"
+        else len(transcripts) == expected_public_count
+        and manifest.get("public_transcript_count") == expected_public_count
+    )
+
+    pilot_manifest_path = ROOT / "artifacts" / "v0.1-pilot-manifest.json"
+    pilot_archive_path = ROOT / "artifacts" / "v0.1-pilot-transcripts.tar.gz"
+    pilot_manifest = _load(pilot_manifest_path) if pilot_manifest_path.exists() else {}
+    archive_digest = hashlib.sha256(pilot_archive_path.read_bytes()).hexdigest() if pilot_archive_path.exists() else ""
+    transcript_entries = pilot_manifest.get("transcripts", [])
+    checks["pilot_archive_manifest_complete"] = bool(
+        pilot_archive_path.exists()
+        and pilot_manifest.get("archive_sha256") == f"sha256:{archive_digest}"
+        and pilot_manifest.get("file_count") == 50
+        and len(transcript_entries) == 50
+        and all(
+            {"relative_path", "sha256", "model", "seed", "weeks", "engine_config_hash", "prompt_hash"}
+            <= set(entry)
+            for entry in transcript_entries
+        )
+    )
 
     references = {
         "baseline_mean_final_1rm_kg": {policy: value["mean_final_1rm_kg"] for policy, value in stored52["summaries"].items()},
@@ -231,7 +334,7 @@ def main() -> None:
             "human_review_candidates": stored_adversarial["comparison"]["human_review_candidates"],
             "release_blocked_candidates": stored_adversarial["comparison"]["release_blocked_candidates"],
         },
-        "public_leaderboard_status": "pending_independent_review_and_live_run",
+        "public_leaderboard_status": public_status,
         "public_leaderboard_seed_values": manifest_public_seeds,
     }
     _write_verification(checks, references, len(transcripts))

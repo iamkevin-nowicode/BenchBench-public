@@ -61,3 +61,22 @@ def test_archive_refuses_detected_credentials(tmp_path: Path) -> None:
         build_archive(source, tmp_path / "pilot.tar.gz", tmp_path / "pilot.json", expected_file_count=1)
     assert not (tmp_path / "pilot.tar.gz").exists()
     assert not (tmp_path / "pilot.json").exists()
+
+
+def test_archive_supports_named_append_only_run_artifacts(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    archive_path = tmp_path / "artifacts" / "v0.2-public-transcripts.tar.gz"
+    manifest_path = tmp_path / "artifacts" / "v0.2-public-manifest.json"
+    _write_transcript(source / "model" / "seed-400.jsonl")
+    manifest = build_archive(
+        source,
+        archive_path,
+        manifest_path,
+        expected_file_count=1,
+        label="v0.2 public live run",
+        archive_prefix="v0.2-public-transcripts",
+        archive_path_label="artifacts/v0.2-public-transcripts.tar.gz",
+    )
+    assert manifest["label"] == "v0.2 public live run"
+    assert manifest["archive_path"] == "artifacts/v0.2-public-transcripts.tar.gz"
+    assert manifest["archive_member_prefix"] == "v0.2-public-transcripts"

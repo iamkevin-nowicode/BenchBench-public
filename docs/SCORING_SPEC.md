@@ -65,9 +65,18 @@ across all focuses. Loads below 0.35× true capacity are warm-up-only and earn
 no strength or technique stimulus. Productive-week qualification is based on
 delivered stimulus, not merely the number of completed session records.
 
-Within a week, raw stimulus is accumulated and passed through a smooth
-over-reaching curve. There is no hard weekly cap. Each episode has a hidden
-volume/recovery optimum; work above it is penalized by
+Sleep protection reserves 0/30/60 shared-ledger minutes for
+`none`/`standard`/`strong`. Sleep does not apply a continuous per-hour
+attendance penalty: below the 6-hour calibration breakpoint it can reduce
+session adherence, and conditional on completion it applies a modest quality
+modifier to executed stimulus. Ordinary 6–8 hour differences therefore do not
+receive a large automatic annual strength effect; severe restriction remains
+costly through the threshold, quality, sleep-debt, fatigue, and injury paths.
+
+Within a week, executed volume is accumulated into raw stimulus and passed
+through a smooth over-reaching curve. There is no hard weekly cap or
+independent frequency multiplier. Each episode has a hidden volume/recovery
+optimum; work above it is penalized by
 `delivered = raw × exp(−k × max(0, raw/optimum − 1)²)`. The same delivered
 credit controls fitness, technique learning, and productive-week qualification.
 

@@ -1,5 +1,12 @@
 
-# Bench-bench v0.1 — Results and Findings Report
+> **SUPERSEDED HISTORICAL REPORT — NOT AN AUTHORITATIVE LEADERBOARD**
+>
+> This report preserves the original write-up, but its Kimi K3 aggregate is
+> transport-contaminated. Use `PILOT_V0.1_LEADERBOARD.md` for the analyzer's
+> corrected historical presentation: Kimi K3 is 0/10 counted, with raw scores
+> retained and transport failures reported separately.
+
+# Bench-bench v0.1 — Results and Findings Report (superseded)
 
 Scope: original five-model public run only. Later model extensions are excluded.
 
@@ -265,4 +272,3 @@ Not established:
 7. Complete independent review before tuning constants or adding another provider.
 
 See reports/INDEPENDENT_REVIEW_INSTRUCTIONS.md for the exact reviewer brief.
-

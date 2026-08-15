@@ -20,3 +20,13 @@ def engine_config_hash() -> str:
         digest.update(path.read_bytes())
         digest.update(b"\0")
     return f"sha256:{digest.hexdigest()}"
+
+
+def current_prompt_hash() -> str:
+    """Return the hash of the exact weekly and reactive prompts in the runner."""
+    # Imported lazily because runner imports engine/configuration modules that
+    # are also used by artifact replay and analysis.
+    from .constraint_inventory import prompt_hash
+    from .runner import ModelRunner
+
+    return prompt_hash(ModelRunner.WEEK_SYSTEM_PROMPT, ModelRunner.REACTIVE_SYSTEM_PROMPT)

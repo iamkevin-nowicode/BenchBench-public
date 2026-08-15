@@ -451,10 +451,13 @@ def test_pain_days_count_active_pain_without_sleep_gate() -> None:
 
 def test_weekly_stimulus_uses_smooth_overreach_without_a_hard_cap() -> None:
     env = BenchEnvironment(3, SimConfig(weeks=1, weekly_stimulus_optimum=0.5, weekly_overreach_penalty_strength=0.9))
+    optimum = env._weekly_stimulus_optimum()
     below = env._smooth_weekly_stimulus(0.4)
+    at_optimum = env._smooth_weekly_stimulus(optimum)
     above = env._smooth_weekly_stimulus(1.0)
     extreme = env._smooth_weekly_stimulus(4.0)
-    assert below == pytest.approx(0.4)
+    assert 0.0 < below < at_optimum
+    assert at_optimum == pytest.approx(optimum)
     assert 0.0 < above < 1.0
     assert 0.0 < extreme < above
 
@@ -484,7 +487,7 @@ def test_shared_time_ledger_rejects_the_8x4_variant() -> None:
     validation = env.validate_action(action)
     assert validation.fallback_used is True
     assert "shared time/resource ledger" in validation.errors[0]
-    assert "1735" in validation.errors[0]
+    assert "1795" in validation.errors[0]
 
 
 def test_shared_ledger_charges_delegation_and_reactive_childcare() -> None:
@@ -814,6 +817,19 @@ def test_hidden_motivation_changes_adherence() -> None:
         low.submit_week(action)
         high.submit_week(action)
     assert high.final_result().completed_sessions > low.final_result().completed_sessions
+
+
+def test_sleep_debt_and_quality_use_the_severe_sleep_threshold() -> None:
+    env = BenchEnvironment(3, SimConfig(weeks=1))
+    env._update_sleep_debt(6.4)
+    assert env._state.sleep_debt == 0.0
+    env._update_sleep_debt(5.0)
+    assert env._state.sleep_debt > 0.0
+    rested = env._recovery_multiplier(6.2, None)
+    ordinary = env._recovery_multiplier(6.0, None)
+    severe = env._recovery_multiplier(4.5, None)
+    assert rested == pytest.approx(ordinary)
+    assert severe < ordinary
 
 
 def test_declared_sleep_and_illness_rules_change_session_execution() -> None:

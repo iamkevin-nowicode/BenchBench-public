@@ -42,6 +42,17 @@ def test_runner_transcript_is_resumable_and_keeps_context(tmp_path) -> None:
     assert all("messages" in record and record["messages"] for record in turns)
     assert all("<observation_json>" in record["request"] for record in turns)
     assert records[-1]["type"] == "run_end"
+    prompt_hashes = {
+        record["prompt_hash"]
+        for record in records
+        if record.get("type") in {"run_start", "turn", "run_end"}
+    }
+    assert len(prompt_hashes) == 1
+    assert all(
+        reactive["prompt_hash"] == next(iter(prompt_hashes))
+        for record in records
+        for reactive in record.get("reactive_turns", [])
+    )
     assert '"sleep_debt"' not in transcript.read_text()
     start = next(record for record in records if record["type"] == "run_start")
     assert start["endpoint_metadata"] == {"kind": "local-scripted"}
@@ -88,7 +99,27 @@ def test_analyzer_flags_provider_transport_failures(tmp_path) -> None:
     assert summary["transport_errors"] == {"http_429": 1}
     assert summary["repair_calls"] == 0
     assert summary["transport_failures"] == 1
+    assert summary["transport_excluded"] is True
+    assert summary["counted_final_1rm_kg"] is None
     assert "Transport-error audit: FAILED" in leaderboard_markdown([summary])
+
+
+def test_historical_pilot_mode_uses_pain_only_and_allows_original_engine_hash(tmp_path) -> None:
+    transcript = tmp_path / "historical.jsonl"
+    runner = ModelRunner(DeterministicPolicyClient("recovery-aware", 3), RunnerConfig(weeks=1))
+    runner.run_episode(3, transcript)
+    records = [json.loads(line) for line in transcript.read_text().splitlines()]
+    records[0]["engine_config_hash"] = "sha256:v0.1-engine"
+    records[-1]["engine_config_hash"] = "sha256:v0.1-engine"
+    for field in ("household_strain_peak", "mean_household_strain", "household_strain_high_weeks", "final_third_mean_household_strain"):
+        records[-1]["result"].pop(field, None)
+    transcript.write_text("".join(json.dumps(record) + "\n" for record in records))
+
+    summary = analyze_transcript(transcript, historical_pilot=True)
+    assert summary["historical_pilot"] is True
+    assert summary["valid"] is True
+    assert summary["counted_final_1rm_kg"] is not None
+    assert summary["transcript_violations"] == []
 
 
 def test_analyzer_excludes_invalid_episode_from_score_aggregates(tmp_path) -> None:
@@ -542,8 +573,23 @@ def test_grok_46_pricing_exposes_short_and_long_context_tiers() -> None:
         "long_context_input_price_per_million": 4.0,
         "long_context_cached_input_price_per_million": 1.0,
         "long_context_output_price_per_million": 12.0,
+        "max_prompt_tokens": 200_000,
         "source": "model-default",
     }
+
+
+def test_grok_46_refuses_prompt_at_short_context_boundary_before_call(monkeypatch) -> None:
+    calls = []
+
+    def fail_if_called(request, timeout):
+        calls.append(request)
+        raise AssertionError("provider must not be called for an oversized request")
+
+    monkeypatch.setattr("bench_bench.runner.urlopen", fail_if_called)
+    client = OpenAICompatibleClient("https://api.x.ai/v1", "grok-4.6")
+    with pytest.raises(RuntimeError, match="request refused before provider call"):
+        client.complete([{"role": "user", "content": "x" * 200_000}])
+    assert calls == []
 
 
 def test_grok_46_switches_to_long_context_rates_at_threshold(monkeypatch) -> None:
@@ -606,6 +652,8 @@ def test_anthropic_native_adapter_uses_structured_outputs_and_splits_thinking_to
                     "content": [{"type": "text", "text": '{"action":{},"notebook_update":""}'}],
                     "usage": {
                         "input_tokens": 100,
+                        "cache_creation_input_tokens": 10,
+                        "cache_read_input_tokens": 20,
                         "output_tokens": 30,
                         "output_tokens_details": {"thinking_tokens": 20},
                     },
@@ -642,10 +690,12 @@ def test_anthropic_native_adapter_uses_structured_outputs_and_splits_thinking_to
 
     assert response.provider == "anthropic"
     assert response.model == "claude-opus-5"
-    assert response.usage.input_tokens == 100
+    assert response.usage.input_tokens == 130
+    assert response.usage.cached_prompt_tokens == 20
+    assert response.usage.cache_creation_input_tokens == 10
     assert response.usage.visible_output_tokens == 10
     assert response.usage.thinking_tokens == 20
-    assert response.usage.cost_usd == pytest.approx(0.00125)
+    assert response.usage.cost_usd == pytest.approx(0.00136)
     assert client.pricing_metadata["source"] == "explicit"
     assert client.endpoint_metadata == {
         "kind": "anthropic-messages",
@@ -658,6 +708,13 @@ def test_anthropic_native_adapter_uses_structured_outputs_and_splits_thinking_to
     assert payload["thinking"] == {"type": "adaptive"}
     assert payload["output_config"]["effort"] == "medium"
     assert payload["output_config"]["format"]["type"] == "json_schema"
+    assert payload["system"] == [
+        {
+            "type": "text",
+            "text": "system",
+            "cache_control": {"type": "ephemeral", "ttl": "1h"},
+        }
+    ]
 
 
 def test_openai_compatible_adapter_prices_cached_input_tokens(monkeypatch) -> None:

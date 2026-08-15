@@ -1,0 +1,60 @@
+{
+  "benchmark": "Bench-bench",
+  "label": "v0.2 four-model seed-400 paid smoke",
+  "archive_path": "artifacts/v0.2-smoke-20260814-transcripts.tar.gz",
+  "archive_member_prefix": "v0.2-smoke-20260814-transcripts",
+  "archive_sha256": "sha256:f070e92bff02cf05391c53032c5485e0c53e01cc1b6a411433a1e02144a5d82f",
+  "file_count": 4,
+  "byte_count": 13094109,
+  "runner_version": "0.1.0",
+  "pricing_table_version": "bench_bench.runner._MODEL_PRICING_USD_PER_MILLION@sha256:5fd68548de5bb67bd8977dfa1d0bee091dab3aaf0c4a0a386a62182b6de1cb81",
+  "engine_config_hashes": [
+    "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52"
+  ],
+  "prompt_hashes": [
+    "sha256:47bb7820487a987edf4935f5e7653db8312252de77e27e8b4bff447a615c4eb9"
+  ],
+  "transcript_tree_sha256": "sha256:5ea00c80fb1d585bf7e7287e45ad3cb6e3c42393285bb1e0fb3df551b041f675",
+  "transcripts": [
+    {
+      "relative_path": "claude-opus-5/seed-400/claude-opus-5-seed-400.jsonl",
+      "sha256": "sha256:db3791282d8931e31efb29e62025f1365e86a49580fc93640ab11487bee0acab",
+      "byte_count": 3902986,
+      "model": "claude-opus-5",
+      "seed": 400,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:47bb7820487a987edf4935f5e7653db8312252de77e27e8b4bff447a615c4eb9"
+    },
+    {
+      "relative_path": "gpt-5.6-sol/seed-400/gpt-5.6-sol-seed-400.jsonl",
+      "sha256": "sha256:fd9a45b3f5696c00b0d0a02471ac6f67d74fd77870f74f0fc5a1ffd0c3296500",
+      "byte_count": 2949628,
+      "model": "gpt-5.6-sol",
+      "seed": 400,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:47bb7820487a987edf4935f5e7653db8312252de77e27e8b4bff447a615c4eb9"
+    },
+    {
+      "relative_path": "grok-4.6/seed-400/grok-4.6-seed-400.jsonl",
+      "sha256": "sha256:5683ba0543b67b4ef6a4cdcc85bbe66b3c3aab4344739c89a3c61144fcd31054",
+      "byte_count": 3347001,
+      "model": "grok-4.6",
+      "seed": 400,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:47bb7820487a987edf4935f5e7653db8312252de77e27e8b4bff447a615c4eb9"
+    },
+    {
+      "relative_path": "muse-spark-1.2/seed-400/muse-spark-1.2-seed-400.jsonl",
+      "sha256": "sha256:f1a9cf341c80a22d9ec092247489faa270ea02798e3c9f3fd4d6188c737dc21f",
+      "byte_count": 2894494,
+      "model": "muse-spark-1.2",
+      "seed": 400,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:47bb7820487a987edf4935f5e7653db8312252de77e27e8b4bff447a615c4eb9"
+    }
+  ]
+}

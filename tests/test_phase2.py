@@ -5,6 +5,7 @@ from bench_bench.evaluation import run_episode, run_suite
 from bench_bench.config import SimConfig
 from bench_bench.engine import BenchEnvironment
 from bench_bench.policies import POLICY_NAMES, make_policy
+from bench_bench.schemas import WeekAction
 
 
 def test_all_phase2_policies_are_constructible() -> None:
@@ -36,8 +37,18 @@ def test_phase2_mechanics_change_outcomes_in_ablations() -> None:
         "no-delayed-adaptation",
         "no-event-system",
     }
-    assert all(ablation["changed_score"] for ablation in report["ablations"])
-    assert all(ablation["changed_decisions"] for ablation in report["ablations"])
+    # The evidence-informed sleep path is intentionally thresholded: this
+    # ordinary 12-week fixture need not differ when no session lands below
+    # the severe-sleep breakpoint. The longer-horizon ladder exercises the
+    # situational sleep choice directly.
+    sleep_ablation = next(item for item in report["ablations"] if item["name"] == "no-sleep-system")
+    assert sleep_ablation["changed_score"] is False
+    no_delayed = next(item for item in report["ablations"] if item["name"] == "no-delayed-adaptation")
+    no_events = next(item for item in report["ablations"] if item["name"] == "no-event-system")
+    assert no_delayed["changed_score"] is True
+    assert no_delayed["changed_decisions"] is False
+    assert no_events["changed_score"] is True
+    assert no_events["changed_decisions"] is True
 
 
 def test_scripted_expert_never_submits_an_infeasible_900_minute_plan() -> None:
@@ -56,6 +67,16 @@ def test_scripted_expert_never_submits_an_infeasible_900_minute_plan() -> None:
             for record in env.log_records
             if record.get("type") == "week"
         )
+
+
+def test_sleep_protection_is_priced_in_the_shared_time_ledger() -> None:
+    config = SimConfig(weeks=1)
+    none = WeekAction(life={"sleep_protection": "none"})
+    standard = WeekAction(life={"sleep_protection": "standard"})
+    strong = WeekAction(life={"sleep_protection": "strong"})
+    env = BenchEnvironment(3, config)
+    assert env._weekly_time_cost_minutes(standard) - env._weekly_time_cost_minutes(none) == 30
+    assert env._weekly_time_cost_minutes(strong) - env._weekly_time_cost_minutes(none) == 60
 
 
 def test_scripted_baselines_play_their_authored_policies() -> None:

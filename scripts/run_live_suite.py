@@ -26,7 +26,7 @@ from typing import Any
 from bench_bench.runner import retry_metrics_from_records
 
 
-SEEDS = tuple(range(100, 110))
+SEEDS = tuple(range(400, 410))
 WEEKS = 52
 TEMPERATURE = 1.0
 MAX_OUTPUT_TOKENS = 8192
@@ -58,22 +58,11 @@ class ModelSpec:
     long_context_input_price_per_million: float | None = None
     long_context_cached_input_price_per_million: float | None = None
     long_context_output_price_per_million: float | None = None
+    max_prompt_tokens: int | None = None
 
 
-# Kimi is deliberately first: it was the slowest smoke test provider.
+# v0.2 public lineup.  The ordering is also the smoke-start order.
 MODEL_SPECS = (
-    ModelSpec(
-        "kimi-k3",
-        "openai-compatible",
-        "kimi-k3",
-        "https://api.moonshot.ai/v1",
-        ".bench-bench-moonshot-key",
-        "BENCH_BENCH_MOONSHOT_API_KEY",
-        "not-exposed",
-        1,
-        50.0,
-        20.0,
-    ),
     ModelSpec(
         "claude-opus-5",
         "anthropic",
@@ -84,6 +73,9 @@ MODEL_SPECS = (
         "medium",
         3,
         70.0,
+        input_price_per_million=5.00,
+        cached_input_price_per_million=0.50,
+        output_price_per_million=25.00,
     ),
     ModelSpec(
         "gpt-5.6-sol",
@@ -95,6 +87,9 @@ MODEL_SPECS = (
         "medium",
         3,
         40.0,
+        input_price_per_million=5.00,
+        cached_input_price_per_million=0.50,
+        output_price_per_million=30.00,
     ),
     ModelSpec(
         "muse-spark-1.2",
@@ -106,40 +101,29 @@ MODEL_SPECS = (
         "medium",
         3,
         15.0,
+        input_price_per_million=1.25,
+        cached_input_price_per_million=0.15,
+        output_price_per_million=4.25,
     ),
     ModelSpec(
-        "grok-4.5",
+        "grok-4.6",
         "openai-compatible",
-        "grok-4.5",
+        "grok-4.6",
         "https://api.x.ai/v1",
         ".bench-bench-xai-key",
         "BENCH_BENCH_XAI_API_KEY",
         "medium",
         2,
-        45.0,
+        30.0,
         5.0,
         2.0,
-        0.30,
+        0.50,
         6.0,
-    ),
-    ModelSpec(
-        label="grok-4.6",
-        provider="openai-compatible",
-        model="grok-4.6",
-        base_url="https://api.x.ai/v1",
-        key_file_name=".bench-bench-xai-key",
-        key_env="BENCH_BENCH_XAI_API_KEY",
-        effort="medium",
-        max_workers=2,
-        cost_ceiling=30.0,
-        request_backoff_seconds=5.0,
-        input_price_per_million=2.0,
-        cached_input_price_per_million=0.5,
-        output_price_per_million=6.0,
-        long_context_threshold_tokens=200_000,
-        long_context_input_price_per_million=4.0,
-        long_context_cached_input_price_per_million=1.0,
-        long_context_output_price_per_million=12.0,
+        200_000,
+        4.0,
+        1.0,
+        12.0,
+        max_prompt_tokens=200_000,
     ),
 )
 
@@ -209,9 +193,21 @@ def transcript_metrics(path: Path) -> dict[str, Any]:
     if end is not None:
         cost = float(end.get("total_cost_usd", 0.0) or 0.0)
         model_calls = int(end.get("model_calls", 0) or 0)
+        input_tokens = int(end.get("input_tokens", 0) or 0)
+        cached_input_tokens = int(end.get("cached_input_tokens", 0) or 0)
+        cache_creation_input_tokens = int(end.get("cache_creation_input_tokens", 0) or 0)
+        visible_output_tokens = int(end.get("visible_output_tokens", 0) or 0)
+        thinking_tokens = int(end.get("thinking_tokens", 0) or 0)
+        total_tokens = int(end.get("total_tokens", 0) or 0)
     else:
         cost = sum(float((item.get("usage") or {}).get("cost_usd", 0.0) or 0.0) for item in attempts)
         model_calls = sum(1 for item in attempts if item.get("is_model_call", True))
+        input_tokens = sum(int((item.get("usage") or {}).get("input_tokens", 0) or 0) for item in attempts)
+        cached_input_tokens = sum(int((item.get("usage") or {}).get("cached_prompt_tokens", 0) or 0) for item in attempts)
+        cache_creation_input_tokens = sum(int((item.get("usage") or {}).get("cache_creation_input_tokens", 0) or 0) for item in attempts)
+        visible_output_tokens = sum(int((item.get("usage") or {}).get("visible_output_tokens", 0) or 0) for item in attempts)
+        thinking_tokens = sum(int((item.get("usage") or {}).get("thinking_tokens", 0) or 0) for item in attempts)
+        total_tokens = sum(int((item.get("usage") or {}).get("total_tokens", 0) or 0) for item in attempts)
     errors = []
     for record in turns:
         errors.extend(str(error) for error in record.get("parse_errors", []) or [])
@@ -228,6 +224,13 @@ def transcript_metrics(path: Path) -> dict[str, Any]:
         "repair_attempts": retry_metrics["repair_attempts"],
         "successful_repairs": retry_metrics["successful_repairs"],
         "model_calls": model_calls,
+        "input_tokens": input_tokens,
+        "cached_input_tokens": cached_input_tokens,
+        "cache_creation_input_tokens": cache_creation_input_tokens,
+        "visible_output_tokens": visible_output_tokens,
+        "thinking_tokens": thinking_tokens,
+        "output_tokens": visible_output_tokens + thinking_tokens,
+        "total_tokens": total_tokens,
         "decisions": decisions,
         "repair_rate": retry_metrics["rejected_output_decisions"] / decisions if decisions else 0.0,
         "transport_failures": retry_metrics["transport_failures"],
@@ -357,6 +360,7 @@ class Supervisor:
                     "long_context_input_price_per_million": spec.long_context_input_price_per_million,
                     "long_context_cached_input_price_per_million": spec.long_context_cached_input_price_per_million,
                     "long_context_output_price_per_million": spec.long_context_output_price_per_million,
+                    "max_prompt_tokens": spec.max_prompt_tokens,
                 }
                 for spec in self.specs
             },
@@ -389,6 +393,7 @@ class Supervisor:
                     "long_context_input_price_per_million": spec.long_context_input_price_per_million,
                     "long_context_cached_input_price_per_million": spec.long_context_cached_input_price_per_million,
                     "long_context_output_price_per_million": spec.long_context_output_price_per_million,
+                    "max_prompt_tokens": spec.max_prompt_tokens,
                 },
                 pending=len(self.pending[spec.label]),
             )
@@ -412,6 +417,33 @@ class Supervisor:
             "decisions": decisions,
             "repair_rate": repairs / decisions if decisions else 0.0,
             "transport_failures": transport_failures,
+            "input_tokens": sum(int(item["input_tokens"]) for item in metrics),
+            "cached_input_tokens": sum(int(item["cached_input_tokens"]) for item in metrics),
+            "cache_creation_input_tokens": sum(int(item["cache_creation_input_tokens"]) for item in metrics),
+            "visible_output_tokens": sum(int(item["visible_output_tokens"]) for item in metrics),
+            "thinking_tokens": sum(int(item["thinking_tokens"]) for item in metrics),
+            "output_tokens": sum(int(item["output_tokens"]) for item in metrics),
+            "total_tokens": sum(int(item["total_tokens"]) for item in metrics),
+            "episodes": [
+                {
+                    "seed": seed,
+                    "complete": item["complete"],
+                    "input_tokens": item["input_tokens"],
+                    "cached_input_tokens": item["cached_input_tokens"],
+                    "cache_creation_input_tokens": item["cache_creation_input_tokens"],
+                    "visible_output_tokens": item["visible_output_tokens"],
+                    "thinking_tokens": item["thinking_tokens"],
+                    "output_tokens": item["output_tokens"],
+                    "total_tokens": item["total_tokens"],
+                    "cost_usd": round(float(item["cost"]), 8),
+                    "repair_rate": item["repair_rate"],
+                    "transport_failures": item["transport_failures"],
+                    "automatic_fallbacks": item["reactive_fallbacks"],
+                    "pain_days": item["pain_days"],
+                    "score_kg": item["score"],
+                }
+                for seed, item in zip(self.seeds, metrics)
+            ],
             "errors": sum(len(item["errors"]) for item in metrics) + self.runtime_errors[spec.label],
             "auth_failures": self.auth_failures[spec.label],
         }
@@ -493,6 +525,7 @@ class Supervisor:
             ("--long-context-input-price-per-million", spec.long_context_input_price_per_million),
             ("--long-context-cached-input-price-per-million", spec.long_context_cached_input_price_per_million),
             ("--long-context-output-price-per-million", spec.long_context_output_price_per_million),
+            ("--max-prompt-tokens", spec.max_prompt_tokens),
         ):
             if value is not None:
                 command.extend([flag, str(value)])
@@ -664,7 +697,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("runs/live-full-20260808"),
+        default=Path("runs/v0.2-public-leaderboard"),
         help="directory containing per-seed transcripts, state, and progress.log",
     )
     parser.add_argument(

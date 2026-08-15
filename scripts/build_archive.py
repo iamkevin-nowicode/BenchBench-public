@@ -144,7 +144,11 @@ def _prompt_hash(records: list[dict[str, Any]], relative_path: str) -> str:
             f"{relative_path}: expected exactly one weekly and one reactive system prompt "
             f"(found {len(weekly)} weekly, {len(reactive)} reactive)"
         )
-    return _sha256_bytes(_canonical_json({"reactive": next(iter(reactive)), "weekly": next(iter(weekly))}))
+    calculated = _sha256_bytes(_canonical_json({"reactive": next(iter(reactive)), "weekly": next(iter(weekly))}))
+    stamped = {record.get("prompt_hash") for record in records if record.get("prompt_hash")}
+    if stamped and (len(stamped) != 1 or calculated not in stamped):
+        raise ArchiveBuildError(f"{relative_path}: inconsistent prompt_hash stamp")
+    return calculated
 
 
 def _transcript_metadata(path: Path, source_dir: Path) -> TranscriptMetadata:
@@ -192,7 +196,12 @@ def _tree_hash(transcripts: Iterable[TranscriptMetadata]) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
-def _write_deterministic_tar(source_dir: Path, paths: list[Path], archive_path: Path) -> None:
+def _write_deterministic_tar(
+    source_dir: Path,
+    paths: list[Path],
+    archive_path: Path,
+    archive_prefix: str,
+) -> None:
     archive_path.parent.mkdir(parents=True, exist_ok=True)
     with archive_path.open("wb") as raw_file:
         with gzip.GzipFile(
@@ -206,7 +215,7 @@ def _write_deterministic_tar(source_dir: Path, paths: list[Path], archive_path: 
                 for path in paths:
                     relative = path.relative_to(source_dir).as_posix()
                     data = path.read_bytes()
-                    info = tarfile.TarInfo(name=f"{ARCHIVE_PREFIX}/{relative}")
+                    info = tarfile.TarInfo(name=f"{archive_prefix}/{relative}")
                     info.size = len(data)
                     info.mode = 0o644
                     info.mtime = 0
@@ -223,6 +232,9 @@ def build_archive(
     manifest_path: str | Path,
     *,
     expected_file_count: int = DEFAULT_EXPECTED_FILE_COUNT,
+    label: str = "v0.1 pilot",
+    archive_prefix: str = ARCHIVE_PREFIX,
+    archive_path_label: str | None = None,
 ) -> dict[str, Any]:
     """Build the archive and manifest, refusing unsafe or ambiguous input."""
     source = Path(source_dir).resolve()
@@ -250,17 +262,20 @@ def build_archive(
     }
     if len(runner_versions) != 1:
         raise ArchiveBuildError(f"expected one runner version, found {sorted(runner_versions)}")
-    _write_deterministic_tar(source, paths, archive)
+    _write_deterministic_tar(source, paths, archive, archive_prefix)
+    display_archive_path = archive_path_label or archive.as_posix()
     manifest_data: dict[str, Any] = {
         "benchmark": "Bench-bench",
-        "label": "v0.1 pilot",
-        "archive_path": "artifacts/v0.1-pilot-transcripts.tar.gz",
-        "archive_member_prefix": ARCHIVE_PREFIX,
+        "label": label,
+        "archive_path": display_archive_path,
+        "archive_member_prefix": archive_prefix,
         "archive_sha256": _sha256_file(archive),
         "file_count": len(transcripts),
         "byte_count": sum(transcript.byte_count for transcript in transcripts),
         "runner_version": next(iter(runner_versions)),
         "pricing_table_version": pricing_table_version(),
+        "engine_config_hashes": sorted({transcript.engine_config_hash for transcript in transcripts}),
+        "prompt_hashes": sorted({transcript.prompt_hash for transcript in transcripts}),
         "transcript_tree_sha256": _tree_hash(transcripts),
         "transcripts": [transcript.__dict__ for transcript in transcripts],
     }
@@ -275,6 +290,9 @@ def main() -> int:
     parser.add_argument("--archive", default="artifacts/v0.1-pilot-transcripts.tar.gz")
     parser.add_argument("--manifest", default="artifacts/v0.1-pilot-manifest.json")
     parser.add_argument("--expected-file-count", type=int, default=DEFAULT_EXPECTED_FILE_COUNT)
+    parser.add_argument("--label", default="v0.1 pilot")
+    parser.add_argument("--archive-prefix", default=ARCHIVE_PREFIX)
+    parser.add_argument("--archive-path-label")
     args = parser.parse_args()
     try:
         result = build_archive(
@@ -282,6 +300,9 @@ def main() -> int:
             args.archive,
             args.manifest,
             expected_file_count=args.expected_file_count,
+            label=args.label,
+            archive_prefix=args.archive_prefix,
+            archive_path_label=args.archive_path_label,
         )
     except ArchiveBuildError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 import math
 import random
 
+from .config import sleep_protection_time_cost_minutes
 from .schemas import InterruptObservation, LifeAllocation, ReactiveAction, SessionPlan, StandingRules, WeekAction, WeekObservation
 
 
@@ -99,6 +100,10 @@ def _conservative_session_minutes(sessions: list[SessionPlan]) -> int:
     return sum(session.duration_min + overhead[session.location] for session in sessions)
 
 
+def _conservative_sleep_minutes(life: LifeAllocation) -> int:
+    return sleep_protection_time_cost_minutes(life.sleep_protection)
+
+
 def _visible_external_time_reserve(observation: WeekObservation) -> int:
     """Reserve the announced week-14 childcare block for scripted policies."""
     return 240 if any(
@@ -158,19 +163,22 @@ class RandomPolicy(ScriptedPolicy):
         # random policy.  Reserve the fixed household block, the announced
         # week-14 childcare block, and maximum gym crowding before sampling
         # optional life allocations.
+        sleep = self.rng.choice(["none", "standard", "strong"])
         budget = max(0, observation.weekly_time_budget_minutes)
-        fixed = max(0, observation.weekly_fixed_household_minutes)
-        required = fixed + _conservative_session_minutes(sessions) + _visible_external_time_reserve(observation)
+        required = (
+            _conservative_session_minutes(sessions)
+            + _visible_external_time_reserve(observation)
+            + sleep_protection_time_cost_minutes(sleep)
+        )
         while sessions and required > budget:
             sessions.pop()
-            required = fixed + _conservative_session_minutes(sessions) + _visible_external_time_reserve(observation)
+            required = _conservative_session_minutes(sessions) + _visible_external_time_reserve(observation)
         remaining_hours = max(0, (budget - required) // 60)
         meal_prep = min(float(self.rng.choice([0, 1, 2, 4])), remaining_hours)
         remaining_hours -= int(meal_prep)
         coverage = min(float(self.rng.choice([0, 1, 2, 3, 4])), remaining_hours)
         remaining_hours -= int(coverage)
         giveback = min(float(self.rng.choice([0, 1, 2, 3, 4])), remaining_hours)
-        sleep = self.rng.choice(["none", "standard", "strong"])
         return WeekAction(
             sessions=sessions,
             life=_life(meal_prep=meal_prep, sleep=sleep, coverage=coverage, giveback=giveback),
@@ -359,7 +367,6 @@ class ScriptedExpertPolicy(ScriptedPolicy):
         """
         budget = max(0, observation.weekly_time_budget_minutes)
         external_reserve = self._visible_external_time_reserve(observation)
-        fixed_household_reserve = max(0, observation.weekly_fixed_household_minutes)
         life_options = [
             _life(meal_prep=3.0, sleep="strong", coverage=3.0, giveback=3.0, chores=2.0, purchases=purchases),
             _life(meal_prep=2.0, sleep="strong", coverage=2.0, giveback=2.0, chores=1.0, purchases=purchases),
@@ -387,8 +394,8 @@ class ScriptedExpertPolicy(ScriptedPolicy):
                 required = (
                     self._conservative_session_minutes(candidate_sessions)
                     + life_minutes
-                    + fixed_household_reserve
                     + external_reserve
+                    + _conservative_sleep_minutes(life)
                 )
                 if required <= budget:
                     return WeekAction(sessions=candidate_sessions, life=life, rules=rules)

@@ -12,13 +12,13 @@ A long-horizon decision-making benchmark for AI agents: manage one simulated yea
 
 ## Status
 
-The v0.1 pilot is preserved as a reproducible archive. v0.2 is in free
-engine redesign and calibration: the six scripted policies are diagnostics,
-while the planned release gate is held-out oracle headroom plus a policy
-ladder. No model leaderboard is claimed by this checkout. v0.2's public
-leaderboard pool is seeds 400–409; its tuning, certification, and regression
-pools are disjoint. The provider-neutral model-only runner, resumable
-transcripts, exploit checks, and self-contained replay viewer are included.
+The v0.1 pilot is preserved as a reproducible archive. v0.2 has completed its
+prompt freeze, deterministic rehearsal, and four-model seed-400 paid smoke;
+the six scripted policies remain diagnostics and no public model leaderboard is
+claimed by this checkout. v0.2's public leaderboard pool is seeds 400–409; its
+tuning, certification, and regression pools are disjoint. The provider-neutral
+model-only runner, resumable transcripts, exploit checks, and self-contained
+replay viewer are included.
 
 ## Quickstart
 
@@ -89,40 +89,45 @@ tar -xzf artifacts/v0.1-pilot-transcripts.tar.gz -C artifacts
 python3 -m bench_bench build-leaderboard \
   --input-dir artifacts/v0.1-pilot-transcripts \
   --json reports/PILOT_V0.1_LEADERBOARD.json \
-  --markdown reports/PILOT_V0.1_LEADERBOARD.md
+  --markdown reports/PILOT_V0.1_LEADERBOARD.md \
+  --historical-pilot
 ```
 
 The archive manifest is `artifacts/v0.1-pilot-manifest.json`. It records the
 per-transcript hashes and provenance, plus the deterministic tarball hash,
 runner version, and content-addressed pricing-table version.
 
+The historical pilot analyzer applies the v0.1 pain-only score rule and
+excludes any transcript with provider transport failures from counted
+aggregates. Kimi K3 therefore remains visible with its raw scores and 702
+transport failures, but is counted 0/10 rather than being ranked on a
+transport-contaminated mean.
+
 To create a new live full-year model suite (separate from the current
 authoritative offline replay), use:
 
 ```bash
-python3 -m bench_bench run-model-suite \
-  --base-url https://api.openai.com/v1 \
-  --models gpt-5.4,gpt-5.4-mini,gpt-5.3-chat-latest,gpt-4.1 \
-  --weeks 52 --temperature 0.2 --api-key-env BENCH_BENCH_API_KEY \
+python3 scripts/run_live_suite.py \
+  --models claude-opus-5,gpt-5.6-sol,muse-spark-1.2,grok-4.6 \
   --seed-values 400,401,402,403,404,405,406,407,408,409 \
-  --request-retries 2 --retry-backoff-seconds 1 \
-  --output-dir runs/public-leaderboard \
-  --analysis-json reports/PUBLIC_LEADERBOARD.json \
-  --analysis-markdown reports/PUBLIC_LEADERBOARD.md
+  --output-dir runs/v0.2-public-leaderboard
 ```
 
-The public leaderboard directory is intentionally empty until the independent
-review is complete.
+The public leaderboard directory is intentionally empty until the ten-seed
+public run. The seed-400 paid smoke is retained separately under the paths in
+`release_manifest.json`. Before the public run, archive the completed run with `scripts/build_archive.py` using
+the v0.2 paths in `release_manifest.json`; do not delete or overwrite an
+existing artifact.
 
 For a local runner smoke test and transcript analyzer:
 
 ```bash
 python3 -m bench_bench demo-runner --weeks 12 --seed-count 5
 python3 -m bench_bench build-leaderboard \
-  --input-dir runs/public-leaderboard \
+  --input-dir runs/v0.2-public-leaderboard \
   --json reports/PUBLIC_LEADERBOARD.json \
   --markdown reports/PUBLIC_LEADERBOARD.md
-python3 -m bench_bench verify-transcript runs/public-leaderboard/gpt-4.1-seed-400.jsonl \
-  --output /tmp/gpt-4.1-seed-400.current-engine.jsonl
-python3 -m bench_bench render-replay runs/public-leaderboard/gpt-4.1-seed-400.jsonl --output /tmp/bench-bench-replay.html
+python3 -m bench_bench verify-transcript runs/v0.2-public-leaderboard/gpt-5.6-sol/seed-400/gpt-5.6-sol-seed-400.jsonl \
+  --output /tmp/gpt-5.6-sol-seed-400.current-engine.jsonl
+python3 -m bench_bench render-replay runs/v0.2-public-leaderboard/gpt-5.6-sol/seed-400/gpt-5.6-sol-seed-400.jsonl --output /tmp/bench-bench-replay.html
 ```

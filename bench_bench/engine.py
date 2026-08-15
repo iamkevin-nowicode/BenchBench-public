@@ -235,7 +235,7 @@ class BenchEnvironment:
     PERSONA = {
         "name": "Dave",
         "age": 38,
-        "role": "returning lifter and full-time working dad",
+        "role": "novice-range bench trainee and full-time working dad",
         "body_mass_kg": 84.0,
         "estimated_1rm_kg": 84.0,
         "baby_age_months": 6.0,
@@ -389,7 +389,13 @@ class BenchEnvironment:
             + external_childcare_hours
         )
         training_minutes = sum(self._session_time_minutes(session) for session in action.sessions)
-        return math.ceil(fixed_household_minutes + training_minutes + allocation_hours * 60.0)
+        sleep_protection_minutes = self.config.sleep_protection_time_cost_minutes(action.life.sleep_protection)
+        return math.ceil(
+            fixed_household_minutes
+            + training_minutes
+            + allocation_hours * 60.0
+            + sleep_protection_minutes
+        )
 
     def _fallback_load_error_for_week_action(self, action: WeekAction) -> str | None:
         ceiling = max(0.0, self._current_observation.estimated_1rm_kg * self.config.fallback_max_load_ratio)
@@ -964,7 +970,7 @@ class BenchEnvironment:
         protection = {"none": 0.0, "standard": 0.18, "strong": 0.36}[runtime.sleep_protection]
         index = self._state.day_index
         noise = self.noise.sleep_noise[index]
-        sleep = 6.92 - event.sleep_pressure * 0.78 + protection + noise
+        sleep = self.config.sleep_baseline_hours - event.sleep_pressure * 0.78 + protection + noise
         sleep -= self._state.sleep_debt * 0.025
         sleep -= self._state.illness_days * 0.18 + self._state.partner_illness_days * 0.15
         sleep -= self._state.household_strain * 0.20
@@ -974,7 +980,11 @@ class BenchEnvironment:
         if not self.config.enable_sleep_system:
             self._state.sleep_debt = 0.0
             return
-        target = 6.8
+        # Keep ordinary 6–8 hour variation out of a continuously accumulating
+        # debt state.  The supplied adherence evidence is threshold-shaped;
+        # severe nights below the same breakpoint still build debt and can
+        # compound through the sleep trajectory and diagnostic pathways.
+        target = self.config.sleep_adherence_threshold_hours
         self._state.sleep_debt = _clamp(
             self._state.sleep_debt + max(0.0, target - sleep) * 0.35 - max(0.0, sleep - target) * 0.25,
             0.0,
@@ -1128,7 +1138,6 @@ class BenchEnvironment:
             return {"status": "missed", "note": reason}
 
         readiness = 0.91
-        readiness -= min(0.28, self._state.sleep_debt * 0.026) if self.config.enable_sleep_system else 0.0
         readiness -= min(0.20, self._state.fatigue_signal * 0.018)
         readiness -= self._state.household_strain * 0.09 if self.config.enable_household_system else 0.0
         readiness -= self._state.work_strain * 0.045
@@ -1146,6 +1155,17 @@ class BenchEnvironment:
             0.18,
             0.97,
         )
+        # The evidence supports a threshold-shaped adherence scenario rather
+        # than a linear penalty for every lost minute. Ordinary 6–8 hour
+        # nights therefore do not continuously move attendance probability;
+        # severe restriction below the breakpoint still does.
+        if self.config.enable_sleep_system and sleep < self.config.sleep_adherence_threshold_hours:
+            deficit = self.config.sleep_adherence_threshold_hours - sleep
+            adherence_probability *= _clamp(
+                1.0 - deficit * self.config.sleep_adherence_penalty_per_hour_below_threshold,
+                0.55,
+                1.0,
+            )
         adhered = self.noise.adherence_noise[self._state.day_index] <= adherence_probability
         if not adhered:
             self._state.missed_sessions += 1
@@ -1324,7 +1344,13 @@ class BenchEnvironment:
         )
 
     def _smooth_weekly_stimulus(self, raw_stimulus: float) -> float:
-        """Convert raw weekly work into smooth, non-capped adaptation credit."""
+        """Convert executed weekly volume into smooth adaptation credit.
+
+        Raw stimulus is accumulated from executed work, then passed through
+        the hidden-optimum over-reaching penalty. Frequency has no separate
+        reward: a fourth exposure helps only by delivering additional volume
+        that survives this same curve.
+        """
         raw_stimulus = max(0.0, raw_stimulus)
         if raw_stimulus == 0.0:
             return 0.0
@@ -1352,7 +1378,14 @@ class BenchEnvironment:
         )
 
     def _recovery_multiplier(self, sleep: float, runtime: _WeekRuntime) -> float:
-        sleep_factor = _clamp(sleep / 7.2, 0.48, 1.10) if self.config.enable_sleep_system else 1.0
+        sleep_factor = 1.0
+        if self.config.enable_sleep_system and sleep < self.config.sleep_adherence_threshold_hours:
+            deficit = self.config.sleep_adherence_threshold_hours - sleep
+            sleep_factor = _clamp(
+                1.0 - deficit * self.config.sleep_quality_penalty_per_hour_below_threshold,
+                self.config.sleep_quality_floor,
+                1.0,
+            )
         household_penalty = self._state.household_strain * 0.18 if self.config.enable_household_system else 0.0
         stress_factor = _clamp(1.0 - household_penalty - self._state.work_strain * 0.08, 0.68, 1.0)
         illness_factor = 0.62 if self._state.illness_days > 0 else 1.0
@@ -1636,7 +1669,7 @@ class BenchEnvironment:
             body_mass_trend=self._body_mass_trend(),  # type: ignore[arg-type]
             budget_available_cents=max(0, self._state.cash_cents),
             current_month_spend_cents=max(0, self._state.current_month_spend_cents),
-            weekly_time_budget_minutes=max(0, self.config.weekly_time_budget_minutes),
+            weekly_time_budget_minutes=max(0, self.config.usable_weekly_time_budget_minutes),
             weekly_fixed_household_minutes=max(0, self.config.weekly_fixed_household_minutes),
             equipment=equipment,
             household_strain_band=self._household_band(),  # type: ignore[arg-type]

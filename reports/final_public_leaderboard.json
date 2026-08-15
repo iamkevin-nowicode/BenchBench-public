@@ -1,4 +1,7 @@
 {
+  "status": "RETRACTED",
+  "superseded_by": "reports/PILOT_V0.1_LEADERBOARD.json",
+  "retraction_reason": "Kimi K3 was counted despite provider transport contamination; use the historical analyzer output with transport exclusion.",
   "aggregation": {
     "counted_seed_fraction_required": 1.0,
     "pain_days_limit": 14,

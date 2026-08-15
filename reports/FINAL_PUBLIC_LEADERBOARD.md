@@ -1,4 +1,14 @@
-# Bench-bench post-run public leaderboard
+> **RETRACTED / SUPERSEDED — DO NOT USE FOR RANKING**
+>
+> This hand-built post-run report is not authoritative. Its Kimi K3 row reports
+> 10/10 counted and 90.48 kg despite provider transport contamination. The
+> canonical historical analyzer report is
+> [`PILOT_V0.1_LEADERBOARD.md`](PILOT_V0.1_LEADERBOARD.md), which excludes
+> transport-failed transcripts from counted aggregates and reports Kimi K3 as
+> 0/10 counted with raw scores retained. A future v0.2 leaderboard must be
+> generated only by the named command in `release_manifest.json`.
+
+# Bench-bench post-run public leaderboard (retracted)
 
 This standalone post-run report covers five models × ten public seeds × 52 simulated weeks (50 episodes). It is derived from the completed live transcripts; no network calls are made during report generation.
 

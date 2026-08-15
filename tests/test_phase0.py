@@ -50,6 +50,21 @@ def test_phase0_analyzer_walks_nested_transcript_roots_and_uses_sample_sd(tmp_pa
     assert aggregate["counted_seed_std_kg"] == round(stdev(scores), 4)
 
 
+def test_phase0_active_directory_skips_archived_and_replay_derivative_transcripts(tmp_path) -> None:
+    active = tmp_path / "active" / "episode.jsonl"
+    archived = tmp_path / "archive" / "episode.jsonl"
+    replayed = tmp_path / "active" / "episode.current-engine.jsonl"
+    runner = ModelRunner(DeterministicPolicyClient("recovery-aware", 3), RunnerConfig(weeks=1))
+    runner.run_episode(3, active)
+    active.replace(replayed)
+    runner.run_episode(4, archived)
+
+    # Put a valid active transcript back alongside the replay derivative.
+    runner.run_episode(3, active)
+    records = analyze_directory(tmp_path)
+    assert [record["path"] for record in records] == ["active/episode.jsonl"]
+
+
 def test_phase0_cli_exposes_named_leaderboard_and_current_engine_verifier() -> None:
     leaderboard = build_parser().parse_args(
         ["build-leaderboard", "--input-dir", "runs", "--json", "out.json", "--markdown", "out.md"]
