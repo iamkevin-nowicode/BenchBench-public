@@ -91,7 +91,7 @@
       408,
       409
     ],
-    "public_leaderboard_status": "pending_full_public_run",
+    "public_leaderboard_status": "public_run_complete_card_pending",
     "twelve_week_diagnostic": {
       "adjacent_sigma": {
         "random->reckless-maximalist": {
@@ -164,5 +164,5 @@
   },
   "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
   "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27",
-  "public_transcript_count": 0
+  "public_transcript_count": 40
 }

@@ -1,0 +1,420 @@
+{
+  "benchmark": "Bench-bench",
+  "label": "v0.2 public live run",
+  "archive_path": "artifacts/v0.2-public-transcripts.tar.gz",
+  "archive_member_prefix": "v0.2-public-transcripts",
+  "archive_sha256": "sha256:3ad637dfec0960dfc1eef768e2fd21cdef442b565601dea3fa013dbcbe63a4b9",
+  "file_count": 40,
+  "byte_count": 130243550,
+  "runner_version": "0.1.0",
+  "pricing_table_version": "bench_bench.runner._MODEL_PRICING_USD_PER_MILLION@sha256:5fd68548de5bb67bd8977dfa1d0bee091dab3aaf0c4a0a386a62182b6de1cb81",
+  "engine_config_hashes": [
+    "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52"
+  ],
+  "prompt_hashes": [
+    "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+  ],
+  "transcript_tree_sha256": "sha256:694aa762d165bbd43a06d8d8d952d35b1104f7ed12cbeae93f76ad3ebef36278",
+  "transcripts": [
+    {
+      "relative_path": "claude-opus-5/seed-400/claude-opus-5-seed-400.jsonl",
+      "sha256": "sha256:126ad7bb5615e7458ebb6cf2d31211b87e25def69cd34d40262a02b3cbc45d05",
+      "byte_count": 3882382,
+      "model": "claude-opus-5",
+      "seed": 400,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "claude-opus-5/seed-401/claude-opus-5-seed-401.jsonl",
+      "sha256": "sha256:dee6f9b235d84e1639b2eb6e871a7dc77263fde1a142e4ce5ca0d94da6771e4e",
+      "byte_count": 3854277,
+      "model": "claude-opus-5",
+      "seed": 401,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "claude-opus-5/seed-402/claude-opus-5-seed-402.jsonl",
+      "sha256": "sha256:d3ab914c8ad94158261c9957fe4fbd47d868d93c0eee3472b839a82e865e79a2",
+      "byte_count": 3952040,
+      "model": "claude-opus-5",
+      "seed": 402,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "claude-opus-5/seed-403/claude-opus-5-seed-403.jsonl",
+      "sha256": "sha256:0e175d73bae6210f7701400232ffafa02973390c1f224ebcff192959913e4519",
+      "byte_count": 3983868,
+      "model": "claude-opus-5",
+      "seed": 403,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "claude-opus-5/seed-404/claude-opus-5-seed-404.jsonl",
+      "sha256": "sha256:76873d036af2a9b3a65174be57a0ffe88d31d96a0cf02e36d9caf3be75d5bcb9",
+      "byte_count": 3929139,
+      "model": "claude-opus-5",
+      "seed": 404,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "claude-opus-5/seed-405/claude-opus-5-seed-405.jsonl",
+      "sha256": "sha256:03e642204e60b20fc313aaa18af795ce14edc1e7c03c51abc5244715b551f0dc",
+      "byte_count": 3869067,
+      "model": "claude-opus-5",
+      "seed": 405,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "claude-opus-5/seed-406/claude-opus-5-seed-406.jsonl",
+      "sha256": "sha256:0ccdb60b8767971a5a030bfd7578772345bd2f19e074aa32c5b211d6a7d534dc",
+      "byte_count": 3848167,
+      "model": "claude-opus-5",
+      "seed": 406,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "claude-opus-5/seed-407/claude-opus-5-seed-407.jsonl",
+      "sha256": "sha256:4a1dbd519bfaab0046bfcf44545c0fa2525719d05af0cb4896d7b85d24f9431d",
+      "byte_count": 3776469,
+      "model": "claude-opus-5",
+      "seed": 407,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "claude-opus-5/seed-408/claude-opus-5-seed-408.jsonl",
+      "sha256": "sha256:37969ad323d3a4580b9eff6ae3ca7990973129a07500f3225dc04f66789a6d70",
+      "byte_count": 3810780,
+      "model": "claude-opus-5",
+      "seed": 408,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "claude-opus-5/seed-409/claude-opus-5-seed-409.jsonl",
+      "sha256": "sha256:0e949846f20cfd3f097dcbca567d0d9ba4b4cf5d573ddc93d0fc5043967571fe",
+      "byte_count": 3970367,
+      "model": "claude-opus-5",
+      "seed": 409,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "gpt-5.6-sol/seed-400/gpt-5.6-sol-seed-400.jsonl",
+      "sha256": "sha256:73a817b9a49f0118761403c567e860e333c7230fa262ba78ebc47a16e79d99ed",
+      "byte_count": 2946297,
+      "model": "gpt-5.6-sol",
+      "seed": 400,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "gpt-5.6-sol/seed-401/gpt-5.6-sol-seed-401.jsonl",
+      "sha256": "sha256:1dd5dee6f3d7bebdd4aec4d28c5f143c701127f194bb33ba4e5370c8fcf81c7f",
+      "byte_count": 2847000,
+      "model": "gpt-5.6-sol",
+      "seed": 401,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "gpt-5.6-sol/seed-402/gpt-5.6-sol-seed-402.jsonl",
+      "sha256": "sha256:f19bffcc2f713f30be7492c02de8d4a521ff79d1093b5880a85302d29b9fedb6",
+      "byte_count": 2957246,
+      "model": "gpt-5.6-sol",
+      "seed": 402,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "gpt-5.6-sol/seed-403/gpt-5.6-sol-seed-403.jsonl",
+      "sha256": "sha256:e38a5300731490730bb673aea5ff7025910357169af4c2cba5e921cdca1f5951",
+      "byte_count": 2974350,
+      "model": "gpt-5.6-sol",
+      "seed": 403,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "gpt-5.6-sol/seed-404/gpt-5.6-sol-seed-404.jsonl",
+      "sha256": "sha256:fdadced1a4ecfb87a1a27872d6343e192050173ca508430a2424b572ad3a5d43",
+      "byte_count": 2993164,
+      "model": "gpt-5.6-sol",
+      "seed": 404,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "gpt-5.6-sol/seed-405/gpt-5.6-sol-seed-405.jsonl",
+      "sha256": "sha256:c1a3dbfb0a12cb771b7e3c0ca17b2c9b95da092d9ed91550b2cac897d757b157",
+      "byte_count": 2877640,
+      "model": "gpt-5.6-sol",
+      "seed": 405,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "gpt-5.6-sol/seed-406/gpt-5.6-sol-seed-406.jsonl",
+      "sha256": "sha256:733002b3ed841bbc916a73f9a06642be244460003a82d8e1b6a037a950fd5db7",
+      "byte_count": 2863792,
+      "model": "gpt-5.6-sol",
+      "seed": 406,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "gpt-5.6-sol/seed-407/gpt-5.6-sol-seed-407.jsonl",
+      "sha256": "sha256:ad899d0433c044737f52c4c6729bd2af3b3eaae8470ccb3f61419d0f68e6653e",
+      "byte_count": 2857056,
+      "model": "gpt-5.6-sol",
+      "seed": 407,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "gpt-5.6-sol/seed-408/gpt-5.6-sol-seed-408.jsonl",
+      "sha256": "sha256:7e4f7f9688ad994d7c18e035ded96d20a7bb8ad781d1776ee2dc78d151442854",
+      "byte_count": 2889159,
+      "model": "gpt-5.6-sol",
+      "seed": 408,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "gpt-5.6-sol/seed-409/gpt-5.6-sol-seed-409.jsonl",
+      "sha256": "sha256:7102c338fe21889dff3830bf2c542b44b11408d59db8fdfd76d0f99554e43182",
+      "byte_count": 3054390,
+      "model": "gpt-5.6-sol",
+      "seed": 409,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "grok-4.6/seed-400/grok-4.6-seed-400.jsonl",
+      "sha256": "sha256:a8ceabe3faeb5267c3932f3ba0a93437084a0027d03429d92b98e211854084ab",
+      "byte_count": 3282894,
+      "model": "grok-4.6",
+      "seed": 400,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "grok-4.6/seed-401/grok-4.6-seed-401.jsonl",
+      "sha256": "sha256:9b96a4a0f3a8bd3e1d8dd9e567b7c9db48b8a8bbbb7bd3e3b2cb2b13eae693a9",
+      "byte_count": 3235949,
+      "model": "grok-4.6",
+      "seed": 401,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "grok-4.6/seed-402/grok-4.6-seed-402.jsonl",
+      "sha256": "sha256:4fafc86d29ab25d18eaf87a3fe8d2cbbcd8cd8c8a79abf1e3f4036216376cc2e",
+      "byte_count": 3324912,
+      "model": "grok-4.6",
+      "seed": 402,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "grok-4.6/seed-403/grok-4.6-seed-403.jsonl",
+      "sha256": "sha256:1ec8febff00e01d7d7d3ab34fa3acdebdbddd9da1826ecc838bfc0df4bb43431",
+      "byte_count": 3294981,
+      "model": "grok-4.6",
+      "seed": 403,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "grok-4.6/seed-404/grok-4.6-seed-404.jsonl",
+      "sha256": "sha256:2bc516e8999a17fcdcb2bb8fa773e1d9248ef159b787521a555f5460a090dfb3",
+      "byte_count": 3266665,
+      "model": "grok-4.6",
+      "seed": 404,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "grok-4.6/seed-405/grok-4.6-seed-405.jsonl",
+      "sha256": "sha256:3d84b35c1e19fa11b670b8642b0ae618e4883a90870b19b44b3e530a46597a0d",
+      "byte_count": 3201944,
+      "model": "grok-4.6",
+      "seed": 405,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "grok-4.6/seed-406/grok-4.6-seed-406.jsonl",
+      "sha256": "sha256:5341ea02a506de4ea63a724b54dea687359963ad94deab5211fed6d0c45ae989",
+      "byte_count": 3316051,
+      "model": "grok-4.6",
+      "seed": 406,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "grok-4.6/seed-407/grok-4.6-seed-407.jsonl",
+      "sha256": "sha256:6ae4f767a75a5770590354ade04b4bef23460fb8b7e1bfbcfd2d2ab002a7d117",
+      "byte_count": 3260888,
+      "model": "grok-4.6",
+      "seed": 407,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "grok-4.6/seed-408/grok-4.6-seed-408.jsonl",
+      "sha256": "sha256:e3aaa91012b5f06e7fb797e49f1ff44949b8940150c09fbc9f4aef0c5f8558b9",
+      "byte_count": 3353075,
+      "model": "grok-4.6",
+      "seed": 408,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "grok-4.6/seed-409/grok-4.6-seed-409.jsonl",
+      "sha256": "sha256:1ed1d404f802cd956c6dbed6ee72dcbe36e142900523e1a5829e27b79b4f0b62",
+      "byte_count": 3600545,
+      "model": "grok-4.6",
+      "seed": 409,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "muse-spark-1.2/seed-400/muse-spark-1.2-seed-400.jsonl",
+      "sha256": "sha256:4a8be5e960c8b6c61ea3abf6165f4a568c906cc9749ed135beb4abd95b40e544",
+      "byte_count": 2880466,
+      "model": "muse-spark-1.2",
+      "seed": 400,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "muse-spark-1.2/seed-401/muse-spark-1.2-seed-401.jsonl",
+      "sha256": "sha256:46afc1e4a83ac12f00c1fddbcae4e9f4aed00f72678525a2f391497b0ad71435",
+      "byte_count": 2882508,
+      "model": "muse-spark-1.2",
+      "seed": 401,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "muse-spark-1.2/seed-402/muse-spark-1.2-seed-402.jsonl",
+      "sha256": "sha256:65c382a64f0c6ed3fc97dd344c6e0e946700b83917b1ff05af5d07f54aa87933",
+      "byte_count": 2974791,
+      "model": "muse-spark-1.2",
+      "seed": 402,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "muse-spark-1.2/seed-403/muse-spark-1.2-seed-403.jsonl",
+      "sha256": "sha256:da69789827828e07ad99d627d2ecdcddf15d5999bd2be79abfe57ea3ad0241dc",
+      "byte_count": 2943845,
+      "model": "muse-spark-1.2",
+      "seed": 403,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "muse-spark-1.2/seed-404/muse-spark-1.2-seed-404.jsonl",
+      "sha256": "sha256:112e3e9b720d3c5402d94d01c2fb64f3206ea11960936cc1deb84630c00f6cd5",
+      "byte_count": 2904343,
+      "model": "muse-spark-1.2",
+      "seed": 404,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "muse-spark-1.2/seed-405/muse-spark-1.2-seed-405.jsonl",
+      "sha256": "sha256:643fecb939727c45b71f031b9b34031036fa952c6258f5619512022025ce4f4f",
+      "byte_count": 2853692,
+      "model": "muse-spark-1.2",
+      "seed": 405,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "muse-spark-1.2/seed-406/muse-spark-1.2-seed-406.jsonl",
+      "sha256": "sha256:802d83d98f58f8f6b8f2fcc69716b6973d1b28f44d0ff44b6562301a88ccd091",
+      "byte_count": 2841119,
+      "model": "muse-spark-1.2",
+      "seed": 406,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "muse-spark-1.2/seed-407/muse-spark-1.2-seed-407.jsonl",
+      "sha256": "sha256:1a4651ae1018c617b7940e257a7c0032cc1ce28e57f57b6a510026c570deb93d",
+      "byte_count": 2852596,
+      "model": "muse-spark-1.2",
+      "seed": 407,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "muse-spark-1.2/seed-408/muse-spark-1.2-seed-408.jsonl",
+      "sha256": "sha256:02c34d9baaaf20c2e613fe23b39f97ba9711cc5531a31a357f9f0d2e3908b982",
+      "byte_count": 2882328,
+      "model": "muse-spark-1.2",
+      "seed": 408,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    },
+    {
+      "relative_path": "muse-spark-1.2/seed-409/muse-spark-1.2-seed-409.jsonl",
+      "sha256": "sha256:832decf83e6fbe0b6327ba46d251d92fd64d963c6d3f6dccb7c98bb2ba93867d",
+      "byte_count": 2953308,
+      "model": "muse-spark-1.2",
+      "seed": 409,
+      "weeks": 52,
+      "engine_config_hash": "sha256:438c1d77d284450cd4e3da2eac9fcda83c45bfb81f7a67598c62763d96602a52",
+      "prompt_hash": "sha256:06d96111ac9db67e92f1a26d00f84e986ea95d13fc2acf0825b97be112ef0d27"
+    }
+  ]
+}

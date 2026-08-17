@@ -54,6 +54,9 @@ def test_archive_bytes_are_deterministic_across_output_paths(tmp_path: Path) -> 
 
 def test_archive_refuses_detected_credentials(tmp_path: Path) -> None:
     source = tmp_path / "source"
+    # Assemble the synthetic token at runtime so the repository itself does
+    # not contain a secret-shaped credential that scanners could mistake for a
+    # live key.
     synthetic_token = "sk-" + "test-credential-value-1234567890"
     _write_transcript(source / "model" / "seed-100.jsonl", f"Bearer {synthetic_token}")
 
