@@ -347,6 +347,7 @@ def _make_live_client(args: argparse.Namespace, model: str, api_key: str | None)
         args.base_url,
         model,
         effort=None if args.effort == "not-exposed" else args.effort,
+        max_output_tokens=args.max_output_tokens,
         long_context_threshold_tokens=args.long_context_threshold_tokens,
         long_context_input_price_per_million=args.long_context_input_price_per_million,
         long_context_cached_input_price_per_million=args.long_context_cached_input_price_per_million,
@@ -358,15 +359,23 @@ def _make_live_client(args: argparse.Namespace, model: str, api_key: str | None)
 
 def _require_configured_pricing(client: Any) -> None:
     pricing = getattr(client, "pricing_metadata", {})
+    source = pricing.get("source") if isinstance(pricing, dict) else None
     if (
         not isinstance(pricing, dict)
-        or pricing.get("source") == "unpriced"
-        or float(pricing.get("input_price_per_million", 0.0)) <= 0.0
-        or float(pricing.get("output_price_per_million", 0.0)) <= 0.0
+        or source == "unpriced"
+        or float(pricing.get("input_price_per_million", 0.0)) < 0.0
+        or float(pricing.get("output_price_per_million", 0.0)) < 0.0
+        or (
+            source != "explicit"
+            and (
+                float(pricing.get("input_price_per_million", 0.0)) == 0.0
+                or float(pricing.get("output_price_per_million", 0.0)) == 0.0
+            )
+        )
     ):
         raise ValueError(
             f"pricing is not configured for model {getattr(client, 'model', 'unknown')}; "
-            "supply explicit input/output prices before running"
+            "supply explicit input/output prices before running (zero is allowed when explicitly declared)"
         )
     print(
         "Pricing configured: "

@@ -276,6 +276,7 @@ class OpenAICompatibleClient:
         timeout_seconds: float = 120.0,
         temperature: float = 0.2,
         effort: str | None = None,
+        max_output_tokens: int = 4_096,
         input_price_per_million: float | None = None,
         cached_input_price_per_million: float | None = None,
         output_price_per_million: float | None = None,
@@ -295,6 +296,7 @@ class OpenAICompatibleClient:
         self.timeout_seconds = timeout_seconds
         self.temperature = temperature
         self.effort = effort
+        self.max_output_tokens = max(1, int(max_output_tokens))
         default_pricing = model_pricing(model) or {}
         explicit_pricing = any(
             value is not None
@@ -364,7 +366,10 @@ class OpenAICompatibleClient:
         if max_prompt_tokens is not None and int(max_prompt_tokens) <= 0:
             raise ValueError("max prompt token limit must be positive")
         self.max_prompt_tokens = int(max_prompt_tokens) if max_prompt_tokens is not None else None
-        self.sampling_parameters = {"temperature": self.temperature}
+        self.sampling_parameters = {
+            "temperature": self.temperature,
+            "max_output_tokens": self.max_output_tokens,
+        }
         if self.effort is not None:
             self.sampling_parameters["effort"] = self.effort
         self.pricing_metadata = {
@@ -402,6 +407,7 @@ class OpenAICompatibleClient:
                 "model": self.model,
                 "messages": messages,
                 "response_format": {"type": "json_object"},
+                "max_tokens": self.max_output_tokens,
             }
             if self.effort is not None:
                 payload["reasoning_effort"] = self.effort
