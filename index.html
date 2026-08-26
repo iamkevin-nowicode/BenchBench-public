@@ -199,13 +199,13 @@
           <p>These are the official v0.2 public results: four models, the same ten public seeds, and 52 simulated weeks per episode. Higher counted 1RM is better.</p>
         </div>
         <div class="board-note"><strong>Read the caveat.</strong> Claude Opus 5 has a 102.00 kg raw diagnostic mean, but 3 of 10 seeds crossed the pain limit. Its official counted mean is withheld; it is shown as a diagnostic, not a ranking.</div>
-        <div class="board-note secondary"><strong>OX Alpha is exploratory.</strong> Added 8/25/2026, it completed a separate 10-seed run under the same engine and prompt, but it was not part of the pre-registered four-model v0.2 leaderboard. New models can be added as labeled comparisons without rewriting the frozen board. Its 102.75 kg raw mean is shown for context; 3 seeds crossed the pain limit, so no counted mean is reportable.</div>
+        <div class="board-note secondary"><strong>Update · 8/26/2026.</strong> OX Alpha was revealed to be GLM 5.3 Flash. The exploratory run was added on 8/25/2026 and completed under the same engine and prompt, but it was not part of the pre-registered four-model v0.2 leaderboard. New models can be added as labeled comparisons without rewriting the frozen board. Its 102.75 kg raw mean is shown for context; 3 seeds crossed the pain limit, so no counted mean is reportable.</div>
         <div class="model-grid">
           <article class="model" style="--accent:var(--teal)"><img src="images/grok%204.5.png" alt="Grok model character illustration"><span class="rank">01 / counted</span><h3>Grok 4.6</h3><div class="score"><strong>101.19</strong><span>kg</span></div><small>10/10 seeds · $1.15 / episode</small></article>
           <article class="model" style="--accent:var(--blue)"><img src="images/muse%20spark%201.2.png" alt="Muse Spark model character illustration"><span class="rank">02 / counted</span><h3>Muse Spark 1.2</h3><div class="score"><strong>101.03</strong><span>kg</span></div><small>10/10 seeds · $1.10 / episode</small></article>
           <article class="model" style="--accent:#3977c9"><img src="images/gpt%205.6%20sol.png" alt="GPT-5.6 Sol model character illustration"><span class="rank">03 / counted</span><h3>GPT-5.6 Sol</h3><div class="score"><strong>96.41</strong><span>kg</span></div><small>10/10 seeds · $3.13 / episode</small></article>
           <article class="model" style="--accent:var(--gold)"><img src="images/opus%205.png" alt="Claude Opus 5 model character illustration"><span class="rank">04 / diagnostic</span><h3>Claude Opus 5</h3><div class="score"><strong>102.00</strong><span>kg raw</span></div><small class="void">7/10 counted · 3 pain-invalid</small></article>
-          <article class="model" style="--accent:#7943b9"><div class="model-mark" role="img" aria-label="OX Alpha typographic mark"><div><strong>OX</strong><span>alpha</span></div></div><span class="rank">05 / exploratory</span><h3>OX Alpha</h3><div class="score"><strong>102.75</strong><span>kg raw</span></div><small class="void">7/10 counted · added 8/25/2026</small></article>
+          <article class="model" style="--accent:#7943b9"><img src="images/glm%205.3%20flash.png" alt="GLM 5.3 Flash character illustration, formerly OX Alpha"><span class="rank">05 / exploratory</span><h3>GLM 5.3 Flash</h3><div class="score"><strong>102.75</strong><span>kg raw</span></div><small class="void">formerly OX Alpha · 7/10 counted · added 8/25/2026</small></article>
         </div>
         <div class="chart-grid" style="margin-top:36px">
           <figure class="chart-card">
@@ -216,7 +216,7 @@
           </figure>
           <figure class="chart-card">
             <h3>Price to performance</h3>
-            <p class="chart-intro">Direct-provider token cost for one 52-week episode against the final 1RM result. OX Alpha is omitted because its exploratory transcript recorded $0.00, not a price.</p>
+            <p class="chart-intro">Direct-provider token cost for one 52-week episode against the final 1RM result. GLM 5.3 Flash is omitted because its exploratory transcript recorded $0.00, not a price.</p>
             <div class="chart-wrap"><svg id="cost-chart" class="chart" viewBox="0 0 760 320" role="img" aria-label="Episode cost compared with final one rep max"></svg></div>
             <figcaption class="caption">The cheap corner is also the strong corner in this run. That is an operational observation, not a claim about intelligence.</figcaption>
           </figure>
@@ -251,7 +251,7 @@
     <div class="wrap">
       <p>Bench-bench v0.2 public run · four models × ten public seeds (400–409) × 52 simulated weeks</p>
       <p class="hash">Engine sha256:438c1d77 · prompt sha256:06d96111 · source: reports/PUBLIC_LEADERBOARD.json</p>
-      <p>Official means require 10/10 counted seeds. OX Alpha is shown as a clearly labeled exploratory comparison, not an official leaderboard entry.</p>
+      <p>Official means require 10/10 counted seeds. GLM 5.3 Flash (formerly OX Alpha) is shown as a clearly labeled exploratory comparison, not an official leaderboard entry.</p>
       <p style="margin-top:15px"><a href="https://bench-bench.goatcounter.com/" rel="noopener">Analytics</a></p>
     </div>
   </footer>
@@ -263,7 +263,7 @@
       {id:"muse", name:"Muse Spark 1.2", color:"#168477", mean:101.027, cost:1.09562, status:"counted", scores:[102.03,103.77,101.00,97.17,104.45,101.78,98.12,100.38,103.93,97.64]},
       {id:"gpt", name:"GPT-5.6 Sol", color:"#3977c9", mean:96.41, cost:3.12905, status:"counted", scores:[95.42,97.49,93.38,96.48,96.71,97.23,94.62,97.76,97.37,97.64]},
       {id:"opus", name:"Claude Opus 5", color:"#b67513", mean:102.00, cost:6.12044, status:"diagnostic", counted:"7/10", invalid:[2,3,8], scores:[102.34,106.28,99.95,98.51,100.96,101.92,105.34,100.01,103.14,101.55]},
-      {id:"ox", name:"OX Alpha", color:"#7943b9", mean:102.75, cost:null, status:"exploratory", counted:"7/10", invalid:[1,2,3], scores:[99.43,105.00,103.50,94.27,101.72,108.07,103.89,104.54,105.05,102.03]}
+      {id:"glm", name:"GLM 5.3 Flash", color:"#7943b9", mean:102.75, cost:null, status:"exploratory", counted:"7/10", invalid:[1,2,3], scores:[99.43,105.00,103.50,94.27,101.72,108.07,103.89,104.54,105.05,102.03]}
     ];
     const ns = "http://www.w3.org/2000/svg";
     const tip = document.querySelector("#chart-tip");
