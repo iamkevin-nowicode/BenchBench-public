@@ -81,10 +81,14 @@
     .section-head > p { max-width: 530px; margin: 0; color: var(--muted); }
     .board-note { margin-bottom: 25px; padding: 15px 18px; background: var(--red-soft); border: 1.5px solid var(--red); color: #743127; }
     .board-note strong { color: var(--red); }
-    .model-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+    .board-note.secondary { margin-top: -10px; background: var(--plate); border-color: var(--ink); color: var(--muted); }
+    .model-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
     .model { position: relative; padding: 14px 14px 16px; background: var(--plate); border: 1.5px solid var(--ink); box-shadow: var(--shadow); }
     .model::before { content: ""; position: absolute; inset: 0 0 auto; height: 5px; background: var(--accent); }
     .model img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; margin-bottom: 13px; background: white; }
+    .model-mark { display: grid; place-items: center; aspect-ratio: 1; margin-bottom: 13px; background: #e9e2f4; color: #44247a; border: 1.5px dashed #7943b9; font-family: var(--display); }
+    .model-mark strong { display: block; font-size: clamp(2.8rem, 5vw, 4.5rem); line-height: .78; letter-spacing: -.1em; }
+    .model-mark span { display: block; margin-top: 13px; font: .58rem var(--mono); letter-spacing: .18em; text-transform: uppercase; }
     .model .rank { color: var(--muted); font: .6rem var(--mono); letter-spacing: .13em; text-transform: uppercase; }
     .model h3 { margin: 7px 0 7px; font-size: 1.18rem; }
     .score { min-height: 35px; display: flex; align-items: baseline; gap: 6px; }
@@ -103,11 +107,19 @@
     .chart .label { fill: var(--ink); font: 13px var(--display); }
     .chart .axis { stroke: var(--ink); stroke-width: 1.2; }
     .chart .gridline { stroke: var(--rule); stroke-width: 1; }
+    .chart-mark { cursor: pointer; }
+    .chart-mark:focus { outline: none; stroke-width: 3; }
     .caption { margin: 11px 0 0; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--muted); font: .63rem/1.45 var(--mono); }
     .legend { display: flex; flex-wrap: wrap; gap: 7px 15px; margin-top: 10px; color: var(--muted); font: .6rem var(--mono); }
     .legend span { display: inline-flex; align-items: center; gap: 5px; }
     .dot { width: 9px; height: 9px; display: inline-block; border-radius: 50%; background: var(--dot); }
     .dot.hollow { border: 2px solid var(--red); background: transparent; }
+    .chart-controls { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+    .chart-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid var(--rule); background: transparent; color: var(--muted); font: .6rem var(--mono); cursor: pointer; }
+    .chart-toggle:hover, .chart-toggle:focus-visible { color: var(--ink); border-color: var(--ink); }
+    .chart-toggle[aria-pressed="false"] { opacity: .42; text-decoration: line-through; }
+    .chart-toggle .dot { flex: 0 0 auto; }
+    .chart-tip { position: fixed; z-index: 30; display: none; max-width: 260px; padding: 9px 11px; border: 1.5px solid var(--ink); background: var(--plate); box-shadow: 4px 5px 0 rgba(23,37,54,.14); color: var(--ink); white-space: pre-line; font: .67rem/1.45 var(--mono); pointer-events: none; }
     .links { display: flex; flex-wrap: wrap; gap: 12px 22px; margin-top: 23px; font: .67rem var(--mono); text-transform: uppercase; }
     .links a { color: var(--muted); }
     .links a:hover { color: var(--red); }
@@ -129,6 +141,7 @@
       .chart-card.wide { grid-column: auto; }
       h1 { font-size: clamp(2.4rem, 8vw, 5rem); }
     }
+    @media (max-width: 1100px) and (min-width: 901px) { .model-grid { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 620px) {
       .wrap { width: calc(100vw - 28px); }
       .nav { min-height: 61px; gap: 10px; }
@@ -185,11 +198,13 @@
           <p>These are the official v0.2 public results: four models, the same ten public seeds, and 52 simulated weeks per episode. Higher counted 1RM is better.</p>
         </div>
         <div class="board-note"><strong>Read the caveat.</strong> Claude Opus 5 has a 102.00 kg raw diagnostic mean, but 3 of 10 seeds crossed the pain limit. Its official counted mean is withheld; it is shown as a diagnostic, not a ranking.</div>
+        <div class="board-note secondary"><strong>OX Alpha is exploratory.</strong> It completed a separate 10-seed run under the same engine and prompt, but it was not part of the pre-registered four-model v0.2 leaderboard. Its 102.75 kg raw mean is shown for context; 3 seeds crossed the pain limit, so no counted mean is reportable.</div>
         <div class="model-grid">
           <article class="model" style="--accent:var(--teal)"><img src="images/grok%204.5.png" alt="Grok model character illustration"><span class="rank">01 / counted</span><h3>Grok 4.6</h3><div class="score"><strong>101.19</strong><span>kg</span></div><small>10/10 seeds · $1.15 / episode</small></article>
           <article class="model" style="--accent:var(--blue)"><img src="images/muse%20spark%201.2.png" alt="Muse Spark model character illustration"><span class="rank">02 / counted</span><h3>Muse Spark 1.2</h3><div class="score"><strong>101.03</strong><span>kg</span></div><small>10/10 seeds · $1.10 / episode</small></article>
           <article class="model" style="--accent:#3977c9"><img src="images/gpt%205.6%20sol.png" alt="GPT-5.6 Sol model character illustration"><span class="rank">03 / counted</span><h3>GPT-5.6 Sol</h3><div class="score"><strong>96.41</strong><span>kg</span></div><small>10/10 seeds · $3.13 / episode</small></article>
           <article class="model" style="--accent:var(--gold)"><img src="images/opus%205.png" alt="Claude Opus 5 model character illustration"><span class="rank">04 / diagnostic</span><h3>Claude Opus 5</h3><div class="score"><strong>102.00</strong><span>kg raw</span></div><small class="void">7/10 counted · 3 pain-invalid</small></article>
+          <article class="model" style="--accent:#7943b9"><div class="model-mark" role="img" aria-label="OX Alpha typographic mark"><div><strong>OX</strong><span>alpha</span></div></div><span class="rank">05 / exploratory</span><h3>OX Alpha</h3><div class="score"><strong>102.75</strong><span>kg raw</span></div><small class="void">7/10 counted · separate run</small></article>
         </div>
         <div class="chart-grid" style="margin-top:36px">
           <figure class="chart-card">
@@ -200,15 +215,15 @@
           </figure>
           <figure class="chart-card">
             <h3>Price to performance</h3>
-            <p class="chart-intro">Direct-provider token cost for one 52-week episode against the final 1RM result.</p>
+            <p class="chart-intro">Direct-provider token cost for one 52-week episode against the final 1RM result. OX Alpha is omitted because its exploratory transcript recorded $0.00, not a price.</p>
             <div class="chart-wrap"><svg id="cost-chart" class="chart" viewBox="0 0 760 320" role="img" aria-label="Episode cost compared with final one rep max"></svg></div>
             <figcaption class="caption">The cheap corner is also the strong corner in this run. That is an operational observation, not a claim about intelligence.</figcaption>
           </figure>
           <figure class="chart-card wide">
             <h3>Seed-by-seed results</h3>
-            <p class="chart-intro">Each line is the same model across seeds 400–409. Hollow red marks are Opus episodes that violated the pain constraint.</p>
+            <p class="chart-intro">Each line is the same model across seeds 400–409. Hover or focus a point for the exact score; use the buttons to isolate a model.</p>
             <div class="chart-wrap"><svg id="seed-chart" class="chart" viewBox="0 0 880 380" role="img" aria-label="Final one rep max by public seed and model"></svg></div>
-            <div class="legend"><span><i class="dot" style="--dot:var(--teal)"></i>Grok 4.6</span><span><i class="dot" style="--dot:var(--blue)"></i>Muse Spark 1.2</span><span><i class="dot" style="--dot:#3977c9"></i>GPT-5.6 Sol</span><span><i class="dot hollow"></i>Opus pain-invalid</span></div>
+            <div id="chart-controls" class="chart-controls" aria-label="Toggle model series"></div>
             <figcaption class="caption">Raw final 1RM by seed. Official aggregates require all ten seeds to remain counted.</figcaption>
           </figure>
         </div>
@@ -235,44 +250,68 @@
     <div class="wrap">
       <p>Bench-bench v0.2 public run · four models × ten public seeds (400–409) × 52 simulated weeks</p>
       <p class="hash">Engine sha256:438c1d77 · prompt sha256:06d96111 · source: reports/PUBLIC_LEADERBOARD.json</p>
-      <p>Official means require 10/10 counted seeds. Exploratory runs are not included in this board.</p>
+      <p>Official means require 10/10 counted seeds. OX Alpha is shown as a clearly labeled exploratory comparison, not an official leaderboard entry.</p>
       <p style="margin-top:15px"><a href="https://bench-bench.goatcounter.com/" rel="noopener">Analytics</a></p>
     </div>
   </footer>
+  <div id="chart-tip" class="chart-tip" role="status" aria-live="polite"></div>
   <script>
     const seeds = [400,401,402,403,404,405,406,407,408,409];
     const models = [
-      {name:"Grok 4.6", color:"#e5422d", mean:101.192, cost:1.14734, scores:[101.11,101.00,100.19,99.67,102.49,100.85,102.54,101.62,104.19,98.26]},
-      {name:"Muse Spark 1.2", color:"#168477", mean:101.027, cost:1.09562, scores:[102.03,103.77,101.00,97.17,104.45,101.78,98.12,100.38,103.93,97.64]},
-      {name:"GPT-5.6 Sol", color:"#3977c9", mean:96.41, cost:3.12905, scores:[95.42,97.49,93.38,96.48,96.71,97.23,94.62,97.76,97.37,97.64]},
-      {name:"Claude Opus 5", color:"#b67513", mean:102.00, cost:6.12044, invalid:[2,3,8], scores:[102.34,106.28,99.95,98.51,100.96,101.92,105.34,100.01,103.14,101.55]}
+      {id:"grok", name:"Grok 4.6", color:"#e5422d", mean:101.192, cost:1.14734, status:"counted", scores:[101.11,101.00,100.19,99.67,102.49,100.85,102.54,101.62,104.19,98.26]},
+      {id:"muse", name:"Muse Spark 1.2", color:"#168477", mean:101.027, cost:1.09562, status:"counted", scores:[102.03,103.77,101.00,97.17,104.45,101.78,98.12,100.38,103.93,97.64]},
+      {id:"gpt", name:"GPT-5.6 Sol", color:"#3977c9", mean:96.41, cost:3.12905, status:"counted", scores:[95.42,97.49,93.38,96.48,96.71,97.23,94.62,97.76,97.37,97.64]},
+      {id:"opus", name:"Claude Opus 5", color:"#b67513", mean:102.00, cost:6.12044, status:"diagnostic", counted:"7/10", invalid:[2,3,8], scores:[102.34,106.28,99.95,98.51,100.96,101.92,105.34,100.01,103.14,101.55]},
+      {id:"ox", name:"OX Alpha", color:"#7943b9", mean:102.75, cost:null, status:"exploratory", counted:"7/10", invalid:[1,2,3], scores:[99.43,105.00,103.50,94.27,101.72,108.07,103.89,104.54,105.05,102.03]}
     ];
     const ns = "http://www.w3.org/2000/svg";
+    const tip = document.querySelector("#chart-tip");
     function node(tag, attrs, parent, content) { const n=document.createElementNS(ns,tag); Object.entries(attrs||{}).forEach(([k,v])=>n.setAttribute(k,v)); if(content!=null)n.textContent=content; parent.appendChild(n); return n; }
+    function showTip(target, message, event) {
+      tip.textContent=message; tip.style.display="block";
+      const box=target.getBoundingClientRect(), x=event?event.clientX+12:box.right+8, y=event?event.clientY+12:box.top;
+      tip.style.left=Math.min(Math.max(8,x),window.innerWidth-tip.offsetWidth-8)+"px";
+      tip.style.top=Math.min(Math.max(8,y),window.innerHeight-tip.offsetHeight-8)+"px";
+    }
+    function hideTip() { tip.style.display="none"; }
+    function makeInteractive(target, message) {
+      target.classList.add("chart-mark"); target.setAttribute("tabindex","0"); target.setAttribute("role","img");
+      node("title",{},target,message);
+      target.addEventListener("pointerenter",event=>showTip(target,message,event));
+      target.addEventListener("pointermove",event=>showTip(target,message,event));
+      target.addEventListener("pointerleave",hideTip);
+      target.addEventListener("focus",()=>showTip(target,message)); target.addEventListener("blur",hideTip);
+    }
     function base(svg, left, right, top, bottom, min, max, ticks) {
       const width=+svg.viewBox.baseVal.width, height=+svg.viewBox.baseVal.height;
       const x2=width-right, y2=height-bottom, y=v=>y2-(v-min)/(max-min)*(y2-top);
       ticks.forEach(t=>{node("line",{x1:left,y1:y(t),x2:x2,y2:y(t),class:"gridline"},svg);node("text",{x:left-9,y:y(t)+4,"text-anchor":"end"},svg,String(t));});
       node("line",{x1:left,y1:top,x2:left,y2:y2,class:"axis"},svg); node("line",{x1:left,y1:y2,x2:x2,y2:y2,class:"axis"},svg); return {width,height,x2,y2,y};
     }
+    function seriesClass(index) { return "series-"+index; }
+    function statusLabel(m) { return m.status==="counted" ? "counted" : m.status+" raw"; }
     function renderMean() {
-      const svg=document.querySelector("#mean-chart"), g=base(svg,76,18,28,57,94,108,[94,98,102,106,108]), barW=105, gap=69;
-      node("defs",{},svg); const pat=node("pattern",{id:"hatch",width:8,height:8,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},svg); node("line",{x1:0,y1:0,x2:0,y2:8,stroke:"#b67513","stroke-width":3,opacity:.4},pat);
-      models.forEach((m,i)=>{const x=92+i*(barW+gap), y=g.y(m.mean); node("rect",{x,y,width:barW,height:g.y(94)-y,fill:i===3?"url(#hatch)":m.color,opacity:i===3?.8:1,stroke:m.color,"stroke-width":i===3?2:0},svg); node("text",{x:x+barW/2,y:g.y(94)+23,"text-anchor":"middle",class:"label"},svg,m.name.replace(" Spark 1.2","")); node("text",{x:x+barW/2,y:y-9,"text-anchor":"middle",class:"label"},svg,i===3?"102.00 raw":m.mean.toFixed(2)); });
+      const svg=document.querySelector("#mean-chart"), g=base(svg,76,18,28,57,92,110,[92,96,100,104,108]), barW=98, gap=26;
+      const defs=node("defs",{},svg), pat=node("pattern",{id:"hatch",width:8,height:8,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},defs); node("line",{x1:0,y1:0,x2:0,y2:8,stroke:"#b67513","stroke-width":3,opacity:.4},pat);
+      models.forEach((m,i)=>{const x=88+i*(barW+gap), y=g.y(m.mean), bar=node("rect",{x,y,width:barW,height:g.y(92)-y,fill:m.status==="counted"?m.color:"url(#hatch)",opacity:m.status==="counted"?1:.82,stroke:m.color,"stroke-width":m.status==="counted"?0:2,class:seriesClass(i)},svg); makeInteractive(bar,`${m.name}\n${m.mean.toFixed(2)} kg · ${statusLabel(m)}\n${m.status==="counted"?"10/10 seeds":(m.counted+" counted")}`); node("text",{x:x+barW/2,y:g.y(92)+23,"text-anchor":"middle",class:"label"},svg,m.name.replace(" Spark 1.2","").replace("Claude ","")); node("text",{x:x+barW/2,y:y-9,"text-anchor":"middle",class:"label"},svg,m.mean.toFixed(2)+(m.status==="counted"?"":" raw")); });
       node("text",{x:744,y:18,"text-anchor":"end"},svg,"kg");
     }
     function renderCost() {
       const svg=document.querySelector("#cost-chart"), g=base(svg,72,18,28,57,94,108,[94,98,102,106,108]);
-      const x=v=>72+Math.log(v/.9)/Math.log(7)*(g.x2-72); // log-scaled cost axis
-      models.forEach((m,i)=>{const cx=x(m.cost), cy=g.y(m.mean); node("circle",{cx,cy,r:8,fill:i===3?"var(--plate)":m.color,stroke:m.color,"stroke-width":i===3?3:2},svg); if(i===3)node("line",{x1:cx-5,y1:cy-5,x2:cx+5,y2:cy+5,stroke:"var(--red)","stroke-width":2},svg); const dx=i===2?-9:10, anchor=i===2?"end":"start"; node("text",{x:cx+dx,y:cy-11,"text-anchor":anchor,class:"label"},svg,m.name.replace(" Spark 1.2","")); node("text",{x:cx+dx,y:cy+14,"text-anchor":anchor},svg,"$"+m.cost.toFixed(2)); });
+      const x=v=>72+Math.log(v/.9)/Math.log(7)*(g.x2-72);
+      models.filter(m=>m.cost!==null).forEach((m)=>{const i=models.indexOf(m), cx=x(m.cost), cy=g.y(m.mean), mark=node("circle",{cx,cy,r:8,fill:m.status==="counted"?m.color:"var(--plate)",stroke:m.color,"stroke-width":m.status==="counted"?2:3,class:seriesClass(i)},svg); makeInteractive(mark,`${m.name}\n${m.mean.toFixed(2)} kg · ${statusLabel(m)}\n$${m.cost.toFixed(2)} per episode`); if(m.status!=="counted")node("line",{x1:cx-5,y1:cy-5,x2:cx+5,y2:cy+5,stroke:"var(--red)","stroke-width":2,class:seriesClass(i)},svg); const dx=i===2?-9:10, anchor=i===2?"end":"start"; node("text",{x:cx+dx,y:cy-11,"text-anchor":anchor,class:"label"},svg,m.name.replace(" Spark 1.2","").replace("Claude ","")); node("text",{x:cx+dx,y:cy+14,"text-anchor":anchor},svg,"$"+m.cost.toFixed(2)); });
       [1,2,4,6].forEach(t=>{const xx=x(t); node("line",{x1:xx,y1:g.y(94),x2:xx,y2:g.y(94)+5,class:"axis"},svg); node("text",{x:xx,y:g.y(94)+21,"text-anchor":"middle"},svg,"$"+t);}); node("text",{x:744,y:18,"text-anchor":"end"},svg,"cost / episode · log scale");
     }
     function renderSeeds() {
-      const svg=document.querySelector("#seed-chart"), g=base(svg,63,20,28,67,92,108,[92,96,100,104,108]), x=i=>63+i*(g.x2-63)/(seeds.length-1);
-      models.forEach((m,mi)=>{let d=""; m.scores.forEach((v,i)=>{d+=(i?"L":"M")+x(i)+" "+g.y(v)+" ";}); node("path",{d,fill:"none",stroke:m.color,"stroke-width":mi===3?1.4:2,opacity:mi===3?.7:1},svg); m.scores.forEach((v,i)=>{const invalid=m.invalid?.includes(i); node("circle",{cx:x(i),cy:g.y(v),r:invalid?6:4,fill:invalid?"var(--plate)":m.color,stroke:invalid?"var(--red)":m.color,"stroke-width":invalid?2:1},svg); if(invalid)node("line",{x1:x(i)-4,y1:g.y(v)-4,x2:x(i)+4,y2:g.y(v)+4,stroke:"var(--red)","stroke-width":1.5},svg);}); });
+      const svg=document.querySelector("#seed-chart"), g=base(svg,63,20,28,67,92,110,[92,96,100,104,108]), x=i=>63+i*(g.x2-63)/(seeds.length-1);
+      models.forEach((m,mi)=>{let d=""; m.scores.forEach((v,i)=>{d+=(i?"L":"M")+x(i)+" "+g.y(v)+" ";}); node("path",{d,fill:"none",stroke:m.color,"stroke-width":mi>=3?1.5:2,opacity:mi>=3?.72:1,class:seriesClass(mi)},svg); m.scores.forEach((v,i)=>{const invalid=m.invalid?.includes(i), mark=node("circle",{cx:x(i),cy:g.y(v),r:invalid?6:4,fill:invalid?"var(--plate)":m.color,stroke:invalid?"var(--red)":m.color,"stroke-width":invalid?2:1,class:seriesClass(mi)},svg); makeInteractive(mark,`${m.name}\nSeed ${seeds[i]} · ${v.toFixed(2)} kg\n${invalid?"excluded: pain constraint":"counted in raw series"}`); if(invalid)node("line",{x1:x(i)-4,y1:g.y(v)-4,x2:x(i)+4,y2:g.y(v)+4,stroke:"var(--red)","stroke-width":1.5,class:seriesClass(mi)},svg);}); });
       seeds.forEach((s,i)=>node("text",{x:x(i),y:g.y(92)+24,"text-anchor":"middle"},svg,String(s).slice(2))); node("text",{x:860,y:18,"text-anchor":"end"},svg,"seed suffix");
     }
-    renderMean(); renderCost(); renderSeeds();
+    function renderControls() {
+      const controls=document.querySelector("#chart-controls");
+      models.forEach((m,i)=>{const button=document.createElement("button"); button.type="button"; button.className="chart-toggle"; button.setAttribute("aria-pressed","true"); button.dataset.index=i; const swatch=document.createElement("i"); swatch.className="dot"; swatch.style.setProperty("--dot",m.color); const label=document.createElement("span"); label.textContent=m.name; button.append(swatch,label); button.addEventListener("click",()=>{const on=button.getAttribute("aria-pressed")==="true"; button.setAttribute("aria-pressed",String(!on)); document.querySelectorAll("."+seriesClass(i)).forEach(mark=>{mark.style.display=on?"none":"";});}); controls.appendChild(button); });
+    }
+    renderMean(); renderCost(); renderSeeds(); renderControls();
   </script>
   <script data-goatcounter="https://bench-bench.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
