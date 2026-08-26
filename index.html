@@ -19,6 +19,8 @@
       --rule: rgba(23, 37, 54, .18);
       --red: #e5422d;
       --red-soft: #f5d8cf;
+      --alert-ink: #743127;
+      --alert-accent: #c73625;
       --teal: #168477;
       --blue: #3977c9;
       --gold: #b67513;
@@ -79,8 +81,8 @@
     .spec span { display: block; margin-top: 6px; color: var(--muted); font: .57rem/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
     .section-head { display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 30px; }
     .section-head > p { max-width: 530px; margin: 0; color: var(--muted); }
-    .board-note { margin-bottom: 25px; padding: 15px 18px; background: var(--red-soft); border: 1.5px solid var(--red); color: #743127; }
-    .board-note strong { color: var(--red); }
+    .board-note { margin-bottom: 25px; padding: 15px 18px; background: var(--red-soft); border: 1.5px solid var(--red); color: var(--alert-ink); }
+    .board-note strong { color: var(--alert-accent); }
     .board-note.secondary { margin-top: -10px; background: var(--plate); border-color: var(--ink); color: var(--muted); }
     .model-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
     .model { position: relative; padding: 14px 14px 16px; background: var(--plate); border: 1.5px solid var(--ink); box-shadow: var(--shadow); }
@@ -96,7 +98,7 @@
     .score span { color: var(--muted); font: .6rem var(--mono); }
     .model small { display: block; margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--muted); font: .62rem/1.4 var(--mono); }
     .model .void { color: var(--red); }
-    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .chart-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
     .chart-card { min-width: 0; padding: 19px 17px 15px; background: var(--plate); border: 1.5px solid var(--ink); box-shadow: var(--shadow); }
     .chart-card.wide { grid-column: 1 / -1; }
     .chart-card h3 { margin-bottom: 5px; }
@@ -127,7 +129,7 @@
     footer p { margin: 0 0 6px; }
     footer .hash { color: var(--ink); }
     @media (prefers-color-scheme: dark) {
-      :root { --paper: #131a22; --plate: #1b2530; --ink: #eef3f1; --muted: #aeb9bd; --rule: rgba(238,243,241,.2); --red-soft: #44231d; --shadow: 6px 7px 0 rgba(0,0,0,.28); }
+      :root { --paper: #131a22; --plate: #1b2530; --ink: #eef3f1; --muted: #aeb9bd; --rule: rgba(238,243,241,.2); --red-soft: #44231d; --alert-ink: #ffd7cf; --alert-accent: #ff9b87; --shadow: 6px 7px 0 rgba(0,0,0,.28); }
       header { background: rgba(19,26,34,.9); }
       body::before { mix-blend-mode: screen; opacity: .1; }
     }
@@ -137,7 +139,6 @@
       .model-grid { grid-template-columns: repeat(2, 1fr); }
       .section-head { display: block; }
       .section-head > p { margin-top: 12px; }
-      .chart-grid { grid-template-columns: 1fr; }
       .chart-card.wide { grid-column: auto; }
       h1 { font-size: clamp(2.4rem, 8vw, 5rem); }
     }
@@ -198,13 +199,13 @@
           <p>These are the official v0.2 public results: four models, the same ten public seeds, and 52 simulated weeks per episode. Higher counted 1RM is better.</p>
         </div>
         <div class="board-note"><strong>Read the caveat.</strong> Claude Opus 5 has a 102.00 kg raw diagnostic mean, but 3 of 10 seeds crossed the pain limit. Its official counted mean is withheld; it is shown as a diagnostic, not a ranking.</div>
-        <div class="board-note secondary"><strong>OX Alpha is exploratory.</strong> It completed a separate 10-seed run under the same engine and prompt, but it was not part of the pre-registered four-model v0.2 leaderboard. Its 102.75 kg raw mean is shown for context; 3 seeds crossed the pain limit, so no counted mean is reportable.</div>
+        <div class="board-note secondary"><strong>OX Alpha is exploratory.</strong> Added 8/25/2026, it completed a separate 10-seed run under the same engine and prompt, but it was not part of the pre-registered four-model v0.2 leaderboard. New models can be added as labeled comparisons without rewriting the frozen board. Its 102.75 kg raw mean is shown for context; 3 seeds crossed the pain limit, so no counted mean is reportable.</div>
         <div class="model-grid">
           <article class="model" style="--accent:var(--teal)"><img src="images/grok%204.5.png" alt="Grok model character illustration"><span class="rank">01 / counted</span><h3>Grok 4.6</h3><div class="score"><strong>101.19</strong><span>kg</span></div><small>10/10 seeds · $1.15 / episode</small></article>
           <article class="model" style="--accent:var(--blue)"><img src="images/muse%20spark%201.2.png" alt="Muse Spark model character illustration"><span class="rank">02 / counted</span><h3>Muse Spark 1.2</h3><div class="score"><strong>101.03</strong><span>kg</span></div><small>10/10 seeds · $1.10 / episode</small></article>
           <article class="model" style="--accent:#3977c9"><img src="images/gpt%205.6%20sol.png" alt="GPT-5.6 Sol model character illustration"><span class="rank">03 / counted</span><h3>GPT-5.6 Sol</h3><div class="score"><strong>96.41</strong><span>kg</span></div><small>10/10 seeds · $3.13 / episode</small></article>
           <article class="model" style="--accent:var(--gold)"><img src="images/opus%205.png" alt="Claude Opus 5 model character illustration"><span class="rank">04 / diagnostic</span><h3>Claude Opus 5</h3><div class="score"><strong>102.00</strong><span>kg raw</span></div><small class="void">7/10 counted · 3 pain-invalid</small></article>
-          <article class="model" style="--accent:#7943b9"><div class="model-mark" role="img" aria-label="OX Alpha typographic mark"><div><strong>OX</strong><span>alpha</span></div></div><span class="rank">05 / exploratory</span><h3>OX Alpha</h3><div class="score"><strong>102.75</strong><span>kg raw</span></div><small class="void">7/10 counted · separate run</small></article>
+          <article class="model" style="--accent:#7943b9"><div class="model-mark" role="img" aria-label="OX Alpha typographic mark"><div><strong>OX</strong><span>alpha</span></div></div><span class="rank">05 / exploratory</span><h3>OX Alpha</h3><div class="score"><strong>102.75</strong><span>kg raw</span></div><small class="void">7/10 counted · added 8/25/2026</small></article>
         </div>
         <div class="chart-grid" style="margin-top:36px">
           <figure class="chart-card">
@@ -299,7 +300,7 @@
     function renderCost() {
       const svg=document.querySelector("#cost-chart"), g=base(svg,72,18,28,57,94,108,[94,98,102,106,108]);
       const x=v=>72+Math.log(v/.9)/Math.log(7)*(g.x2-72);
-      models.filter(m=>m.cost!==null).forEach((m)=>{const i=models.indexOf(m), cx=x(m.cost), cy=g.y(m.mean), mark=node("circle",{cx,cy,r:8,fill:m.status==="counted"?m.color:"var(--plate)",stroke:m.color,"stroke-width":m.status==="counted"?2:3,class:seriesClass(i)},svg); makeInteractive(mark,`${m.name}\n${m.mean.toFixed(2)} kg · ${statusLabel(m)}\n$${m.cost.toFixed(2)} per episode`); if(m.status!=="counted")node("line",{x1:cx-5,y1:cy-5,x2:cx+5,y2:cy+5,stroke:"var(--red)","stroke-width":2,class:seriesClass(i)},svg); const dx=i===2?-9:10, anchor=i===2?"end":"start"; node("text",{x:cx+dx,y:cy-11,"text-anchor":anchor,class:"label"},svg,m.name.replace(" Spark 1.2","").replace("Claude ","")); node("text",{x:cx+dx,y:cy+14,"text-anchor":anchor},svg,"$"+m.cost.toFixed(2)); });
+      models.filter(m=>m.cost!==null).forEach((m)=>{const i=models.indexOf(m), cx=x(m.cost), cy=g.y(m.mean), mark=node("circle",{cx,cy,r:8,fill:m.status==="counted"?m.color:"var(--plate)",stroke:m.color,"stroke-width":m.status==="counted"?2:3,class:seriesClass(i)},svg); makeInteractive(mark,`${m.name}\n${m.mean.toFixed(2)} kg · ${statusLabel(m)}\n$${m.cost.toFixed(2)} per episode`); if(m.status!=="counted")node("line",{x1:cx-5,y1:cy-5,x2:cx+5,y2:cy+5,stroke:"var(--red)","stroke-width":2,class:seriesClass(i)},svg); const offsets={0:{dx:-10,labelDy:-15,costDy:15,anchor:"end"},1:{dx:10,labelDy:17,costDy:34,anchor:"start"},2:{dx:-9,labelDy:-11,costDy:14,anchor:"end"},3:{dx:10,labelDy:-11,costDy:14,anchor:"start"}}, offset=offsets[i]||{dx:10,labelDy:-11,costDy:14,anchor:"start"}; node("text",{x:cx+offset.dx,y:cy+offset.labelDy,"text-anchor":offset.anchor,class:"label"},svg,m.name.replace(" Spark 1.2","").replace("Claude ","")); node("text",{x:cx+offset.dx,y:cy+offset.costDy,"text-anchor":offset.anchor},svg,"$"+m.cost.toFixed(2)); });
       [1,2,4,6].forEach(t=>{const xx=x(t); node("line",{x1:xx,y1:g.y(94),x2:xx,y2:g.y(94)+5,class:"axis"},svg); node("text",{x:xx,y:g.y(94)+21,"text-anchor":"middle"},svg,"$"+t);}); node("text",{x:744,y:18,"text-anchor":"end"},svg,"cost / episode · log scale");
     }
     function renderSeeds() {
