@@ -1,13 +1,279 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="refresh" content="0; url=bench-bench-report.html">
-    <meta name="description" content="Bench-bench: a long-horizon benchmark for AI coaching under uncertainty and disruption.">
-    <link rel="canonical" href="bench-bench-report.html">
-    <title>Bench-bench report</title>
-  </head>
-  <body>
-    <p><a href="bench-bench-report.html">Open the Bench-bench report</a></p>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bench-bench — Can your model lift*?</title>
+  <meta name="description" content="Bench-bench is a 52-week benchmark for AI planning under training, money, time, and family disruption.">
+  <link rel="canonical" href="https://bench-bench.xyz/">
+  <meta property="og:title" content="Bench-bench — Can your model lift*?">
+  <meta property="og:description" content="A year-long simulated coaching test for AI models.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bench-bench.xyz/">
+  <style>
+    :root {
+      --paper: #f7f1e7;
+      --plate: #fffdf8;
+      --ink: #172536;
+      --muted: #5d6873;
+      --rule: rgba(23, 37, 54, .18);
+      --red: #e5422d;
+      --red-soft: #f5d8cf;
+      --teal: #168477;
+      --blue: #3977c9;
+      --gold: #b67513;
+      --shadow: 6px 7px 0 rgba(23, 37, 54, .12);
+      --display: Georgia, "Times New Roman", serif;
+      --body: "Avenir Next", Avenir, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      --mono: "SF Mono", SFMono-Regular, Menlo, Consolas, ui-monospace, monospace;
+      --max: 1120px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(rgba(23,37,54,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23,37,54,.045) 1px, transparent 1px),
+        var(--paper);
+      background-size: 32px 32px;
+      font: 16px/1.6 var(--body);
+      overflow-x: hidden;
+    }
+    body::before { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .18; background-image: radial-gradient(rgba(23,37,54,.1) .55px, transparent .55px); background-size: 5px 5px; mix-blend-mode: multiply; }
+    a { color: inherit; }
+    .wrap { width: min(var(--max), calc(100% - 44px)); max-width: 100%; margin: 0 auto; }
+    .mono, .eyebrow, nav a { font-family: var(--mono); }
+    :focus-visible { outline: 3px solid var(--red); outline-offset: 4px; }
+    header { position: sticky; top: 0; z-index: 5; border-bottom: 1.5px solid var(--rule); background: rgba(247,241,231,.9); backdrop-filter: blur(10px); }
+    .nav { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 22px; }
+    .brand { display: inline-flex; align-items: center; text-decoration: none; }
+    .brand img { width: 146px; display: block; }
+    nav { display: flex; align-items: center; gap: 21px; }
+    nav a { color: var(--muted); font-size: .68rem; letter-spacing: .09em; text-decoration: none; text-transform: uppercase; }
+    nav a:hover { color: var(--red); }
+    main { padding-bottom: 72px; }
+    section { padding: 78px 0; border-bottom: 1.5px solid var(--rule); }
+    .hero { padding: 82px 0 68px; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: 60px; align-items: center; }
+    .hero-grid > * { min-width: 0; }
+    .eyebrow { margin: 0 0 15px; color: var(--red); font-size: .67rem; letter-spacing: .17em; text-transform: uppercase; }
+    h1, h2, h3 { margin-top: 0; font-family: var(--display); font-weight: 600; letter-spacing: -.025em; }
+    h1 { max-width: 700px; margin-bottom: 17px; font-size: clamp(3.5rem, 8vw, 7rem); line-height: .9; }
+    h2 { margin-bottom: 10px; font-size: clamp(2rem, 4.3vw, 4rem); line-height: .98; }
+    h3 { margin-bottom: 7px; font-size: 1.25rem; line-height: 1.1; }
+    p { margin: 0 0 1rem; }
+    .asterisk { display: block; margin: 0 0 22px; color: var(--muted); font: .7rem var(--mono); letter-spacing: .1em; text-transform: lowercase; }
+    .lede { max-width: 630px; color: var(--muted); font-size: clamp(1.03rem, 1.7vw, 1.25rem); line-height: 1.55; }
+    .hero-note { max-width: 610px; margin-top: 25px; padding-top: 18px; border-top: 1.5px solid var(--rule); color: var(--muted); }
+    .cta { display: inline-flex; align-items: center; gap: 10px; margin-top: 7px; padding: 11px 14px; border: 1.5px solid var(--ink); background: var(--plate); box-shadow: 4px 5px 0 rgba(23,37,54,.12); font: .68rem var(--mono); letter-spacing: .07em; text-decoration: none; text-transform: uppercase; }
+    .cta:hover { color: var(--red); transform: translate(1px, 1px); box-shadow: 2px 3px 0 rgba(23,37,54,.12); }
+    .hero-plate { position: relative; padding: 17px; background: var(--plate); border: 1.5px solid var(--ink); box-shadow: var(--shadow); transform: rotate(1deg); }
+    .hero-plate::before { content: "FIELD NOTES / V0.2"; position: absolute; right: 13px; top: -13px; padding: 3px 7px; background: var(--red); color: white; font: .58rem var(--mono); letter-spacing: .13em; transform: rotate(-3deg); }
+    .hero-plate img { width: 100%; display: block; }
+    .plate-copy { margin: 14px 0 0; color: var(--muted); font: .66rem/1.5 var(--mono); }
+    .specs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 27px; background: var(--ink); border: 1.5px solid var(--ink); }
+    .spec { padding: 14px 12px; background: var(--plate); }
+    .spec strong { display: block; font: 1.5rem/1 var(--display); }
+    .spec span { display: block; margin-top: 6px; color: var(--muted); font: .57rem/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 30px; }
+    .section-head > p { max-width: 530px; margin: 0; color: var(--muted); }
+    .board-note { margin-bottom: 25px; padding: 15px 18px; background: var(--red-soft); border: 1.5px solid var(--red); color: #743127; }
+    .board-note strong { color: var(--red); }
+    .model-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+    .model { position: relative; padding: 14px 14px 16px; background: var(--plate); border: 1.5px solid var(--ink); box-shadow: var(--shadow); }
+    .model::before { content: ""; position: absolute; inset: 0 0 auto; height: 5px; background: var(--accent); }
+    .model img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; margin-bottom: 13px; background: white; }
+    .model .rank { color: var(--muted); font: .6rem var(--mono); letter-spacing: .13em; text-transform: uppercase; }
+    .model h3 { margin: 7px 0 7px; font-size: 1.18rem; }
+    .score { min-height: 35px; display: flex; align-items: baseline; gap: 6px; }
+    .score strong { font: 1.85rem/1 var(--display); }
+    .score span { color: var(--muted); font: .6rem var(--mono); }
+    .model small { display: block; margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--muted); font: .62rem/1.4 var(--mono); }
+    .model .void { color: var(--red); }
+    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .chart-card { min-width: 0; padding: 19px 17px 15px; background: var(--plate); border: 1.5px solid var(--ink); box-shadow: var(--shadow); }
+    .chart-card.wide { grid-column: 1 / -1; }
+    .chart-card h3 { margin-bottom: 5px; }
+    .chart-intro { min-height: 42px; color: var(--muted); font-size: .82rem; line-height: 1.45; }
+    .chart-wrap { overflow-x: auto; margin-top: 10px; }
+    svg.chart { display: block; width: 100%; min-width: 540px; height: auto; }
+    .chart text { fill: var(--muted); font: 10px var(--mono); }
+    .chart .label { fill: var(--ink); font: 13px var(--display); }
+    .chart .axis { stroke: var(--ink); stroke-width: 1.2; }
+    .chart .gridline { stroke: var(--rule); stroke-width: 1; }
+    .caption { margin: 11px 0 0; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--muted); font: .63rem/1.45 var(--mono); }
+    .legend { display: flex; flex-wrap: wrap; gap: 7px 15px; margin-top: 10px; color: var(--muted); font: .6rem var(--mono); }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .dot { width: 9px; height: 9px; display: inline-block; border-radius: 50%; background: var(--dot); }
+    .dot.hollow { border: 2px solid var(--red); background: transparent; }
+    .links { display: flex; flex-wrap: wrap; gap: 12px 22px; margin-top: 23px; font: .67rem var(--mono); text-transform: uppercase; }
+    .links a { color: var(--muted); }
+    .links a:hover { color: var(--red); }
+    footer { padding: 32px 0 54px; color: var(--muted); font: .63rem/1.7 var(--mono); }
+    footer p { margin: 0 0 6px; }
+    footer .hash { color: var(--ink); }
+    @media (prefers-color-scheme: dark) {
+      :root { --paper: #131a22; --plate: #1b2530; --ink: #eef3f1; --muted: #aeb9bd; --rule: rgba(238,243,241,.2); --red-soft: #44231d; --shadow: 6px 7px 0 rgba(0,0,0,.28); }
+      header { background: rgba(19,26,34,.9); }
+      body::before { mix-blend-mode: screen; opacity: .1; }
+    }
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+      .hero-plate { max-width: 560px; }
+      .model-grid { grid-template-columns: repeat(2, 1fr); }
+      .section-head { display: block; }
+      .section-head > p { margin-top: 12px; }
+      .chart-grid { grid-template-columns: 1fr; }
+      .chart-card.wide { grid-column: auto; }
+      h1 { font-size: clamp(2.4rem, 8vw, 5rem); }
+    }
+    @media (max-width: 620px) {
+      .wrap { width: calc(100vw - 28px); }
+      .nav { min-height: 61px; gap: 10px; }
+      .brand img { width: 119px; }
+      nav { gap: 8px; }
+      nav a { font-size: .49rem; letter-spacing: .025em; }
+      section { padding: 57px 0; }
+      .hero { padding-top: 59px; }
+      h1 { font-size: clamp(2.25rem, 11.5vw, 3.6rem); overflow-wrap: anywhere; }
+      .specs { grid-template-columns: 1fr; }
+      .spec { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+      .spec span { margin: 0; text-align: right; }
+      .model-grid { grid-template-columns: 1fr; }
+      .model { box-shadow: 4px 5px 0 rgba(23,37,54,.12); }
+      .chart-card { box-shadow: 4px 5px 0 rgba(23,37,54,.12); }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="/" aria-label="Bench-bench home"><img src="images/bench-bench%20logo.png" alt="Bench-bench"></a>
+      <nav aria-label="Primary navigation"><a href="#results">Results</a><a href="bench-bench-report.html">Full report</a></nav>
+    </div>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <p class="eyebrow">Long-horizon planning / v0.2</p>
+          <h1>Can your model lift*?</h1>
+          <span class="asterisk">* bro</span>
+          <p class="lede">Bench-bench puts an AI coach in a messy simulated year and asks whether it can keep Dave moving toward a stronger bench press while real life keeps interrupting.</p>
+          <p class="hero-note">Dave is 38, back in the gym after years off, and has a one rep max of 185lbs. He has a full-time job, a full-time working partner, and a six-month-old. Every week, a model plans training, recovery, childcare, groceries, purchases, time, and money.</p>
+          <a class="cta" href="#results">See the results <span aria-hidden="true">→</span></a>
+          <div class="specs" aria-label="Benchmark at a glance">
+            <div class="spec"><strong>52</strong><span>simulated weeks</span></div>
+            <div class="spec"><strong>3</strong><span>standardized tests</span></div>
+            <div class="spec"><strong>10</strong><span>public seeds / model</span></div>
+          </div>
+        </div>
+        <div class="hero-plate">
+          <img src="images/bench-bench%20logo.png" alt="Hand-drawn Bench-bench logo with a barbell">
+          <p class="plate-copy">A coach, a barbell, a newborn, and one year of decisions. The score is the lift at the end—not the plan on paper.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="results">
+      <div class="wrap">
+        <div class="section-head">
+          <div><p class="eyebrow">01 / the board</p><h2>A year of decisions, reduced to one lift.</h2></div>
+          <p>These are the official v0.2 public results: four models, the same ten public seeds, and 52 simulated weeks per episode. Higher counted 1RM is better.</p>
+        </div>
+        <div class="board-note"><strong>Read the caveat.</strong> Claude Opus 5 has a 102.00 kg raw diagnostic mean, but 3 of 10 seeds crossed the pain limit. Its official counted mean is withheld; it is shown as a diagnostic, not a ranking.</div>
+        <div class="model-grid">
+          <article class="model" style="--accent:var(--teal)"><img src="images/grok%204.5.png" alt="Grok model character illustration"><span class="rank">01 / counted</span><h3>Grok 4.6</h3><div class="score"><strong>101.19</strong><span>kg</span></div><small>10/10 seeds · $1.15 / episode</small></article>
+          <article class="model" style="--accent:var(--blue)"><img src="images/muse%20spark%201.2.png" alt="Muse Spark model character illustration"><span class="rank">02 / counted</span><h3>Muse Spark 1.2</h3><div class="score"><strong>101.03</strong><span>kg</span></div><small>10/10 seeds · $1.10 / episode</small></article>
+          <article class="model" style="--accent:#3977c9"><img src="images/gpt%205.6%20sol.png" alt="GPT-5.6 Sol model character illustration"><span class="rank">03 / counted</span><h3>GPT-5.6 Sol</h3><div class="score"><strong>96.41</strong><span>kg</span></div><small>10/10 seeds · $3.13 / episode</small></article>
+          <article class="model" style="--accent:var(--gold)"><img src="images/opus%205.png" alt="Claude Opus 5 model character illustration"><span class="rank">04 / diagnostic</span><h3>Claude Opus 5</h3><div class="score"><strong>102.00</strong><span>kg raw</span></div><small class="void">7/10 counted · 3 pain-invalid</small></article>
+        </div>
+        <div class="chart-grid" style="margin-top:36px">
+          <figure class="chart-card">
+            <h3>Mean final 1RM</h3>
+            <p class="chart-intro">The official counted means, with Opus retained as a clearly marked raw diagnostic.</p>
+            <div class="chart-wrap"><svg id="mean-chart" class="chart" viewBox="0 0 760 320" role="img" aria-label="Mean final one rep max by model"></svg></div>
+            <figcaption class="caption">kg · three hidden standardized tests averaged at weeks 44, 48, and 52.</figcaption>
+          </figure>
+          <figure class="chart-card">
+            <h3>Price to performance</h3>
+            <p class="chart-intro">Direct-provider token cost for one 52-week episode against the final 1RM result.</p>
+            <div class="chart-wrap"><svg id="cost-chart" class="chart" viewBox="0 0 760 320" role="img" aria-label="Episode cost compared with final one rep max"></svg></div>
+            <figcaption class="caption">The cheap corner is also the strong corner in this run. That is an operational observation, not a claim about intelligence.</figcaption>
+          </figure>
+          <figure class="chart-card wide">
+            <h3>Seed-by-seed results</h3>
+            <p class="chart-intro">Each line is the same model across seeds 400–409. Hollow red marks are Opus episodes that violated the pain constraint.</p>
+            <div class="chart-wrap"><svg id="seed-chart" class="chart" viewBox="0 0 880 380" role="img" aria-label="Final one rep max by public seed and model"></svg></div>
+            <div class="legend"><span><i class="dot" style="--dot:var(--teal)"></i>Grok 4.6</span><span><i class="dot" style="--dot:var(--blue)"></i>Muse Spark 1.2</span><span><i class="dot" style="--dot:#3977c9"></i>GPT-5.6 Sol</span><span><i class="dot hollow"></i>Opus pain-invalid</span></div>
+            <figcaption class="caption">Raw final 1RM by seed. Official aggregates require all ten seeds to remain counted.</figcaption>
+          </figure>
+        </div>
+        <div class="links"><a href="reports/PUBLIC_LEADERBOARD.md">Read the leaderboard →</a><a href="bench-bench-report.html">Open the full report →</a></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div><p class="eyebrow">02 / what is being tested</p><h2>Not a workout tip. A year of tradeoffs.</h2></div>
+          <p>The benchmark measures whether a model can hold a coherent strategy across recurring disruption: train, recover, spend scarce time, and revise when the week breaks.</p>
+        </div>
+        <div class="specs">
+          <div class="spec"><strong>01</strong><span>noisy observations</span></div>
+          <div class="spec"><strong>02</strong><span>finite time + cash</span></div>
+          <div class="spec"><strong>03</strong><span>missed sessions</span></div>
+        </div>
+        <p class="hero-note">The final score is Dave’s true capacity after a fixed three-day taper—not the noisy weekly estimate. The current result is narrower than “general intelligence”: it is a measurement of long-horizon configuration and programming quality under recurring disruption.</p>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <div class="wrap">
+      <p>Bench-bench v0.2 public run · four models × ten public seeds (400–409) × 52 simulated weeks</p>
+      <p class="hash">Engine sha256:438c1d77 · prompt sha256:06d96111 · source: reports/PUBLIC_LEADERBOARD.json</p>
+      <p>Official means require 10/10 counted seeds. Exploratory runs are not included in this board.</p>
+      <p style="margin-top:15px"><a href="https://bench-bench.goatcounter.com/" rel="noopener">Analytics</a></p>
+    </div>
+  </footer>
+  <script>
+    const seeds = [400,401,402,403,404,405,406,407,408,409];
+    const models = [
+      {name:"Grok 4.6", color:"#e5422d", mean:101.192, cost:1.14734, scores:[101.11,101.00,100.19,99.67,102.49,100.85,102.54,101.62,104.19,98.26]},
+      {name:"Muse Spark 1.2", color:"#168477", mean:101.027, cost:1.09562, scores:[102.03,103.77,101.00,97.17,104.45,101.78,98.12,100.38,103.93,97.64]},
+      {name:"GPT-5.6 Sol", color:"#3977c9", mean:96.41, cost:3.12905, scores:[95.42,97.49,93.38,96.48,96.71,97.23,94.62,97.76,97.37,97.64]},
+      {name:"Claude Opus 5", color:"#b67513", mean:102.00, cost:6.12044, invalid:[2,3,8], scores:[102.34,106.28,99.95,98.51,100.96,101.92,105.34,100.01,103.14,101.55]}
+    ];
+    const ns = "http://www.w3.org/2000/svg";
+    function node(tag, attrs, parent, content) { const n=document.createElementNS(ns,tag); Object.entries(attrs||{}).forEach(([k,v])=>n.setAttribute(k,v)); if(content!=null)n.textContent=content; parent.appendChild(n); return n; }
+    function base(svg, left, right, top, bottom, min, max, ticks) {
+      const width=+svg.viewBox.baseVal.width, height=+svg.viewBox.baseVal.height;
+      const x2=width-right, y2=height-bottom, y=v=>y2-(v-min)/(max-min)*(y2-top);
+      ticks.forEach(t=>{node("line",{x1:left,y1:y(t),x2:x2,y2:y(t),class:"gridline"},svg);node("text",{x:left-9,y:y(t)+4,"text-anchor":"end"},svg,String(t));});
+      node("line",{x1:left,y1:top,x2:left,y2:y2,class:"axis"},svg); node("line",{x1:left,y1:y2,x2:x2,y2:y2,class:"axis"},svg); return {width,height,x2,y2,y};
+    }
+    function renderMean() {
+      const svg=document.querySelector("#mean-chart"), g=base(svg,76,18,28,57,94,108,[94,98,102,106,108]), barW=105, gap=69;
+      node("defs",{},svg); const pat=node("pattern",{id:"hatch",width:8,height:8,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},svg); node("line",{x1:0,y1:0,x2:0,y2:8,stroke:"#b67513","stroke-width":3,opacity:.4},pat);
+      models.forEach((m,i)=>{const x=92+i*(barW+gap), y=g.y(m.mean); node("rect",{x,y,width:barW,height:g.y(94)-y,fill:i===3?"url(#hatch)":m.color,opacity:i===3?.8:1,stroke:m.color,"stroke-width":i===3?2:0},svg); node("text",{x:x+barW/2,y:g.y(94)+23,"text-anchor":"middle",class:"label"},svg,m.name.replace(" Spark 1.2","")); node("text",{x:x+barW/2,y:y-9,"text-anchor":"middle",class:"label"},svg,i===3?"102.00 raw":m.mean.toFixed(2)); });
+      node("text",{x:744,y:18,"text-anchor":"end"},svg,"kg");
+    }
+    function renderCost() {
+      const svg=document.querySelector("#cost-chart"), g=base(svg,72,18,28,57,94,108,[94,98,102,106,108]);
+      const x=v=>72+Math.log(v/.9)/Math.log(7)*(g.x2-72); // log-scaled cost axis
+      models.forEach((m,i)=>{const cx=x(m.cost), cy=g.y(m.mean); node("circle",{cx,cy,r:8,fill:i===3?"var(--plate)":m.color,stroke:m.color,"stroke-width":i===3?3:2},svg); if(i===3)node("line",{x1:cx-5,y1:cy-5,x2:cx+5,y2:cy+5,stroke:"var(--red)","stroke-width":2},svg); const dx=i===2?-9:10, anchor=i===2?"end":"start"; node("text",{x:cx+dx,y:cy-11,"text-anchor":anchor,class:"label"},svg,m.name.replace(" Spark 1.2","")); node("text",{x:cx+dx,y:cy+14,"text-anchor":anchor},svg,"$"+m.cost.toFixed(2)); });
+      [1,2,4,6].forEach(t=>{const xx=x(t); node("line",{x1:xx,y1:g.y(94),x2:xx,y2:g.y(94)+5,class:"axis"},svg); node("text",{x:xx,y:g.y(94)+21,"text-anchor":"middle"},svg,"$"+t);}); node("text",{x:744,y:18,"text-anchor":"end"},svg,"cost / episode · log scale");
+    }
+    function renderSeeds() {
+      const svg=document.querySelector("#seed-chart"), g=base(svg,63,20,28,67,92,108,[92,96,100,104,108]), x=i=>63+i*(g.x2-63)/(seeds.length-1);
+      models.forEach((m,mi)=>{let d=""; m.scores.forEach((v,i)=>{d+=(i?"L":"M")+x(i)+" "+g.y(v)+" ";}); node("path",{d,fill:"none",stroke:m.color,"stroke-width":mi===3?1.4:2,opacity:mi===3?.7:1},svg); m.scores.forEach((v,i)=>{const invalid=m.invalid?.includes(i); node("circle",{cx:x(i),cy:g.y(v),r:invalid?6:4,fill:invalid?"var(--plate)":m.color,stroke:invalid?"var(--red)":m.color,"stroke-width":invalid?2:1},svg); if(invalid)node("line",{x1:x(i)-4,y1:g.y(v)-4,x2:x(i)+4,y2:g.y(v)+4,stroke:"var(--red)","stroke-width":1.5},svg);}); });
+      seeds.forEach((s,i)=>node("text",{x:x(i),y:g.y(92)+24,"text-anchor":"middle"},svg,String(s).slice(2))); node("text",{x:860,y:18,"text-anchor":"end"},svg,"seed suffix");
+    }
+    renderMean(); renderCost(); renderSeeds();
+  </script>
+  <script data-goatcounter="https://bench-bench.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
 </html>
