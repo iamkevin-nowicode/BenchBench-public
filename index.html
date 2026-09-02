@@ -13,25 +13,29 @@
   <style>
     :root {
       --paper: #f7f1e7;
+      --paper-deep: #eee4d5;
       --plate: #fffdf8;
       --ink: #172536;
       --muted: #5d6873;
+      --faint: #89919a;
       --rule: rgba(23, 37, 54, .18);
       --red: #e5422d;
-      --red-soft: #f5d8cf;
+      --red-soft: #f7ddd4;
       --alert-ink: #743127;
-      --alert-accent: #c73625;
       --teal: #168477;
       --blue: #3977c9;
       --gold: #b67513;
+      --purple: #7541b5;
       --shadow: 6px 7px 0 rgba(23, 37, 54, .12);
       --display: Georgia, "Times New Roman", serif;
       --body: "Avenir Next", Avenir, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
       --mono: "SF Mono", SFMono-Regular, Menlo, Consolas, ui-monospace, monospace;
       --max: 1120px;
     }
+
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
+    img, svg { max-width: 100%; }
     body {
       margin: 0;
       color: var(--ink);
@@ -43,145 +47,347 @@
       font: 16px/1.6 var(--body);
       overflow-x: hidden;
     }
-    body::before { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .18; background-image: radial-gradient(rgba(23,37,54,.1) .55px, transparent .55px); background-size: 5px 5px; mix-blend-mode: multiply; }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: .18;
+      background-image: radial-gradient(rgba(23,37,54,.1) .55px, transparent .55px);
+      background-size: 5px 5px;
+      mix-blend-mode: multiply;
+    }
     a { color: inherit; }
+    button, select { font: inherit; }
+    .skip-nav {
+      position: fixed;
+      left: 15px;
+      top: 10px;
+      z-index: 50;
+      padding: 9px 12px;
+      background: var(--ink);
+      color: var(--plate);
+      transform: translateY(-140%);
+    }
+    .skip-nav:focus { transform: translateY(0); }
     .wrap { width: min(var(--max), calc(100% - 44px)); max-width: 100%; margin: 0 auto; }
-    .mono, .eyebrow, nav a { font-family: var(--mono); }
+    .mono, .eyebrow, nav a, .meta, .status, .data-note, .control-label { font-family: var(--mono); }
     :focus-visible { outline: 3px solid var(--red); outline-offset: 4px; }
-    header { position: sticky; top: 0; z-index: 5; border-bottom: 1.5px solid var(--rule); background: rgba(247,241,231,.9); backdrop-filter: blur(10px); }
-    .nav { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 22px; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1.5px solid var(--rule);
+      background: rgba(247,241,231,.92);
+      backdrop-filter: blur(10px);
+    }
+    .nav {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+    }
     .brand { display: inline-flex; align-items: center; text-decoration: none; }
     .brand img { width: 146px; display: block; }
     nav { display: flex; align-items: center; gap: 21px; }
-    nav a { color: var(--muted); font-size: .68rem; letter-spacing: .09em; text-decoration: none; text-transform: uppercase; }
+    nav a {
+      color: var(--muted);
+      font-size: .68rem;
+      letter-spacing: .09em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
     nav a:hover { color: var(--red); }
-    main { padding-bottom: 72px; }
+    main { padding-bottom: 75px; }
     section { padding: 78px 0; border-bottom: 1.5px solid var(--rule); }
     .hero { padding: 82px 0 68px; }
-    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: 60px; align-items: center; }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(300px, .92fr);
+      gap: 62px;
+      align-items: center;
+    }
     .hero-grid > * { min-width: 0; }
-    .eyebrow { margin: 0 0 15px; color: var(--red); font-size: .67rem; letter-spacing: .17em; text-transform: uppercase; }
+    .eyebrow {
+      margin: 0 0 15px;
+      color: var(--red);
+      font-size: .67rem;
+      letter-spacing: .17em;
+      text-transform: uppercase;
+    }
     h1, h2, h3 { margin-top: 0; font-family: var(--display); font-weight: 600; letter-spacing: -.025em; }
     h1 { max-width: 700px; margin-bottom: 17px; font-size: clamp(3.5rem, 8vw, 7rem); line-height: .9; }
-    h2 { margin-bottom: 10px; font-size: clamp(2rem, 4.3vw, 4rem); line-height: .98; }
+    h2 { margin-bottom: 10px; font-size: clamp(2rem, 4.5vw, 4.1rem); line-height: .98; }
     h3 { margin-bottom: 7px; font-size: 1.25rem; line-height: 1.1; }
     p { margin: 0 0 1rem; }
-    .asterisk { display: block; margin: 0 0 22px; color: var(--muted); font: .7rem var(--mono); letter-spacing: .1em; text-transform: lowercase; }
-    .lede { max-width: 630px; color: var(--muted); font-size: clamp(1.03rem, 1.7vw, 1.25rem); line-height: 1.55; }
-    .hero-note { max-width: 610px; margin-top: 25px; padding-top: 18px; border-top: 1.5px solid var(--rule); color: var(--muted); }
-    .cta { display: inline-flex; align-items: center; gap: 10px; margin-top: 7px; padding: 11px 14px; border: 1.5px solid var(--ink); background: var(--plate); box-shadow: 4px 5px 0 rgba(23,37,54,.12); font: .68rem var(--mono); letter-spacing: .07em; text-decoration: none; text-transform: uppercase; }
+    .asterisk {
+      display: block;
+      margin: 0 0 22px;
+      color: var(--muted);
+      font: .7rem var(--mono);
+      letter-spacing: .1em;
+      text-transform: lowercase;
+    }
+    .lede { max-width: 650px; color: var(--muted); font-size: clamp(1.04rem, 1.7vw, 1.25rem); line-height: 1.55; }
+    .hero-note { max-width: 650px; margin-top: 25px; padding-top: 18px; border-top: 1.5px solid var(--rule); color: var(--muted); }
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      margin-top: 7px;
+      padding: 11px 14px;
+      border: 1.5px solid var(--ink);
+      background: var(--plate);
+      box-shadow: 4px 5px 0 rgba(23,37,54,.12);
+      font: .68rem var(--mono);
+      letter-spacing: .07em;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: transform 180ms ease, box-shadow 180ms ease, color 180ms ease;
+    }
     .cta:hover { color: var(--red); transform: translate(1px, 1px); box-shadow: 2px 3px 0 rgba(23,37,54,.12); }
-    .hero-plate { position: relative; padding: 17px; background: var(--plate); border: 1.5px solid var(--ink); box-shadow: var(--shadow); transform: rotate(1deg); }
-    .hero-plate::before { content: "FIELD NOTES / V0.2"; position: absolute; right: 13px; top: -13px; padding: 3px 7px; background: var(--red); color: white; font: .58rem var(--mono); letter-spacing: .13em; transform: rotate(-3deg); }
+    .hero-plate {
+      position: relative;
+      padding: 17px;
+      background: var(--plate);
+      border: 1.5px solid var(--ink);
+      box-shadow: var(--shadow);
+      transform: rotate(1deg);
+    }
+    .hero-plate::before {
+      content: "FIELD NOTES / V0.2";
+      position: absolute;
+      right: 13px;
+      top: -13px;
+      padding: 3px 7px;
+      background: var(--red);
+      color: white;
+      font: .58rem var(--mono);
+      letter-spacing: .13em;
+      transform: rotate(-3deg);
+    }
     .hero-plate img { width: 100%; display: block; }
     .plate-copy { margin: 14px 0 0; color: var(--muted); font: .66rem/1.5 var(--mono); }
-    .specs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 27px; background: var(--ink); border: 1.5px solid var(--ink); }
+    .specs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin-top: 27px;
+      background: var(--ink);
+      border: 1.5px solid var(--ink);
+    }
     .spec { padding: 14px 12px; background: var(--plate); }
     .spec strong { display: block; font: 1.5rem/1 var(--display); }
     .spec span { display: block; margin-top: 6px; color: var(--muted); font: .57rem/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+
     .section-head { display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 30px; }
-    .section-head > p { max-width: 530px; margin: 0; color: var(--muted); }
-    .board-note { margin-bottom: 25px; padding: 15px 18px; background: var(--red-soft); border: 1.5px solid var(--red); color: var(--alert-ink); }
-    .board-note strong { color: var(--alert-accent); }
+    .section-head > p { max-width: 555px; margin: 0; color: var(--muted); }
+    .section-intro { max-width: 720px; color: var(--muted); }
+    .board-note {
+      margin-bottom: 25px;
+      padding: 15px 18px;
+      background: var(--red-soft);
+      border: 1.5px solid var(--red);
+      color: var(--alert-ink);
+    }
+    .board-note strong { color: var(--red); }
     .board-note.secondary { margin-top: -10px; background: var(--plate); border-color: var(--ink); color: var(--muted); }
-    .model-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
-    .model { position: relative; padding: 14px 14px 16px; background: var(--plate); border: 1.5px solid var(--ink); box-shadow: var(--shadow); }
+    .model-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .model {
+      position: relative;
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      padding: 14px 14px 16px;
+      background: var(--plate);
+      border: 1.5px solid var(--ink);
+      box-shadow: var(--shadow);
+    }
     .model::before { content: ""; position: absolute; inset: 0 0 auto; height: 5px; background: var(--accent); }
-    .model img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; margin-bottom: 13px; background: white; }
-    .model-mark { display: grid; place-items: center; aspect-ratio: 1; margin-bottom: 13px; background: #e9e2f4; color: #44247a; border: 1.5px dashed #7943b9; font-family: var(--display); }
-    .model-mark strong { display: block; font-size: clamp(2.8rem, 5vw, 4.5rem); line-height: .78; letter-spacing: -.1em; }
-    .model-mark span { display: block; margin-top: 13px; font: .58rem var(--mono); letter-spacing: .18em; text-transform: uppercase; }
-    .model .rank { color: var(--muted); font: .6rem var(--mono); letter-spacing: .13em; text-transform: uppercase; }
-    .model h3 { margin: 7px 0 7px; font-size: 1.18rem; }
-    .score { min-height: 35px; display: flex; align-items: baseline; gap: 6px; }
-    .score strong { font: 1.85rem/1 var(--display); }
+    .model img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      margin-bottom: 13px;
+      background: white;
+    }
+    .model-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .model .rank, .status { color: var(--muted); font: .59rem var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .model .status { color: var(--accent); text-align: right; }
+    .model h3 { margin: 7px 0 7px; font-size: 1.25rem; }
+    .score { min-height: 38px; display: flex; align-items: baseline; gap: 6px; }
+    .score strong { font: 2rem/1 var(--display); }
     .score span { color: var(--muted); font: .6rem var(--mono); }
-    .model small { display: block; margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--muted); font: .62rem/1.4 var(--mono); }
-    .model .void { color: var(--red); }
-    .chart-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
-    .chart-card { min-width: 0; padding: 19px 17px 15px; background: var(--plate); border: 1.5px solid var(--ink); box-shadow: var(--shadow); }
-    .chart-card.wide { grid-column: 1 / -1; }
+    .model small { display: block; margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--muted); font: .62rem/1.45 var(--mono); }
+    .model small.void { color: var(--red); }
+    .model .model-note { min-height: 42px; margin: 8px 0 0; color: var(--muted); font-size: .83rem; line-height: 1.45; }
+    .model .model-note strong { color: var(--ink); }
+    .model-grid .model:nth-child(n+4) { background: rgba(255,253,248,.77); }
+
+    /* Charts intentionally stack one per row: this is part of the mobile layout, not an accident. */
+    .chart-stack { display: grid; grid-template-columns: 1fr; gap: 22px; margin-top: 34px; }
+    .chart-card {
+      min-width: 0;
+      padding: 21px 19px 16px;
+      background: var(--plate);
+      border: 1.5px solid var(--ink);
+      box-shadow: var(--shadow);
+    }
     .chart-card h3 { margin-bottom: 5px; }
-    .chart-intro { min-height: 42px; color: var(--muted); font-size: .82rem; line-height: 1.45; }
-    .chart-wrap { overflow-x: auto; margin-top: 10px; }
-    svg.chart { display: block; width: 100%; min-width: 540px; height: auto; }
+    .chart-intro { min-height: 42px; max-width: 740px; color: var(--muted); font-size: .84rem; line-height: 1.47; }
+    .chart-wrap { overflow-x: auto; margin-top: 12px; padding-bottom: 3px; }
+    svg.chart { display: block; width: 100%; min-width: 640px; height: auto; overflow: visible; }
+    svg.chart.scatter { min-width: 700px; }
     .chart text { fill: var(--muted); font: 10px var(--mono); }
     .chart .label { fill: var(--ink); font: 13px var(--display); }
+    .chart .small-label { fill: var(--muted); font: 9px var(--mono); }
     .chart .axis { stroke: var(--ink); stroke-width: 1.2; }
     .chart .gridline { stroke: var(--rule); stroke-width: 1; }
+    .chart .axis-title { fill: var(--muted); font: 10px var(--mono); letter-spacing: .04em; }
     .chart-mark { cursor: pointer; }
-    .chart-mark:focus { outline: none; stroke-width: 3; }
-    .caption { margin: 11px 0 0; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--muted); font: .63rem/1.45 var(--mono); }
-    .legend { display: flex; flex-wrap: wrap; gap: 7px 15px; margin-top: 10px; color: var(--muted); font: .6rem var(--mono); }
-    .legend span { display: inline-flex; align-items: center; gap: 5px; }
-    .dot { width: 9px; height: 9px; display: inline-block; border-radius: 50%; background: var(--dot); }
-    .dot.hollow { border: 2px solid var(--red); background: transparent; }
-    .chart-controls { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
-    .chart-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid var(--rule); background: transparent; color: var(--muted); font: .6rem var(--mono); cursor: pointer; }
+    .chart-mark:focus { outline: none; stroke-width: 3.5; }
+    .chart-controls { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+    .chart-toggle, .select-wrap {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      gap: 6px;
+      padding: 6px 9px;
+      border: 1px solid var(--rule);
+      background: transparent;
+      color: var(--muted);
+      font: .62rem var(--mono);
+    }
+    .chart-toggle { cursor: pointer; transition: border-color 160ms ease, color 160ms ease, background 160ms ease; }
     .chart-toggle:hover, .chart-toggle:focus-visible { color: var(--ink); border-color: var(--ink); }
     .chart-toggle[aria-pressed="false"] { opacity: .42; text-decoration: line-through; }
-    .chart-toggle .dot { flex: 0 0 auto; }
-    .chart-tip { position: fixed; z-index: 30; display: none; max-width: 260px; padding: 9px 11px; border: 1.5px solid var(--ink); background: var(--plate); box-shadow: 4px 5px 0 rgba(23,37,54,.14); color: var(--ink); white-space: pre-line; font: .67rem/1.45 var(--mono); pointer-events: none; }
-    .links { display: flex; flex-wrap: wrap; gap: 12px 22px; margin-top: 23px; font: .67rem var(--mono); text-transform: uppercase; }
+    .chart-toggle[aria-pressed="true"] { background: rgba(23,37,54,.045); }
+    .select-wrap { gap: 8px; }
+    .select-wrap select { border: 0; background: transparent; color: var(--ink); font: .62rem var(--mono); cursor: pointer; }
+    .select-wrap select:focus { outline: none; }
+    .dot { width: 9px; height: 9px; display: inline-block; flex: 0 0 auto; border-radius: 50%; background: var(--dot); }
+    .dot.hollow { border: 2px solid var(--red); background: transparent; }
+    .chart-tip {
+      position: fixed;
+      z-index: 30;
+      display: none;
+      max-width: 285px;
+      padding: 9px 11px;
+      border: 1.5px solid var(--ink);
+      background: var(--plate);
+      box-shadow: 4px 5px 0 rgba(23,37,54,.14);
+      color: var(--ink);
+      white-space: pre-line;
+      font: .67rem/1.45 var(--mono);
+      pointer-events: none;
+    }
+    .caption { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--muted); font: .63rem/1.45 var(--mono); }
+    .legend { display: flex; flex-wrap: wrap; gap: 7px 15px; margin-top: 10px; color: var(--muted); font: .6rem var(--mono); }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .annotation {
+      margin-top: 19px;
+      padding: 15px 17px;
+      border-left: 4px solid var(--red);
+      background: rgba(229,66,45,.07);
+      color: var(--muted);
+    }
+    .annotation strong { color: var(--ink); }
+
+    .insight-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 28px; }
+    .insight { padding: 18px; background: var(--plate); border: 1.5px solid var(--ink); box-shadow: 4px 5px 0 rgba(23,37,54,.1); }
+    .insight .number { color: var(--red); font: .68rem var(--mono); letter-spacing: .1em; }
+    .insight h3 { margin-top: 17px; }
+    .insight p { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.5; }
+    .method-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, .65fr); gap: 48px; align-items: start; }
+    .method-copy { max-width: 700px; color: var(--muted); }
+    .method-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--rule); }
+    .method-list li { display: grid; grid-template-columns: 72px 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+    .method-list b { color: var(--red); font: .67rem var(--mono); letter-spacing: .08em; }
+    .method-list span { color: var(--muted); font-size: .87rem; }
+    .history-note { margin-top: 27px; padding: 17px; background: var(--paper-deep); border: 1.5px dashed var(--ink); color: var(--muted); }
+    .links { display: flex; flex-wrap: wrap; gap: 12px 22px; margin-top: 25px; font: .67rem var(--mono); text-transform: uppercase; }
     .links a { color: var(--muted); }
     .links a:hover { color: var(--red); }
     footer { padding: 32px 0 54px; color: var(--muted); font: .63rem/1.7 var(--mono); }
     footer p { margin: 0 0 6px; }
     footer .hash { color: var(--ink); }
+
     @media (prefers-color-scheme: dark) {
-      :root { --paper: #131a22; --plate: #1b2530; --ink: #eef3f1; --muted: #aeb9bd; --rule: rgba(238,243,241,.2); --red-soft: #44231d; --alert-ink: #ffd7cf; --alert-accent: #ff9b87; --shadow: 6px 7px 0 rgba(0,0,0,.28); }
-      header { background: rgba(19,26,34,.9); }
+      :root { --paper: #131a22; --paper-deep: #18232d; --plate: #1b2530; --ink: #eef3f1; --muted: #aeb9bd; --faint: #818d94; --rule: rgba(238,243,241,.2); --red-soft: #44231d; --alert-ink: #ffd7cf; --shadow: 6px 7px 0 rgba(0,0,0,.28); }
+      header { background: rgba(19,26,34,.92); }
       body::before { mix-blend-mode: screen; opacity: .1; }
+      .model-grid .model:nth-child(n+4) { background: rgba(27,37,48,.78); }
+      .chart-toggle[aria-pressed="true"] { background: rgba(238,243,241,.06); }
     }
     @media (max-width: 900px) {
-      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
-      .hero-plate { max-width: 560px; }
-      .model-grid { grid-template-columns: repeat(2, 1fr); }
+      .hero-grid { grid-template-columns: 1fr; gap: 42px; }
+      .hero-plate { max-width: 590px; }
+      .model-grid, .insight-grid { grid-template-columns: repeat(2, 1fr); }
       .section-head { display: block; }
       .section-head > p { margin-top: 12px; }
-      .chart-card.wide { grid-column: auto; }
-      h1 { font-size: clamp(2.4rem, 8vw, 5rem); }
+      .method-grid { grid-template-columns: 1fr; gap: 30px; }
+      h1 { font-size: clamp(2.8rem, 9vw, 5rem); }
     }
-    @media (max-width: 1100px) and (min-width: 901px) { .model-grid { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 620px) {
       .wrap { width: calc(100vw - 28px); }
-      .nav { min-height: 61px; gap: 10px; }
+      .nav { min-height: 61px; gap: 10px; overflow: hidden; }
       .brand img { width: 119px; }
-      nav { gap: 8px; }
+      nav { gap: 9px; flex-shrink: 0; }
       nav a { font-size: .49rem; letter-spacing: .025em; }
+      nav a:nth-child(n+3) { display: none; }
       section { padding: 57px 0; }
       .hero { padding-top: 59px; }
-      h1 { font-size: clamp(2.25rem, 11.5vw, 3.6rem); overflow-wrap: anywhere; }
+      .hero-grid, .hero-grid > *, .hero-copy, .hero-plate { width: 100%; max-width: 100%; min-width: 0; }
+      h1 { width: 100%; max-width: 100%; font-size: clamp(2.35rem, 12vw, 3.7rem); overflow-wrap: anywhere; }
+      .lede, .hero-note { max-width: 100%; overflow-wrap: anywhere; }
       .specs { grid-template-columns: 1fr; }
       .spec { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
       .spec span { margin: 0; text-align: right; }
-      .model-grid { grid-template-columns: 1fr; }
+      .model-grid, .insight-grid { grid-template-columns: 1fr; }
       .model { box-shadow: 4px 5px 0 rgba(23,37,54,.12); }
-      .chart-card { box-shadow: 4px 5px 0 rgba(23,37,54,.12); }
+      .chart-card { padding: 17px 13px 14px; box-shadow: 4px 5px 0 rgba(23,37,54,.12); }
+      .chart-wrap { margin-right: -4px; }
+      .chart-controls { gap: 6px; }
+      .chart-toggle, .select-wrap { min-height: 44px; }
     }
-    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition: none !important; } }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
   </style>
 </head>
 <body>
+  <a class="skip-nav" href="#main">Skip to content</a>
   <header>
     <div class="wrap nav">
-      <a class="brand" href="/" aria-label="Bench-bench home"><img src="images/bench-bench%20logo.png" alt="Bench-bench"></a>
-      <nav aria-label="Primary navigation"><a href="#results">Results</a><a href="bench-bench-report.html">Full report</a></nav>
+      <a class="brand" href="#top" aria-label="Bench-bench home"><img src="images/bench-bench%20logo.png" alt="Bench-bench"></a>
+      <nav aria-label="Primary navigation">
+        <a href="#results">Results</a>
+        <a href="#reliability">Reliability</a>
+        <a href="#method">Method</a>
+        <a href="bench-bench-report.html">Full report</a>
+      </nav>
     </div>
   </header>
-  <main>
-    <section class="hero">
+
+  <main id="main">
+    <section id="top" class="hero">
       <div class="wrap hero-grid">
         <div>
           <p class="eyebrow">Long-horizon planning / v0.2</p>
           <h1>Can your model lift*?</h1>
           <span class="asterisk">* bro</span>
-          <p class="lede">Bench-bench puts an AI coach in a messy simulated year and asks whether it can keep Dave moving toward a stronger bench press while real life keeps interrupting.</p>
-          <p class="hero-note">Dave is 38, back in the gym after years off, and has a one rep max of 185lbs. He has a full-time job, a full-time working partner, and a six-month-old. Every week, a model plans training, recovery, childcare, groceries, purchases, time, and money.</p>
+          <p class="lede">I keep hearing labs talk about training, lift, and moving weights, but can their models even lift*? Bench-bench is my attempt to test that in a year where the plan keeps meeting real life.</p>
+          <p class="hero-note">Dave is 38, back in the gym after years off, and has a one rep max of 185lbs. He has a full-time job, a full-time working partner, and a six-month-old. Every week, a model plans training, recovery, childcare, groceries, purchases, time, and money while illness, travel, work crunches, and missed sessions disrupt the plan.</p>
           <a class="cta" href="#results">See the results <span aria-hidden="true">→</span></a>
           <div class="specs" aria-label="Benchmark at a glance">
             <div class="spec"><strong>52</strong><span>simulated weeks</span></div>
-            <div class="spec"><strong>3</strong><span>standardized tests</span></div>
+            <div class="spec"><strong>3</strong><span>hidden standardized tests</span></div>
             <div class="spec"><strong>10</strong><span>public seeds / model</span></div>
           </div>
         </div>
@@ -195,124 +401,388 @@
     <section id="results">
       <div class="wrap">
         <div class="section-head">
-          <div><p class="eyebrow">01 / the board</p><h2>A year of decisions, reduced to one lift.</h2></div>
-          <p>These are the official v0.2 public results: four models, the same ten public seeds, and 52 simulated weeks per episode. Higher counted 1RM is better.</p>
+          <div><p class="eyebrow">01 / the board</p><h2>High scores are only half the story.</h2></div>
+          <p>The official v0.2 public run fixed the engine, prompt, models, and seeds before the calls. Extensions are visible, but clearly separated from the preregistered board.</p>
         </div>
-        <div class="board-note"><strong>Read the caveat.</strong> Claude Opus 5 has a 102.00 kg raw diagnostic mean, but 3 of 10 seeds crossed the pain limit. Its official counted mean is withheld; it is shown as a diagnostic, not a ranking.</div>
-        <div class="board-note secondary"><strong>Update · 8/26/2026.</strong> OX Alpha was revealed to be GLM 5.3 Flash. The exploratory run was added on 8/25/2026 and completed under the same engine and prompt, but it was not part of the pre-registered four-model v0.2 leaderboard. New models can be added as labeled comparisons without rewriting the frozen board. Its 102.75 kg raw mean is shown for context; 3 seeds crossed the pain limit, so no counted mean is reportable.</div>
-        <div class="model-grid">
-          <article class="model" style="--accent:var(--teal)"><img src="images/grok%204.5.png" alt="Grok model character illustration"><span class="rank">01 / counted</span><h3>Grok 4.6</h3><div class="score"><strong>101.19</strong><span>kg</span></div><small>10/10 seeds · $1.15 / episode</small></article>
-          <article class="model" style="--accent:var(--blue)"><img src="images/muse%20spark%201.2.png" alt="Muse Spark model character illustration"><span class="rank">02 / counted</span><h3>Muse Spark 1.2</h3><div class="score"><strong>101.03</strong><span>kg</span></div><small>10/10 seeds · $1.10 / episode</small></article>
-          <article class="model" style="--accent:#3977c9"><img src="images/gpt%205.6%20sol.png" alt="GPT-5.6 Sol model character illustration"><span class="rank">03 / counted</span><h3>GPT-5.6 Sol</h3><div class="score"><strong>96.41</strong><span>kg</span></div><small>10/10 seeds · $3.13 / episode</small></article>
-          <article class="model" style="--accent:var(--gold)"><img src="images/opus%205.png" alt="Claude Opus 5 model character illustration"><span class="rank">04 / diagnostic</span><h3>Claude Opus 5</h3><div class="score"><strong>102.00</strong><span>kg raw</span></div><small class="void">7/10 counted · 3 pain-invalid</small></article>
-          <article class="model" style="--accent:#7943b9"><img src="images/glm%205.3%20flash.png" alt="GLM 5.3 Flash character illustration, formerly OX Alpha"><span class="rank">05 / exploratory</span><h3>GLM 5.3 Flash</h3><div class="score"><strong>102.75</strong><span>kg raw</span></div><small class="void">formerly OX Alpha · 7/10 counted · added 8/25/2026</small></article>
-        </div>
-        <div class="chart-grid" style="margin-top:36px">
-          <figure class="chart-card">
-            <h3>Mean final 1RM</h3>
-            <p class="chart-intro">The official counted means, with Opus retained as a clearly marked raw diagnostic.</p>
-            <div class="chart-wrap"><svg id="mean-chart" class="chart" viewBox="0 0 760 320" role="img" aria-label="Mean final one rep max by model"></svg></div>
-            <figcaption class="caption">kg · three hidden standardized tests averaged at weeks 44, 48, and 52.</figcaption>
-          </figure>
-          <figure class="chart-card">
-            <h3>Price to performance</h3>
-            <p class="chart-intro">Direct-provider token cost for one 52-week episode against the final 1RM result. GLM 5.3 Flash is omitted because its exploratory transcript recorded $0.00, not a price.</p>
-            <div class="chart-wrap"><svg id="cost-chart" class="chart" viewBox="0 0 760 320" role="img" aria-label="Episode cost compared with final one rep max"></svg></div>
-            <figcaption class="caption">The cheap corner is also the strong corner in this run. That is an operational observation, not a claim about intelligence.</figcaption>
-          </figure>
-          <figure class="chart-card wide">
-            <h3>Seed-by-seed results</h3>
-            <p class="chart-intro">Each line is the same model across seeds 400–409. Hover or focus a point for the exact score; use the buttons to isolate a model.</p>
-            <div class="chart-wrap"><svg id="seed-chart" class="chart" viewBox="0 0 880 380" role="img" aria-label="Final one rep max by public seed and model"></svg></div>
-            <div id="chart-controls" class="chart-controls" aria-label="Toggle model series"></div>
-            <figcaption class="caption">Raw final 1RM by seed. Official aggregates require all ten seeds to remain counted.</figcaption>
-          </figure>
-        </div>
-        <div class="links"><a href="reports/PUBLIC_LEADERBOARD.md">Read the leaderboard →</a><a href="bench-bench-report.html">Open the full report →</a></div>
+        <div class="board-note"><strong>How to read this.</strong> A raw 1RM is a useful performance diagnostic. A model only receives an official counted aggregate when all ten seeds stay within the pain constraint. That keeps a high score from hiding an unreliable year.</div>
+        <div class="board-note secondary"><strong>Fable 5.1 · new extension.</strong> Fable’s raw mean is 102.29 kg, with 9/10 seeds countable. One seed reached 17 pain days and is shown as a reliability failure, not silently dropped.</div>
+        <div id="model-grid" class="model-grid" aria-live="polite"></div>
+        <noscript><p class="annotation">JavaScript is required for the interactive result board. The full report remains available at <a href="bench-bench-report.html">bench-bench-report.html</a>.</p></noscript>
       </div>
     </section>
 
-    <section>
+    <section id="reliability">
       <div class="wrap">
         <div class="section-head">
-          <div><p class="eyebrow">02 / what is being tested</p><h2>Not a workout tip. A year of tradeoffs.</h2></div>
-          <p>The benchmark measures whether a model can hold a coherent strategy across recurring disruption: train, recover, spend scarce time, and revise when the week breaks.</p>
+          <div><p class="eyebrow">02 / performance × reliability</p><h2>Strong, safe, or both?</h2></div>
+          <p>Every point is a model run. Move over—or focus—a point for the exact raw mean, countable fraction, pain failures, transport failures, and protocol burden.</p>
         </div>
-        <div class="specs">
-          <div class="spec"><strong>01</strong><span>noisy observations</span></div>
-          <div class="spec"><strong>02</strong><span>finite time + cash</span></div>
-          <div class="spec"><strong>03</strong><span>missed sessions</span></div>
+        <div class="chart-controls" aria-label="Reliability chart cohort controls">
+          <button type="button" class="chart-toggle cohort-toggle" data-cohort="current" aria-pressed="true">Current v0.2</button>
+          <button type="button" class="chart-toggle cohort-toggle" data-cohort="pilot" aria-pressed="false">v0.1 pilot</button>
+          <button type="button" class="chart-toggle cohort-toggle" data-cohort="all" aria-pressed="false">Both eras</button>
         </div>
-        <p class="hero-note">The final score is Dave’s true capacity after a fixed three-day taper—not the noisy weekly estimate. The current result is narrower than “general intelligence”: it is a measurement of long-horizon configuration and programming quality under recurring disruption.</p>
+        <figure class="chart-card">
+          <h3>Raw performance vs. countable reliability</h3>
+          <p class="chart-intro">The x-axis is the average raw final 1RM. The y-axis is the percentage of seeds that remained countable. Hollow red points indicate a run with at least one pain or transport exclusion.</p>
+          <div class="chart-wrap"><svg id="reliability-chart" class="chart scatter" viewBox="0 0 920 470" role="img" aria-label="Raw final one rep max compared with countable seed reliability"></svg></div>
+          <figcaption class="caption">No composite score is invented here. The two axes stay visible so performance cannot erase reliability.</figcaption>
+        </figure>
+        <div class="annotation"><strong>The current read:</strong> Grok 4.6 is the highest current model that is both raw-strong and 10/10 countable. Fable, Opus, and GLM/OX have higher raw means, but each has pain-invalid seeds.</div>
+      </div>
+    </section>
+
+    <section id="charts">
+      <div class="wrap">
+        <div class="section-head">
+          <div><p class="eyebrow">03 / the data</p><h2>Pull the year apart.</h2></div>
+          <p>Switch cohorts, isolate lines, and inspect the operational cost of getting a model through 52 weeks. These are diagnostic views of the recorded runs.</p>
+        </div>
+        <div class="chart-controls" aria-label="Detailed chart cohort controls">
+          <button type="button" class="chart-toggle detail-cohort" data-cohort="current" aria-pressed="true">Current v0.2</button>
+          <button type="button" class="chart-toggle detail-cohort" data-cohort="pilot" aria-pressed="false">v0.1 pilot</button>
+        </div>
+        <div class="chart-stack">
+          <figure class="chart-card">
+            <h3>Mean final 1RM</h3>
+            <p class="chart-intro">Bars show raw means. Hatching marks a model whose full seed set does not qualify for an official counted aggregate.</p>
+            <div class="chart-wrap"><svg id="mean-chart" class="chart" viewBox="0 0 920 390" role="img" aria-label="Mean final one rep max by model"></svg></div>
+            <figcaption class="caption">kg · the official score averages standardized tests at weeks 44, 48, and 52.</figcaption>
+          </figure>
+
+          <figure class="chart-card">
+            <h3>Seed-by-seed results</h3>
+            <p class="chart-intro">Each line follows one model across the same ten seeds. Hollow points are excluded from counted aggregation, but raw outcomes remain visible.</p>
+            <div class="chart-wrap"><svg id="seed-chart" class="chart" viewBox="0 0 920 430" role="img" aria-label="Final one rep max by public seed and model"></svg></div>
+            <div id="seed-controls" class="chart-controls" aria-label="Toggle model series"></div>
+            <figcaption class="caption">Current seeds are 400–409. Pilot seeds are 100–109. Use the controls to reduce the visual density.</figcaption>
+          </figure>
+
+          <figure class="chart-card">
+            <h3>Operational reliability</h3>
+            <p class="chart-intro">Choose one operational measure. Repairs and automatic fallbacks are counted separately from transport failures.</p>
+            <div class="chart-controls" aria-label="Operational chart controls">
+              <label class="select-wrap"><span class="control-label">Measure</span><select id="ops-metric" aria-label="Operational measure"><option value="countable">Countable seeds</option><option value="repair">Repair rate</option><option value="fallback">Automatic fallback rate</option><option value="transport">Transport failures / run</option></select></label>
+            </div>
+            <div class="chart-wrap"><svg id="ops-chart" class="chart" viewBox="0 0 920 440" role="img" aria-label="Operational reliability by model"></svg></div>
+            <figcaption class="caption">The all-seed countable rule is the scoring gate; protocol rates explain how a model got there.</figcaption>
+          </figure>
+
+          <figure class="chart-card">
+            <h3>Price to performance</h3>
+            <p class="chart-intro">Direct-provider API cost per 52-week episode against raw performance. GLM/OX is omitted because its exploratory transcript recorded $0.00, not a price.</p>
+            <div class="chart-wrap"><svg id="cost-chart" class="chart" viewBox="0 0 920 410" role="img" aria-label="Episode cost compared with raw final one rep max"></svg></div>
+            <figcaption class="caption">Cost is an operational fact, not a claim about intelligence. Historical and current provider prices are not interchangeable.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="takeaways">
+      <div class="wrap">
+        <div class="section-head">
+          <div><p class="eyebrow">04 / what it says</p><h2>The useful answer is two-dimensional.</h2></div>
+          <p>Bench-bench does not turn one unreliable high score into a clean win. It leaves the tradeoff visible.</p>
+        </div>
+        <div class="insight-grid">
+          <article class="insight"><span class="number">01 / CURRENT LEADER</span><h3>Grok is the clean top result.</h3><p>Grok 4.6 averages 101.19 kg and remains countable on all ten current seeds. Muse is almost tied at 101.03 kg, while GPT is lower at 96.41 kg.</p></article>
+          <article class="insight"><span class="number">02 / RAW ≠ OFFICIAL</span><h3>Raw leaders carry risk.</h3><p>Fable, Opus, and GLM/OX all post raw means above the current official leader, but each crosses the pain limit on at least one seed. Their results are valuable diagnostics, not leaderboard wins.</p></article>
+          <article class="insight"><span class="number">03 / PROTOCOL HEALTH</span><h3>Kimi is a transport story.</h3><p>Kimi’s historical 90.48 kg raw number is not a capability ranking: 702 transport failures made all ten pilot episodes uncountable. Reliability is part of the evidence.</p></article>
+        </div>
+        <div class="history-note"><strong>Why the eras stay separate:</strong> v0.1 and v0.2 changed the engine and prompt. Their numbers can tell the development story, but they should not be merged into a single cross-version leaderboard.</div>
+        <div class="links"><a href="reports/PUBLIC_LEADERBOARD.md">Read the current leaderboard →</a><a href="reports/PILOT_V0.1_LEADERBOARD.md">Read the corrected pilot →</a><a href="bench-bench-report.html">Open the full report →</a></div>
+      </div>
+    </section>
+
+    <section id="method">
+      <div class="wrap method-grid">
+        <div>
+          <p class="eyebrow">05 / how to read bench-bench</p>
+          <h2>A year is the point.</h2>
+          <div class="method-copy">
+            <p>Dave’s weekly observation is noisy. The model never sees true capacity, fatigue, or the next disruption. It writes a complete weekly plan, then the simulator decides what actually happens under a finite 900-minute ledger, cash limits, missed sessions, illness, travel, childcare, and recovery dynamics.</p>
+            <p>The final score is Dave’s true capacity after a fixed three-day taper, averaged across three hidden tests. A model can write a convincing plan in week one. The benchmark asks whether it can keep making coherent decisions when the year stops cooperating.</p>
+          </div>
+        </div>
+        <ol class="method-list">
+          <li><b>52 WEEKS</b><span>One simulated year of recurring decisions.</span></li>
+          <li><b>10 SEEDS</b><span>Matched public worlds for each model.</span></li>
+          <li><b>3 TESTS</b><span>Weeks 44, 48, and 52 after taper.</span></li>
+          <li><b>2 AXES</b><span>Performance and reliability remain visible.</span></li>
+        </ol>
       </div>
     </section>
   </main>
+
   <footer>
     <div class="wrap">
-      <p>Bench-bench v0.2 public run · four models × ten public seeds (400–409) × 52 simulated weeks</p>
+      <p>Bench-bench v0.2 · four preregistered models × ten public seeds (400–409) × 52 simulated weeks</p>
       <p class="hash">Engine sha256:438c1d77 · prompt sha256:06d96111 · source: reports/PUBLIC_LEADERBOARD.json</p>
-      <p>Official means require 10/10 counted seeds. GLM 5.3 Flash (formerly OX Alpha) is shown as a clearly labeled exploratory comparison, not an official leaderboard entry.</p>
+      <p>Fable 5.1 and GLM 5.3 Flash / OX Alpha are clearly labeled extensions. Official means require 10/10 countable seeds.</p>
       <p style="margin-top:15px"><a href="https://bench-bench.goatcounter.com/" rel="noopener">Analytics</a></p>
     </div>
   </footer>
+
   <div id="chart-tip" class="chart-tip" role="status" aria-live="polite"></div>
   <script>
-    const seeds = [400,401,402,403,404,405,406,407,408,409];
-    const models = [
-      {id:"grok", name:"Grok 4.6", color:"#e5422d", mean:101.192, cost:1.14734, status:"counted", scores:[101.11,101.00,100.19,99.67,102.49,100.85,102.54,101.62,104.19,98.26]},
-      {id:"muse", name:"Muse Spark 1.2", color:"#168477", mean:101.027, cost:1.09562, status:"counted", scores:[102.03,103.77,101.00,97.17,104.45,101.78,98.12,100.38,103.93,97.64]},
-      {id:"gpt", name:"GPT-5.6 Sol", color:"#3977c9", mean:96.41, cost:3.12905, status:"counted", scores:[95.42,97.49,93.38,96.48,96.71,97.23,94.62,97.76,97.37,97.64]},
-      {id:"opus", name:"Claude Opus 5", color:"#b67513", mean:102.00, cost:6.12044, status:"diagnostic", counted:"7/10", invalid:[2,3,8], scores:[102.34,106.28,99.95,98.51,100.96,101.92,105.34,100.01,103.14,101.55]},
-      {id:"glm", name:"GLM 5.3 Flash", color:"#7943b9", mean:102.75, cost:null, status:"exploratory", counted:"7/10", invalid:[1,2,3], scores:[99.43,105.00,103.50,94.27,101.72,108.07,103.89,104.54,105.05,102.03]}
+    const currentSeeds = [400, 401, 402, 403, 404, 405, 406, 407, 408, 409];
+    const pilotSeeds = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109];
+    const currentModels = [
+      { id: "grok46", name: "Grok 4.6", short: "Grok 4.6", color: "#e5422d", image: "images/grok%204.5.png", cohort: "current", status: "official", mean: 101.192, sd: 1.658, scores: [101.11,101.00,100.19,99.67,102.49,100.85,102.54,101.62,104.19,98.26], countable: 10, pain: [0,0,0,0,0,0,0,0,0,0], repairRate: 3.1, repairs: 22, fallbacks: 10, transport: 0, cost: 1.1473, note: "Highest current countable mean." },
+      { id: "muse12", name: "Muse Spark 1.2", short: "Muse", color: "#168477", image: "images/muse%20spark%201.2.png", cohort: "current", status: "official", mean: 101.027, sd: 2.676, scores: [102.03,103.77,101.00,97.17,104.45,101.78,98.12,100.38,103.93,97.64], countable: 10, pain: [0,0,0,0,0,0,0,0,0,0], repairRate: 2.0, repairs: 14, fallbacks: 8, transport: 0, cost: 1.0956, note: "Nearly tied with Grok, with the lightest repair burden." },
+      { id: "gpt56", name: "GPT-5.6 Sol", short: "GPT-5.6", color: "#3977c9", image: "images/gpt%205.6%20sol.png", cohort: "current", status: "official", mean: 96.410, sd: 1.474, scores: [95.42,97.49,93.38,96.48,96.71,97.23,94.62,97.76,97.37,97.64], countable: 10, pain: [0,0,0,0,0,0,0,0,0,0], repairRate: 3.3, repairs: 23, fallbacks: 4, transport: 0, cost: 3.1290, note: "Lower raw performance, fully countable across the run." },
+      { id: "opus5", name: "Claude Opus 5", short: "Opus 5", color: "#b67513", image: "images/opus%205.png", cohort: "current", status: "diagnostic", mean: 102.000, sd: 2.416, scores: [102.34,106.28,99.95,98.51,100.96,101.92,105.34,100.01,103.14,101.55], countable: 7, pain: [0,0,24,42,8,0,0,0,22,0], repairRate: 15.9, repairs: 112, fallbacks: 14, transport: 0, cost: 6.1204, note: "High raw mean; three seeds crossed the pain limit." },
+      { id: "fable51", name: "Claude Fable 5.1", short: "Fable 5.1", color: "#2863a8", image: "images/fable%2051.png", cohort: "current", status: "extension", mean: 102.289, sd: 1.754, scores: [103.15,101.84,98.62,102.42,103.33,103.70,102.46,102.88,104.46,100.03], countable: 9, pain: [0,0,0,0,0,0,0,0,17,0], repairRate: 8.0, repairs: 56, fallbacks: 12, transport: 0, cost: 11.0658, note: "New extension; one seed reached 17 pain days." },
+      { id: "glm53", name: "GLM 5.3 Flash", short: "GLM 5.3", color: "#7541b5", image: "images/glm%205.3%20flash.png", cohort: "current", status: "exploratory", mean: 102.750, sd: 3.775, scores: [99.43,105.00,103.50,94.27,101.72,108.07,103.89,104.54,105.05,102.03], countable: 7, pain: [0,76,50,38,0,1,0,0,0,0], repairRate: 5.8, repairs: 41, fallbacks: 10, transport: 0, cost: null, note: "Formerly OX Alpha; exploratory and unpriced." }
     ];
+    const pilotModels = [
+      { id: "pilot-opus5", name: "Claude Opus 5", short: "Opus 5", color: "#b67513", image: "images/opus%205.png", cohort: "pilot", status: "historical", mean: 100.064, sd: 2.253, scores: [97.61,101.13,101.88,102.15,94.88,101.52,101.09,100.31,100.65,99.42], countable: 10, pain: [0,0,0,0,0,0,0,0,0,0], repairRate: 19.2, repairs: 130, fallbacks: 13, transport: 0, cost: 5.9503, note: "Historical pilot result; engine and prompt differ from v0.2." },
+      { id: "pilot-grok45", name: "Grok 4.5", short: "Grok 4.5", color: "#e5422d", image: "images/grok%204.5.png", cohort: "pilot", status: "historical", mean: 99.191, sd: 2.091, scores: [101.35,101.80,100.27,99.07,97.21,98.26,100.23,100.50,94.91,98.31], countable: 10, pain: [0,0,0,0,0,0,0,0,0,0], repairRate: 8.4, repairs: 57, fallbacks: 7, transport: 0, cost: .9225, note: "Historical pilot result; not a v0.2 leaderboard row." },
+      { id: "pilot-muse12", name: "Muse Spark 1.2", short: "Muse", color: "#168477", image: "images/muse%20spark%201.2.png", cohort: "pilot", status: "historical", mean: 98.616, sd: 1.333, scores: [98.90,97.63,98.17,99.40,97.45,99.92,101.51,97.70,97.34,98.14], countable: 10, pain: [0,0,0,0,0,0,0,0,0,0], repairRate: 4.4, repairs: 30, fallbacks: 11, transport: 0, cost: 1.0753, note: "Historical pilot result; engine and prompt differ from v0.2." },
+      { id: "pilot-gpt56", name: "GPT-5.6 Sol", short: "GPT-5.6", color: "#3977c9", image: "images/gpt%205.6%20sol.png", cohort: "pilot", status: "historical", mean: 93.864, sd: 1.231, scores: [94.75,91.80,95.44,94.68,92.58,94.91,94.37,92.85,92.82,94.44], countable: 10, pain: [0,0,0,0,0,0,0,0,0,0], repairRate: 2.2, repairs: 15, fallbacks: 3, transport: 0, cost: 2.8056, note: "Historical pilot result; engine and prompt differ from v0.2." },
+      { id: "pilot-kimi", name: "Kimi K3", short: "Kimi K3", color: "#273c55", image: "images/k3.png", cohort: "pilot", status: "transport", mean: 90.483, sd: 6.219, scores: [97.25,93.36,99.79,98.78,89.05,86.88,85.14,84.62,84.79,85.17], countable: 0, pain: [0,0,0,0,0,0,0,0,0,0], repairRate: 5.8, repairs: 39, fallbacks: 353, transport: 702, cost: 2.0095, note: "Not rankable; all ten pilot episodes had transport failures." }
+    ];
+    const allModels = [...currentModels, ...pilotModels];
     const ns = "http://www.w3.org/2000/svg";
     const tip = document.querySelector("#chart-tip");
-    function node(tag, attrs, parent, content) { const n=document.createElementNS(ns,tag); Object.entries(attrs||{}).forEach(([k,v])=>n.setAttribute(k,v)); if(content!=null)n.textContent=content; parent.appendChild(n); return n; }
+    let reliabilityCohort = "current";
+    let detailCohort = "current";
+
+    function svgNode(tag, attrs, parent, content) {
+      const node = document.createElementNS(ns, tag);
+      Object.entries(attrs || {}).forEach(([key, value]) => node.setAttribute(key, value));
+      if (content !== undefined && content !== null) node.textContent = content;
+      parent.appendChild(node);
+      return node;
+    }
+    function fmt(value, digits = 2) { return Number(value).toFixed(digits); }
+    function pct(value, digits = 1) { return `${Number(value).toFixed(digits)}%`; }
+    function currentSet(cohort) {
+      if (cohort === "pilot") return pilotModels;
+      if (cohort === "all") return allModels;
+      return currentModels;
+    }
+    function seedsFor(cohort) { return cohort === "pilot" ? pilotSeeds : currentSeeds; }
     function showTip(target, message, event) {
-      tip.textContent=message; tip.style.display="block";
-      const box=target.getBoundingClientRect(), x=event?event.clientX+12:box.right+8, y=event?event.clientY+12:box.top;
-      tip.style.left=Math.min(Math.max(8,x),window.innerWidth-tip.offsetWidth-8)+"px";
-      tip.style.top=Math.min(Math.max(8,y),window.innerHeight-tip.offsetHeight-8)+"px";
+      tip.textContent = message;
+      tip.style.display = "block";
+      const box = target.getBoundingClientRect();
+      const x = event ? event.clientX + 12 : box.right + 8;
+      const y = event ? event.clientY + 12 : box.top;
+      tip.style.left = `${Math.min(Math.max(8, x), window.innerWidth - tip.offsetWidth - 8)}px`;
+      tip.style.top = `${Math.min(Math.max(8, y), window.innerHeight - tip.offsetHeight - 8)}px`;
     }
-    function hideTip() { tip.style.display="none"; }
-    function makeInteractive(target, message) {
-      target.classList.add("chart-mark"); target.setAttribute("tabindex","0"); target.setAttribute("role","img");
-      node("title",{},target,message);
-      target.addEventListener("pointerenter",event=>showTip(target,message,event));
-      target.addEventListener("pointermove",event=>showTip(target,message,event));
-      target.addEventListener("pointerleave",hideTip);
-      target.addEventListener("focus",()=>showTip(target,message)); target.addEventListener("blur",hideTip);
+    function hideTip() { tip.style.display = "none"; }
+    function attachInteractive(target, message) {
+      target.classList.add("chart-mark");
+      target.setAttribute("tabindex", "0");
+      target.setAttribute("role", "img");
+      target.setAttribute("aria-label", message.replace(/\n/g, ", "));
+      svgNode("title", {}, target, message);
+      target.addEventListener("pointerenter", event => showTip(target, message, event));
+      target.addEventListener("pointermove", event => showTip(target, message, event));
+      target.addEventListener("pointerleave", hideTip);
+      target.addEventListener("focus", () => showTip(target, message));
+      target.addEventListener("blur", hideTip);
     }
-    function base(svg, left, right, top, bottom, min, max, ticks) {
-      const width=+svg.viewBox.baseVal.width, height=+svg.viewBox.baseVal.height;
-      const x2=width-right, y2=height-bottom, y=v=>y2-(v-min)/(max-min)*(y2-top);
-      ticks.forEach(t=>{node("line",{x1:left,y1:y(t),x2:x2,y2:y(t),class:"gridline"},svg);node("text",{x:left-9,y:y(t)+4,"text-anchor":"end"},svg,String(t));});
-      node("line",{x1:left,y1:top,x2:left,y2:y2,class:"axis"},svg); node("line",{x1:left,y1:y2,x2:x2,y2:y2,class:"axis"},svg); return {width,height,x2,y2,y};
+    function chartBase(svg, { left, right, top, bottom, min, max, ticks, xLabel, yLabel }) {
+      const width = svg.viewBox.baseVal.width;
+      const height = svg.viewBox.baseVal.height;
+      const x2 = width - right;
+      const y2 = height - bottom;
+      const y = value => y2 - ((value - min) / (max - min)) * (y2 - top);
+      ticks.forEach(tick => {
+        svgNode("line", { x1: left, y1: y(tick), x2, y2: y(tick), class: "gridline" }, svg);
+        svgNode("text", { x: left - 10, y: y(tick) + 4, "text-anchor": "end" }, svg, String(tick));
+      });
+      svgNode("line", { x1: left, y1: top, x2: left, y2, class: "axis" }, svg);
+      svgNode("line", { x1: left, y1: y2, x2, y2, class: "axis" }, svg);
+      if (xLabel) svgNode("text", { x: (left + x2) / 2, y: height - 12, "text-anchor": "middle", class: "axis-title" }, svg, xLabel);
+      if (yLabel) svgNode("text", { x: 16, y: (top + y2) / 2, transform: `rotate(-90 16 ${(top + y2) / 2})`, "text-anchor": "middle", class: "axis-title" }, svg, yLabel);
+      return { width, height, x2, y2, y };
     }
-    function seriesClass(index) { return "series-"+index; }
-    function statusLabel(m) { return m.status==="counted" ? "counted" : m.status+" raw"; }
+    function hatch(svg, id, color) {
+      const defs = svgNode("defs", {}, svg);
+      const pattern = svgNode("pattern", { id, width: 8, height: 8, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, defs);
+      svgNode("line", { x1: 0, y1: 0, x2: 0, y2: 8, stroke: color, "stroke-width": 3, opacity: .44 }, pattern);
+    }
+    function renderReliability() {
+      const svg = document.querySelector("#reliability-chart");
+      svg.replaceChildren();
+      const models = currentSet(reliabilityCohort);
+      const g = chartBase(svg, { left: 83, right: 28, top: 40, bottom: 64, min: 0, max: 105, ticks: [0, 25, 50, 75, 100], xLabel: "raw mean final 1RM (kg)", yLabel: "countable seeds" });
+      const xMin = 89, xMax = 104;
+      const x = value => 83 + ((value - xMin) / (xMax - xMin)) * (g.x2 - 83);
+      [89, 92, 95, 98, 101, 104].forEach(value => {
+        const cx = x(value);
+        svgNode("line", { x1: cx, y1: g.y2, x2: cx, y2: g.y2 + 6, class: "axis" }, svg);
+        svgNode("text", { x: cx, y: g.y2 + 23, "text-anchor": "middle", class: "small-label" }, svg, String(value));
+      });
+      const offsets = { "grok46": -18, "muse12": 18, "gpt56": -18, "opus5": -20, "fable51": 20, "glm53": 20, "pilot-opus5": -20, "pilot-grok45": 20, "pilot-muse12": -18, "pilot-gpt56": 20, "pilot-kimi": -20 };
+      models.forEach(model => {
+        const cx = x(model.mean);
+        const cy = g.y(model.countable * 10);
+        const excluded = model.countable < 10 || model.transport > 0;
+        const mark = svgNode("circle", { cx, cy, r: excluded ? 9 : 8, fill: excluded ? "var(--plate)" : model.color, stroke: excluded ? "var(--red)" : model.color, "stroke-width": excluded ? 3 : 2 }, svg);
+        const painText = model.pain.some(value => value > 14) ? `\nPain-invalid seeds: ${model.pain.filter(value => value > 14).length}` : "";
+        const transportText = model.transport ? `\nTransport failures: ${model.transport}` : "";
+        attachInteractive(mark, `${model.name} · ${model.cohort === "current" ? "v0.2" : "v0.1 pilot"}\nRaw mean: ${fmt(model.mean)} kg\nCountable: ${model.countable}/10${painText}${transportText}`);
+        const labelY = Math.max(22, Math.min(g.y2 - 8, cy + (offsets[model.id] || 18)));
+        svgNode("text", { x: cx + 11, y: labelY, class: "label" }, svg, model.short);
+      });
+      svgNode("text", { x: g.x2, y: 24, "text-anchor": "end", class: "small-label" }, svg, reliabilityCohort === "all" ? "current + pilot" : reliabilityCohort === "current" ? "current v0.2" : "v0.1 pilot");
+    }
     function renderMean() {
-      const svg=document.querySelector("#mean-chart"), g=base(svg,76,18,28,57,92,110,[92,96,100,104,108]), barW=98, gap=26;
-      const defs=node("defs",{},svg), pat=node("pattern",{id:"hatch",width:8,height:8,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},defs); node("line",{x1:0,y1:0,x2:0,y2:8,stroke:"#b67513","stroke-width":3,opacity:.4},pat);
-      models.forEach((m,i)=>{const x=88+i*(barW+gap), y=g.y(m.mean), bar=node("rect",{x,y,width:barW,height:g.y(92)-y,fill:m.status==="counted"?m.color:"url(#hatch)",opacity:m.status==="counted"?1:.82,stroke:m.color,"stroke-width":m.status==="counted"?0:2,class:seriesClass(i)},svg); makeInteractive(bar,`${m.name}\n${m.mean.toFixed(2)} kg · ${statusLabel(m)}\n${m.status==="counted"?"10/10 seeds":(m.counted+" counted")}`); node("text",{x:x+barW/2,y:g.y(92)+23,"text-anchor":"middle",class:"label"},svg,m.name.replace(" Spark 1.2","").replace("Claude ","")); node("text",{x:x+barW/2,y:y-9,"text-anchor":"middle",class:"label"},svg,m.mean.toFixed(2)+(m.status==="counted"?"":" raw")); });
-      node("text",{x:744,y:18,"text-anchor":"end"},svg,"kg");
-    }
-    function renderCost() {
-      const svg=document.querySelector("#cost-chart"), g=base(svg,72,18,28,57,94,108,[94,98,102,106,108]);
-      const x=v=>72+Math.log(v/.9)/Math.log(7)*(g.x2-72);
-      models.filter(m=>m.cost!==null).forEach((m)=>{const i=models.indexOf(m), cx=x(m.cost), cy=g.y(m.mean), mark=node("circle",{cx,cy,r:8,fill:m.status==="counted"?m.color:"var(--plate)",stroke:m.color,"stroke-width":m.status==="counted"?2:3,class:seriesClass(i)},svg); makeInteractive(mark,`${m.name}\n${m.mean.toFixed(2)} kg · ${statusLabel(m)}\n$${m.cost.toFixed(2)} per episode`); if(m.status!=="counted")node("line",{x1:cx-5,y1:cy-5,x2:cx+5,y2:cy+5,stroke:"var(--red)","stroke-width":2,class:seriesClass(i)},svg); const offsets={0:{dx:-10,labelDy:-15,costDy:15,anchor:"end"},1:{dx:10,labelDy:17,costDy:34,anchor:"start"},2:{dx:-9,labelDy:-11,costDy:14,anchor:"end"},3:{dx:10,labelDy:-11,costDy:14,anchor:"start"}}, offset=offsets[i]||{dx:10,labelDy:-11,costDy:14,anchor:"start"}; node("text",{x:cx+offset.dx,y:cy+offset.labelDy,"text-anchor":offset.anchor,class:"label"},svg,m.name.replace(" Spark 1.2","").replace("Claude ","")); node("text",{x:cx+offset.dx,y:cy+offset.costDy,"text-anchor":offset.anchor},svg,"$"+m.cost.toFixed(2)); });
-      [1,2,4,6].forEach(t=>{const xx=x(t); node("line",{x1:xx,y1:g.y(94),x2:xx,y2:g.y(94)+5,class:"axis"},svg); node("text",{x:xx,y:g.y(94)+21,"text-anchor":"middle"},svg,"$"+t);}); node("text",{x:744,y:18,"text-anchor":"end"},svg,"cost / episode · log scale");
+      const svg = document.querySelector("#mean-chart");
+      svg.replaceChildren();
+      const models = currentSet(detailCohort).filter(model => model.cohort === detailCohort);
+      const g = chartBase(svg, { left: 72, right: 22, top: 35, bottom: 78, min: 88, max: 110, ticks: [88, 92, 96, 100, 104, 108], xLabel: "model", yLabel: "kg" });
+      const patternId = `hatch-${detailCohort}`;
+      hatch(svg, patternId, "#b67513");
+      const barWidth = Math.min(115, (g.x2 - 72) / models.length * .68);
+      const gap = (g.x2 - 72) / models.length;
+      models.forEach((model, index) => {
+        const cx = 72 + gap * (index + .5);
+        const top = g.y(model.mean);
+        const bar = svgNode("rect", { x: cx - barWidth / 2, y: top, width: barWidth, height: g.y(88) - top, fill: model.countable === 10 ? model.color : `url(#${patternId})`, opacity: model.countable === 10 ? 1 : .86, stroke: model.countable === 10 ? "none" : model.color, "stroke-width": model.countable === 10 ? 0 : 2 }, svg);
+        attachInteractive(bar, `${model.name}\nRaw mean: ${fmt(model.mean)} kg\nRaw seed SD: ${fmt(model.sd)} kg\n${model.countable}/10 countable${model.countable === 10 ? "" : " · diagnostic only"}`);
+        svgNode("text", { x: cx, y: top - 10, "text-anchor": "middle", class: "label" }, svg, `${fmt(model.mean)}${model.countable === 10 ? "" : " raw"}`);
+        const label = model.short.length > 12 ? model.short.replace(" ", "\n") : model.short;
+        label.split("\n").forEach((part, line) => svgNode("text", { x: cx, y: g.y2 + 23 + line * 13, "text-anchor": "middle", class: "small-label" }, svg, part));
+      });
+      svgNode("text", { x: g.x2, y: 20, "text-anchor": "end", class: "small-label" }, svg, detailCohort === "current" ? "current v0.2 raw means" : "v0.1 pilot raw means");
     }
     function renderSeeds() {
-      const svg=document.querySelector("#seed-chart"), g=base(svg,63,20,28,67,92,110,[92,96,100,104,108]), x=i=>63+i*(g.x2-63)/(seeds.length-1);
-      models.forEach((m,mi)=>{let d=""; m.scores.forEach((v,i)=>{d+=(i?"L":"M")+x(i)+" "+g.y(v)+" ";}); node("path",{d,fill:"none",stroke:m.color,"stroke-width":mi>=3?1.5:2,opacity:mi>=3?.72:1,class:seriesClass(mi)},svg); m.scores.forEach((v,i)=>{const invalid=m.invalid?.includes(i), mark=node("circle",{cx:x(i),cy:g.y(v),r:invalid?6:4,fill:invalid?"var(--plate)":m.color,stroke:invalid?"var(--red)":m.color,"stroke-width":invalid?2:1,class:seriesClass(mi)},svg); makeInteractive(mark,`${m.name}\nSeed ${seeds[i]} · ${v.toFixed(2)} kg\n${invalid?"excluded: pain constraint":"counted in raw series"}`); if(invalid)node("line",{x1:x(i)-4,y1:g.y(v)-4,x2:x(i)+4,y2:g.y(v)+4,stroke:"var(--red)","stroke-width":1.5,class:seriesClass(mi)},svg);}); });
-      seeds.forEach((s,i)=>node("text",{x:x(i),y:g.y(92)+24,"text-anchor":"middle"},svg,String(s).slice(2))); node("text",{x:860,y:18,"text-anchor":"end"},svg,"seed suffix");
+      const svg = document.querySelector("#seed-chart");
+      svg.replaceChildren();
+      const models = currentSet(detailCohort).filter(model => model.cohort === detailCohort);
+      const seeds = seedsFor(detailCohort);
+      const g = chartBase(svg, { left: 62, right: 22, top: 35, bottom: 72, min: 88, max: 110, ticks: [88, 92, 96, 100, 104, 108], xLabel: "seed", yLabel: "kg" });
+      const x = index => 62 + index * (g.x2 - 62) / (seeds.length - 1);
+      models.forEach((model, modelIndex) => {
+        let path = "";
+        model.scores.forEach((score, index) => { path += `${index ? "L" : "M"}${x(index)} ${g.y(score)} `; });
+        svgNode("path", { d: path, fill: "none", stroke: model.color, "stroke-width": modelIndex > 3 ? 1.5 : 2, opacity: modelIndex > 3 ? .75 : 1, class: `seed-series-${model.id}` }, svg);
+        model.scores.forEach((score, index) => {
+          const invalid = model.countable < 10 && model.pain[index] > 14 || model.transport > 0;
+          const mark = svgNode("circle", { cx: x(index), cy: g.y(score), r: invalid ? 6.5 : 4.2, fill: invalid ? "var(--plate)" : model.color, stroke: invalid ? "var(--red)" : model.color, "stroke-width": invalid ? 2.5 : 1.2, class: `seed-series-${model.id}` }, svg);
+          attachInteractive(mark, `${model.name}\nSeed ${seeds[index]} · ${fmt(score)} kg\n${invalid ? "excluded from counted result" : "raw result; countable"}`);
+          if (invalid) svgNode("line", { x1: x(index) - 4, y1: g.y(score) - 4, x2: x(index) + 4, y2: g.y(score) + 4, stroke: "var(--red)", "stroke-width": 1.5, class: `seed-series-${model.id}` }, svg);
+        });
+      });
+      seeds.forEach((seed, index) => svgNode("text", { x: x(index), y: g.y2 + 24, "text-anchor": "middle", class: "small-label" }, svg, String(seed)));
+      svgNode("text", { x: g.x2, y: 20, "text-anchor": "end", class: "small-label" }, svg, detailCohort === "current" ? "raw scores · seeds 400–409" : "raw scores · seeds 100–109");
     }
-    function renderControls() {
-      const controls=document.querySelector("#chart-controls");
-      models.forEach((m,i)=>{const button=document.createElement("button"); button.type="button"; button.className="chart-toggle"; button.setAttribute("aria-pressed","true"); button.dataset.index=i; const swatch=document.createElement("i"); swatch.className="dot"; swatch.style.setProperty("--dot",m.color); const label=document.createElement("span"); label.textContent=m.name; button.append(swatch,label); button.addEventListener("click",()=>{const on=button.getAttribute("aria-pressed")==="true"; button.setAttribute("aria-pressed",String(!on)); document.querySelectorAll("."+seriesClass(i)).forEach(mark=>{mark.style.display=on?"none":"";});}); controls.appendChild(button); });
+    function renderSeedControls() {
+      const controls = document.querySelector("#seed-controls");
+      controls.replaceChildren();
+      const models = currentSet(detailCohort).filter(model => model.cohort === detailCohort);
+      models.forEach(model => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "chart-toggle";
+        button.setAttribute("aria-pressed", "true");
+        button.setAttribute("aria-label", `Toggle ${model.name} seed series`);
+        const dot = document.createElement("i");
+        dot.className = "dot";
+        dot.style.setProperty("--dot", model.color);
+        const label = document.createElement("span");
+        label.textContent = model.name;
+        button.append(dot, label);
+        button.addEventListener("click", () => {
+          const on = button.getAttribute("aria-pressed") === "true";
+          button.setAttribute("aria-pressed", String(!on));
+          document.querySelectorAll(`.seed-series-${model.id}`).forEach(node => { node.style.display = on ? "none" : ""; });
+        });
+        controls.appendChild(button);
+      });
     }
-    renderMean(); renderCost(); renderSeeds(); renderControls();
+    function renderOps() {
+      const svg = document.querySelector("#ops-chart");
+      svg.replaceChildren();
+      const models = currentSet(detailCohort).filter(model => model.cohort === detailCohort);
+      const metric = document.querySelector("#ops-metric").value;
+      const labels = { countable: "countable seeds (%)", repair: "rejected-output repair rate (%)", fallback: "automatic fallback rate (%)", transport: "transport failures / 10-seed run" };
+      const valueFor = model => metric === "countable" ? model.countable * 10 : metric === "repair" ? model.repairRate : metric === "fallback" ? model.fallbacks / 7.04 : model.transport;
+      const max = metric === "transport" ? Math.max(10, ...models.map(valueFor)) : 100;
+      const ticks = metric === "transport" ? [0, 200, 400, 600, 800].filter(value => value <= max || value === 0) : [0, 25, 50, 75, 100];
+      const g = chartBase(svg, { left: 72, right: 34, top: 34, bottom: 36, min: 0, max: metric === "transport" ? Math.max(800, max) : 100, ticks, xLabel: "", yLabel: labels[metric] });
+      const rowHeight = (g.y2 - 34) / models.length;
+      models.forEach((model, index) => {
+        const value = valueFor(model);
+        const y = 34 + rowHeight * index + rowHeight * .22;
+        const height = rowHeight * .56;
+        const width = ((value - 0) / (metric === "transport" ? Math.max(800, max) : 100)) * (g.x2 - 72);
+        const bar = svgNode("rect", { x: 72, y, width: Math.max(1, width), height, fill: model.color, opacity: model.cohort === "current" && model.status !== "official" ? .63 : .9 }, svg);
+        attachInteractive(bar, `${model.name}\n${labels[metric]}: ${metric === "transport" ? Math.round(value) : fmt(value, 1)}`);
+        svgNode("text", { x: 66, y: y + height / 2 + 4, "text-anchor": "end", class: "small-label" }, svg, model.short);
+        svgNode("text", { x: 80 + width, y: y + height / 2 + 4, class: "label" }, svg, metric === "transport" ? String(Math.round(value)) : `${fmt(value, 1)}%`);
+      });
+      svgNode("text", { x: g.x2, y: 19, "text-anchor": "end", class: "small-label" }, svg, detailCohort === "current" ? "current v0.2" : "v0.1 pilot");
+    }
+    function renderCost() {
+      const svg = document.querySelector("#cost-chart");
+      svg.replaceChildren();
+      const models = currentSet(detailCohort).filter(model => model.cohort === detailCohort && model.cost !== null);
+      const g = chartBase(svg, { left: 82, right: 30, top: 36, bottom: 63, min: 90, max: 106, ticks: [90, 94, 98, 102, 106], xLabel: "cost / 52-week episode (USD)", yLabel: "raw mean kg" });
+      const costs = models.map(model => model.cost);
+      const minCost = Math.max(.5, Math.min(...costs) * .72);
+      const maxCost = Math.max(...costs) * 1.12;
+      const x = value => 82 + ((value - minCost) / (maxCost - minCost)) * (g.x2 - 82);
+      models.forEach(model => {
+        const cx = x(model.cost);
+        const cy = g.y(model.mean);
+        const excluded = model.countable < 10;
+        const point = svgNode("circle", { cx, cy, r: excluded ? 9 : 8, fill: excluded ? "var(--plate)" : model.color, stroke: excluded ? "var(--red)" : model.color, "stroke-width": excluded ? 3 : 2 }, svg);
+        attachInteractive(point, `${model.name}\nRaw mean: ${fmt(model.mean)} kg\nCost: $${fmt(model.cost, 2)} / episode\n${model.countable}/10 countable`);
+        svgNode("text", { x: cx + 11, y: cy - 10, class: "label" }, svg, model.short);
+        svgNode("text", { x: cx + 11, y: cy + 16, class: "small-label" }, svg, `$${fmt(model.cost, 2)}`);
+      });
+      const costTicks = [1, 2, 5, 10].filter(value => value >= minCost && value <= maxCost);
+      costTicks.forEach(value => { const cx = x(value); svgNode("line", { x1: cx, y1: g.y2, x2: cx, y2: g.y2 + 5, class: "axis" }, svg); svgNode("text", { x: cx, y: g.y2 + 22, "text-anchor": "middle", class: "small-label" }, svg, `$${value}`); });
+      svgNode("text", { x: g.x2, y: 20, "text-anchor": "end", class: "small-label" }, svg, detailCohort === "current" ? "current v0.2 priced runs" : "v0.1 pilot priced runs");
+    }
+    function renderCards() {
+      const grid = document.querySelector("#model-grid");
+      grid.replaceChildren();
+      currentModels.forEach((model, index) => {
+        const card = document.createElement("article");
+        card.className = "model";
+        card.style.setProperty("--accent", model.color);
+        const meta = document.createElement("div");
+        meta.className = "model-meta";
+        meta.innerHTML = `<span class="rank">${String(index + 1).padStart(2, "0")} / ${model.status}</span><span class="status">${model.countable}/10 countable</span>`;
+        const image = document.createElement("img");
+        image.src = model.image;
+        image.alt = `${model.name} character illustration`;
+        const title = document.createElement("h3");
+        title.textContent = model.name;
+        const score = document.createElement("div");
+        score.className = "score";
+        score.innerHTML = `<strong>${fmt(model.mean)}</strong><span>kg ${model.countable === 10 ? "counted" : "raw"}</span>`;
+        const note = document.createElement("p");
+        note.className = "model-note";
+        note.innerHTML = `<strong>${model.countable === 10 ? "Countable result." : "Diagnostic only."}</strong> ${model.note}`;
+        const small = document.createElement("small");
+        small.className = model.countable === 10 ? "" : "void";
+        small.textContent = `${model.repairRate.toFixed(1)}% repairs · ${model.fallbacks} auto fallbacks · ${model.cost === null ? "cost not priced" : "$" + model.cost.toFixed(2) + " / episode"}`;
+        card.append(meta, image, title, score, note, small);
+        grid.appendChild(card);
+      });
+    }
+    function setPressed(selector, value) {
+      document.querySelectorAll(selector).forEach(button => button.setAttribute("aria-pressed", String(button.dataset.cohort === value)));
+    }
+    document.querySelectorAll(".cohort-toggle").forEach(button => button.addEventListener("click", () => { reliabilityCohort = button.dataset.cohort; setPressed(".cohort-toggle", reliabilityCohort); renderReliability(); }));
+    document.querySelectorAll(".detail-cohort").forEach(button => button.addEventListener("click", () => { detailCohort = button.dataset.cohort; setPressed(".detail-cohort", detailCohort); renderMean(); renderSeeds(); renderSeedControls(); renderOps(); renderCost(); }));
+    document.querySelector("#ops-metric").addEventListener("change", renderOps);
+    renderCards();
+    renderReliability();
+    renderMean();
+    renderSeeds();
+    renderSeedControls();
+    renderOps();
+    renderCost();
   </script>
   <script data-goatcounter="https://bench-bench.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
