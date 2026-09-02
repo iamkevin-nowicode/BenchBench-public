@@ -226,6 +226,10 @@ _MODEL_PRICING_USD_PER_MILLION: dict[str, dict[str, float]] = {
     # Anthropic standard global API pricing; thinking is included in output
     # tokens and is billed at the output rate.
     "claude-opus-5": {"input": 5.00, "cached_input": 0.50, "output": 25.00},
+    # Claude Fable 5.1 pricing. The native Anthropic adapter uses the 1h
+    # ephemeral cache, whose write price is 2x base input and whose reads are
+    # priced separately at $0.25/M tokens.
+    "claude-fable-5-1": {"input": 10.00, "cached_input": 0.25, "output": 50.00},
 }
 
 

@@ -127,6 +127,29 @@ MODEL_SPECS = (
     ),
 )
 
+# Fable is a post-release model extension. Keep it out of the historical
+# four-model default lineup, but make it available to the same resumable
+# supervisor with its own preregistered output root.
+EXTENSION_MODEL_SPECS = (
+    ModelSpec(
+        "claude-fable-5-1",
+        "anthropic",
+        "claude-fable-5-1",
+        "https://api.anthropic.com/v1/messages",
+        ".bench-bench-anthropic-key",
+        "BENCH_BENCH_ANTHROPIC_API_KEY",
+        "medium",
+        1,
+        200.0,
+        request_backoff_seconds=10.0,
+        input_price_per_million=10.00,
+        cached_input_price_per_million=0.25,
+        output_price_per_million=50.00,
+    ),
+)
+
+ALL_MODEL_SPECS = MODEL_SPECS + EXTENSION_MODEL_SPECS
+
 
 @dataclass
 class Job:
@@ -724,7 +747,7 @@ def main() -> int:
         print("at least one seed is required", file=sys.stderr)
         return 2
     requested_models = tuple(dict.fromkeys(value.strip() for value in args.models.split(",") if value.strip()))
-    specs_by_label = {spec.label: spec for spec in MODEL_SPECS}
+    specs_by_label = {spec.label: spec for spec in ALL_MODEL_SPECS}
     unknown_models = [label for label in requested_models if label not in specs_by_label]
     if unknown_models:
         print(f"unknown model label(s): {', '.join(unknown_models)}", file=sys.stderr)

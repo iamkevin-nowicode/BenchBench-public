@@ -518,3 +518,27 @@ observed ordering and quantify each difference and its two-sided 95% paired-t
 interval. It will describe that ordering as evidence for this frozen engine,
 prompt, provider configuration, and public seed set, not as a universal claim
 about the models or a license to extend the seed set after seeing the result.
+
+## v0.2 Claude Fable 5.1 extension preregistration — 2026-09-01
+
+Claude Fable 5.1 is evaluated as a separately identified model extension to the
+completed four-model v0.2 public run. The exact API model string is
+`claude-fable-5-1`, using Anthropic's native `/v1/messages` endpoint, the
+current engine/config hash, and the current prompt hash. It uses temperature
+1.0, medium effort, adaptive thinking, an 8192-token output limit, and the
+native adapter's one-hour ephemeral system-block cache.
+
+The extension is preregistered for one 52-week episode on each seed 400–409.
+Seed 400 is both the first official extension episode and a canary. It is
+eligible for the extension aggregate only after the predeclared transcript,
+provenance, credential-scan, rejection, transport, cost, and retention checks
+pass. A failed canary is excluded and causes the extension to stop and rerun
+from seed 400 under the corrected hash; no score-based exclusion is allowed.
+The extension is written to `runs/v0.2-fable-5-1-public` and has a $200 funded
+budget, with a $180 planning estimate. This does not alter the historical
+four-model preregistration or its leaderboard.
+
+Fable 5.1 pricing is recorded explicitly as $10/M base input, $0.25/M cached
+input, $20/M one-hour cache creation, and $50/M output, sourced from the
+official model documentation. Pricing and token usage are recorded per
+attempt and per episode.

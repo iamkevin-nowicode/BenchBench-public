@@ -526,7 +526,7 @@ def test_openai_compatible_adapter_parses_a_chat_completion_response(tmp_path, m
     assert requests[0]["reasoning_effort"] == "medium"
     records = [json.loads(line) for line in (tmp_path / "http.jsonl").read_text().splitlines()]
     start = next(record for record in records if record["type"] == "run_start")
-    assert start["sampling"] == {"temperature": 0.2, "effort": "medium"}
+    assert start["sampling"] == {"temperature": 0.2, "effort": "medium", "max_output_tokens": 4096}
     assert start["pricing"]["source"] == "explicit"
     assert start["pricing"]["input_price_per_million"] == 1.0
     assert client.endpoint_metadata == {
@@ -561,6 +561,19 @@ def test_known_model_pricing_is_available_without_cli_price_flags() -> None:
         "output_price_per_million": 4.25,
         "source": "model-default",
     }
+
+
+def test_fable_model_pricing_is_available_without_cli_price_flags() -> None:
+    client = AnthropicMessagesClient(
+        "https://api.anthropic.com/v1/messages",
+        "claude-fable-5-1",
+        temperature=1.0,
+        effort="medium",
+    )
+    assert client.pricing_metadata["input_price_per_million"] == 10.0
+    assert client.pricing_metadata["cached_input_price_per_million"] == 0.25
+    assert client.pricing_metadata["cache_creation_input_price_per_million"] == 20.0
+    assert client.pricing_metadata["output_price_per_million"] == 50.0
 
 
 def test_grok_46_pricing_exposes_short_and_long_context_tiers() -> None:
