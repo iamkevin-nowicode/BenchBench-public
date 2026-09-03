@@ -405,6 +405,7 @@
           <p>The official v0.2 public run fixed the engine, prompt, models, and seeds before the calls. Extensions are visible, but clearly separated from the preregistered board.</p>
         </div>
         <div class="board-note"><strong>How to read this.</strong> A raw 1RM is a useful performance diagnostic. A model only receives an official counted aggregate when all ten seeds stay within the pain constraint. That keeps a high score from hiding an unreliable year.</div>
+        <div class="board-note"><strong>09/03/2026 · new strongest model.</strong> Muse Spark 1.3 now has the strongest observed result: <strong>103.45 kg</strong> across all ten seeds, with every seed countable. It is shown as a labeled extension to the frozen v0.2 board.</div>
         <div class="board-note secondary"><strong>Fable 5.1 · new extension.</strong> Fable’s raw mean is 102.29 kg, with 9/10 seeds countable. One seed reached 17 pain days and is shown as a reliability failure, not silently dropped.</div>
         <div id="model-grid" class="model-grid" aria-live="polite"></div>
         <noscript><p class="annotation">JavaScript is required for the interactive result board. The full report remains available at <a href="bench-bench-report.html">bench-bench-report.html</a>.</p></noscript>
@@ -428,7 +429,7 @@
           <div class="chart-wrap"><svg id="reliability-chart" class="chart scatter" viewBox="0 0 920 470" role="img" aria-label="Raw final one rep max compared with countable seed reliability"></svg></div>
           <figcaption class="caption">No composite score is invented here. The two axes stay visible so performance cannot erase reliability.</figcaption>
         </figure>
-        <div class="annotation"><strong>The current read:</strong> Grok 4.6 is the highest current model that is both raw-strong and 10/10 countable. Fable, Opus, and GLM/OX have higher raw means, but each has pain-invalid seeds.</div>
+        <div class="annotation"><strong>The current read:</strong> Muse Spark 1.3 is now the strongest countable result at 103.45 kg across ten seeds. Fable, Opus, and GLM/OX still have higher-risk raw diagnostics, but each has pain-invalid seeds; Muse 1.3’s result remains countable on every seed.</div>
       </div>
     </section>
 
@@ -485,8 +486,8 @@
           <p>Bench-bench does not turn one unreliable high score into a clean win. It leaves the tradeoff visible.</p>
         </div>
         <div class="insight-grid">
-          <article class="insight"><span class="number">01 / CURRENT LEADER</span><h3>Grok is the clean top result.</h3><p>Grok 4.6 averages 101.19 kg and remains countable on all ten current seeds. Muse is almost tied at 101.03 kg, while GPT is lower at 96.41 kg.</p></article>
-          <article class="insight"><span class="number">02 / RAW ≠ OFFICIAL</span><h3>Raw leaders carry risk.</h3><p>Fable, Opus, and GLM/OX all post raw means above the current official leader, but each crosses the pain limit on at least one seed. Their results are valuable diagnostics, not leaderboard wins.</p></article>
+          <article class="insight"><span class="number">01 / NEW LEADER · 09/03/2026</span><h3>Muse Spark 1.3 takes the top spot.</h3><p>Muse Spark 1.3 averages 103.45 kg and remains countable on all ten seeds. It leads Grok 4.6’s 101.19 kg by 2.26 kg, while keeping pain days at zero.</p></article>
+          <article class="insight"><span class="number">02 / RAW ≠ COUNTABLE</span><h3>Raw strength still carries risk.</h3><p>Fable, Opus, and GLM/OX post strong raw diagnostics, but each crosses the pain limit on at least one seed. Muse Spark 1.3 is the stronger result because it combines the highest mean with 10/10 countability.</p></article>
           <article class="insight"><span class="number">03 / PROTOCOL HEALTH</span><h3>Kimi is a transport story.</h3><p>Kimi’s historical 90.48 kg raw number is not a capability ranking: 702 transport failures made all ten pilot episodes uncountable. Reliability is part of the evidence.</p></article>
         </div>
         <div class="history-note"><strong>Why the eras stay separate:</strong> v0.1 and v0.2 changed the engine and prompt. Their numbers can tell the development story, but they should not be merged into a single cross-version leaderboard.</div>
@@ -518,7 +519,7 @@
     <div class="wrap">
       <p>Bench-bench v0.2 · four preregistered models × ten public seeds (400–409) × 52 simulated weeks</p>
       <p class="hash">Engine sha256:438c1d77 · prompt sha256:06d96111 · source: reports/PUBLIC_LEADERBOARD.json</p>
-      <p>Fable 5.1 and GLM 5.3 Flash / OX Alpha are clearly labeled extensions. Official means require 10/10 countable seeds.</p>
+      <p>Fable 5.1, GLM 5.3 Flash / OX Alpha, and Muse Spark 1.3 are clearly labeled extensions. Official means require 10/10 countable seeds.</p>
       <p style="margin-top:15px"><a href="https://bench-bench.goatcounter.com/" rel="noopener">Analytics</a></p>
     </div>
   </footer>
@@ -528,7 +529,8 @@
     const currentSeeds = [400, 401, 402, 403, 404, 405, 406, 407, 408, 409];
     const pilotSeeds = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109];
     const currentModels = [
-      { id: "grok46", name: "Grok 4.6", short: "Grok 4.6", color: "#e5422d", image: "images/grok%204.5.png", cohort: "current", status: "official", mean: 101.192, sd: 1.658, scores: [101.11,101.00,100.19,99.67,102.49,100.85,102.54,101.62,104.19,98.26], countable: 10, pain: [0,0,0,0,0,0,0,0,0,0], repairRate: 3.1, repairs: 22, fallbacks: 10, transport: 0, cost: 1.1473, note: "Highest current countable mean." },
+      { id: "muse13", name: "Muse Spark 1.3", short: "Muse 1.3", color: "#155fbe", image: "images/muse%20spark%201.3.png", cohort: "current", status: "extension", mean: 103.453, sd: 1.683, scores: [105.05,105.03,103.72,102.47,102.13,100.88,105.22,103.93,104.97,101.13], countable: 10, pain: [0,0,0,0,0,0,0,0,0,0], repairRate: 2.6, repairs: 18, fallbacks: 2, transport: 0, cost: 1.0024, note: "New strongest countable result; clean ten-seed extension dated 09/03/2026." },
+      { id: "grok46", name: "Grok 4.6", short: "Grok 4.6", color: "#e5422d", image: "images/grok%204.5.png", cohort: "current", status: "official", mean: 101.192, sd: 1.658, scores: [101.11,101.00,100.19,99.67,102.49,100.85,102.54,101.62,104.19,98.26], countable: 10, pain: [0,0,0,0,0,0,0,0,0,0], repairRate: 3.1, repairs: 22, fallbacks: 10, transport: 0, cost: 1.1473, note: "Previous countable leader; now behind Muse Spark 1.3." },
       { id: "muse12", name: "Muse Spark 1.2", short: "Muse", color: "#168477", image: "images/muse%20spark%201.2.png", cohort: "current", status: "official", mean: 101.027, sd: 2.676, scores: [102.03,103.77,101.00,97.17,104.45,101.78,98.12,100.38,103.93,97.64], countable: 10, pain: [0,0,0,0,0,0,0,0,0,0], repairRate: 2.0, repairs: 14, fallbacks: 8, transport: 0, cost: 1.0956, note: "Nearly tied with Grok, with the lightest repair burden." },
       { id: "gpt56", name: "GPT-5.6 Sol", short: "GPT-5.6", color: "#3977c9", image: "images/gpt%205.6%20sol.png", cohort: "current", status: "official", mean: 96.410, sd: 1.474, scores: [95.42,97.49,93.38,96.48,96.71,97.23,94.62,97.76,97.37,97.64], countable: 10, pain: [0,0,0,0,0,0,0,0,0,0], repairRate: 3.3, repairs: 23, fallbacks: 4, transport: 0, cost: 3.1290, note: "Lower raw performance, fully countable across the run." },
       { id: "opus5", name: "Claude Opus 5", short: "Opus 5", color: "#b67513", image: "images/opus%205.png", cohort: "current", status: "diagnostic", mean: 102.000, sd: 2.416, scores: [102.34,106.28,99.95,98.51,100.96,101.92,105.34,100.01,103.14,101.55], countable: 7, pain: [0,0,24,42,8,0,0,0,22,0], repairRate: 15.9, repairs: 112, fallbacks: 14, transport: 0, cost: 6.1204, note: "High raw mean; three seeds crossed the pain limit." },
@@ -611,14 +613,18 @@
       svg.replaceChildren();
       const models = currentSet(reliabilityCohort);
       const g = chartBase(svg, { left: 83, right: 28, top: 40, bottom: 64, min: 0, max: 105, ticks: [0, 25, 50, 75, 100], xLabel: "raw mean final 1RM (kg)", yLabel: "countable seeds" });
-      const xMin = 89, xMax = 104;
+      const xMin = 89, xMax = 105;
       const x = value => 83 + ((value - xMin) / (xMax - xMin)) * (g.x2 - 83);
-      [89, 92, 95, 98, 101, 104].forEach(value => {
+      [89, 93, 97, 101, 105].forEach(value => {
         const cx = x(value);
         svgNode("line", { x1: cx, y1: g.y2, x2: cx, y2: g.y2 + 6, class: "axis" }, svg);
         svgNode("text", { x: cx, y: g.y2 + 23, "text-anchor": "middle", class: "small-label" }, svg, String(value));
       });
-      const offsets = { "grok46": -18, "muse12": 18, "gpt56": -18, "opus5": -20, "fable51": 20, "glm53": 20, "pilot-opus5": -20, "pilot-grok45": 20, "pilot-muse12": -18, "pilot-gpt56": 20, "pilot-kimi": -20 };
+      const offsets = {
+        "muse13": { x: -70, y: -28 }, "grok46": { x: -38, y: -18 }, "muse12": { x: 18, y: 22 },
+        "gpt56": { x: -18, y: -18 }, "opus5": { x: -58, y: -28 }, "fable51": { x: -48, y: 24 }, "glm53": { x: 18, y: 44 },
+        "pilot-opus5": { x: -20, y: -20 }, "pilot-grok45": { x: 20, y: 20 }, "pilot-muse12": { x: -18, y: -18 }, "pilot-gpt56": { x: 20, y: 20 }, "pilot-kimi": { x: -20, y: -20 }
+      };
       models.forEach(model => {
         const cx = x(model.mean);
         const cy = g.y(model.countable * 10);
@@ -626,9 +632,11 @@
         const mark = svgNode("circle", { cx, cy, r: excluded ? 9 : 8, fill: excluded ? "var(--plate)" : model.color, stroke: excluded ? "var(--red)" : model.color, "stroke-width": excluded ? 3 : 2 }, svg);
         const painText = model.pain.some(value => value > 14) ? `\nPain-invalid seeds: ${model.pain.filter(value => value > 14).length}` : "";
         const transportText = model.transport ? `\nTransport failures: ${model.transport}` : "";
-        attachInteractive(mark, `${model.name} · ${model.cohort === "current" ? "v0.2" : "v0.1 pilot"}\nRaw mean: ${fmt(model.mean)} kg\nCountable: ${model.countable}/10${painText}${transportText}`);
-        const labelY = Math.max(22, Math.min(g.y2 - 8, cy + (offsets[model.id] || 18)));
-        svgNode("text", { x: cx + 11, y: labelY, class: "label" }, svg, model.short);
+        const cohortLabel = model.cohort === "current" ? (model.status === "extension" ? "v0.2 extension" : "v0.2") : "v0.1 pilot";
+        attachInteractive(mark, `${model.name} · ${cohortLabel}\nRaw mean: ${fmt(model.mean)} kg\nCountable: ${model.countable}/10${painText}${transportText}`);
+        const offset = offsets[model.id] || { x: 0, y: 18 };
+        const labelY = Math.max(22, Math.min(g.y2 - 8, cy + offset.y));
+        svgNode("text", { x: cx + 11 + offset.x, y: labelY, class: "label" }, svg, model.short);
       });
       svgNode("text", { x: g.x2, y: 24, "text-anchor": "end", class: "small-label" }, svg, reliabilityCohort === "all" ? "current + pilot" : reliabilityCohort === "current" ? "current v0.2" : "v0.1 pilot");
     }
@@ -729,14 +737,19 @@
       const minCost = Math.max(.5, Math.min(...costs) * .72);
       const maxCost = Math.max(...costs) * 1.12;
       const x = value => 82 + ((value - minCost) / (maxCost - minCost)) * (g.x2 - 82);
+      const labelOffsets = {
+        "muse13": { x: -28, y: -26 }, "grok46": { x: 12, y: 3 }, "muse12": { x: 14, y: 28 },
+        "gpt56": { x: -78, y: 4 }, "opus5": { x: 12, y: -18 }, "fable51": { x: -4, y: 18 }, "glm53": { x: 12, y: 18 }
+      };
       models.forEach(model => {
         const cx = x(model.cost);
         const cy = g.y(model.mean);
         const excluded = model.countable < 10;
         const point = svgNode("circle", { cx, cy, r: excluded ? 9 : 8, fill: excluded ? "var(--plate)" : model.color, stroke: excluded ? "var(--red)" : model.color, "stroke-width": excluded ? 3 : 2 }, svg);
         attachInteractive(point, `${model.name}\nRaw mean: ${fmt(model.mean)} kg\nCost: $${fmt(model.cost, 2)} / episode\n${model.countable}/10 countable`);
-        svgNode("text", { x: cx + 11, y: cy - 10, class: "label" }, svg, model.short);
-        svgNode("text", { x: cx + 11, y: cy + 16, class: "small-label" }, svg, `$${fmt(model.cost, 2)}`);
+        const offset = labelOffsets[model.id] || { x: 11, y: -10 };
+        svgNode("text", { x: cx + offset.x, y: cy + offset.y, class: "label" }, svg, model.short);
+        svgNode("text", { x: cx + offset.x, y: cy + offset.y + 16, class: "small-label" }, svg, `$${fmt(model.cost, 2)}`);
       });
       const costTicks = [1, 2, 5, 10].filter(value => value >= minCost && value <= maxCost);
       costTicks.forEach(value => { const cx = x(value); svgNode("line", { x1: cx, y1: g.y2, x2: cx, y2: g.y2 + 5, class: "axis" }, svg); svgNode("text", { x: cx, y: g.y2 + 22, "text-anchor": "middle", class: "small-label" }, svg, `$${value}`); });
